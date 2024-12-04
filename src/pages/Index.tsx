@@ -24,7 +24,7 @@ const Index = () => {
         }`}
       >
         <h1 
-          className="text-[200px] font-['Chewy'] text-foreground z-10 opacity-0 animate-[fade-in_1s_ease-out_forwards]"
+          className="text-[200px] font-['Chewy'] text-foreground opacity-0 animate-[fade-in_1s_ease-out_forwards]"
         >
           2800
         </h1>
