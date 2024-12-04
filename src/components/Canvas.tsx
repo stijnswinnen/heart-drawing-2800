@@ -17,11 +17,12 @@ export const Canvas = ({ onDrawingComplete }: CanvasProps) => {
       width: 800,
       height: 600,
       backgroundColor: "transparent",
+      isDrawingMode: true,
     });
 
-    canvas.freeDrawingBrush.color = "#FFDEE2";
+    // Initialize the brush after canvas creation
     canvas.freeDrawingBrush.width = 5;
-    canvas.isDrawingMode = true;
+    canvas.freeDrawingBrush.color = "#FFDEE2";
 
     setFabricCanvas(canvas);
     toast("Draw your heart! Be creative ❤️");
