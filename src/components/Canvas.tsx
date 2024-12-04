@@ -20,9 +20,11 @@ export const Canvas = ({ onDrawingComplete }: CanvasProps) => {
       isDrawingMode: true,
     });
 
-    // Initialize the brush after canvas creation
-    canvas.freeDrawingBrush.width = 2;
-    canvas.freeDrawingBrush.color = "#000000";
+    // Set up the drawing brush
+    if (canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.width = 2;
+      canvas.freeDrawingBrush.color = "#000000";
+    }
 
     setFabricCanvas(canvas);
     toast("Draw your heart! Be creative ❤️");
