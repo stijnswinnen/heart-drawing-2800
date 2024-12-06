@@ -68,7 +68,6 @@ const Index = () => {
 
       {hasDrawn && (
         <button
-          onClick={() => setShowForm(true)}
           className="absolute bottom-8 right-8 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity animate-[fade-in_0.5s_ease-out]"
         >
           Submit
