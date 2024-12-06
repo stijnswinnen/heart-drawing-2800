@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Canvas } from "@/components/Canvas";
-import { SubmitForm } from "@/components/SubmitForm";
 import { Heart } from "lucide-react";
+import { DrawingTools } from "@/components/DrawingTools";
 
 const Index = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [penSize, setPenSize] = useState(2);
+  const [penColor, setPenColor] = useState("#000000");
+  const [isEraser, setIsEraser] = useState(false);
 
   const handleHeartClick = () => {
     setIsDrawing(true);
@@ -19,12 +21,14 @@ const Index = () => {
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-white overflow-hidden">
       <div 
-        className={`flex items-center gap-4 transition-transform duration-700 ${
+        className={`flex items-center gap-4 transition-all duration-700 ${
           isDrawing ? '-translate-x-[30%]' : 'translate-x-0'
         }`}
       >
         <h1 
-          className="text-[200px] font-['Chewy'] text-foreground opacity-0 animate-[fade-in_1s_ease-out_forwards]"
+          className={`text-[clamp(100px,20vw,200px)] font-['Chewy'] transition-opacity duration-700 ${
+            isDrawing ? 'opacity-20' : 'opacity-100'
+          } opacity-0 animate-[fade-in_1s_ease-out_forwards]`}
         >
           2800
         </h1>
@@ -44,8 +48,21 @@ const Index = () => {
       </div>
       
       {isDrawing && (
-        <div className="absolute inset-0 flex items-center justify-center animate-[fade-in_0.5s_ease-out]">
-          <Canvas onDrawingComplete={handleDrawingComplete} />
+        <div className="absolute inset-0 flex flex-col items-center justify-center animate-[fade-in_0.5s_ease-out]">
+          <Canvas 
+            onDrawingComplete={handleDrawingComplete}
+            penSize={penSize}
+            penColor={isEraser ? "#FFFFFF" : penColor}
+          />
+          
+          <DrawingTools
+            penSize={penSize}
+            setPenSize={setPenSize}
+            penColor={penColor}
+            setPenColor={setPenColor}
+            isEraser={isEraser}
+            setIsEraser={setIsEraser}
+          />
         </div>
       )}
 
@@ -57,8 +74,6 @@ const Index = () => {
           Submit
         </button>
       )}
-
-      {showForm && <SubmitForm onClose={() => setShowForm(false)} />}
     </div>
   );
 };
