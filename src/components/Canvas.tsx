@@ -18,9 +18,14 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
     const canvas = new FabricCanvas(canvasRef.current, {
       width: window.innerWidth,
       height: window.innerHeight * 0.7,
-      backgroundColor: "transparent",
+      backgroundColor: "#FFFFFF",
       isDrawingMode: true,
     });
+
+    if (canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.width = penSize;
+      canvas.freeDrawingBrush.color = penColor || "#000000";
+    }
 
     setFabricCanvas(canvas);
     toast("Draw your heart! Be creative ❤️");
@@ -56,7 +61,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
 
   return (
     <div className="relative w-full mx-auto">
-      <canvas ref={canvasRef} className="cursor-pen" />
+      <canvas ref={canvasRef} className="cursor-pen border border-gray-200" />
     </div>
   );
 };

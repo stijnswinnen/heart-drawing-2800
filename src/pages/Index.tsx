@@ -26,9 +26,9 @@ const Index = () => {
         }`}
       >
         <h1 
-          className={`text-[clamp(100px,20vw,200px)] font-['Chewy'] transition-opacity duration-700 ${
+          className={`text-[clamp(100px,20vw,200px)] font-['Chewy'] transition-all duration-700 ${
             isDrawing ? 'opacity-20' : 'opacity-100'
-          } opacity-0 animate-[fade-in_1s_ease-out_forwards]`}
+          }`}
         >
           2800
         </h1>
@@ -40,7 +40,7 @@ const Index = () => {
           >
             <Heart 
               size={200} 
-              className="text-primary animate-[pulse_1.5s_ease-in-out_infinite] z-10" 
+              className="text-primary animate-pulse z-10" 
               fill="#FFDEE2"
             />
           </div>
@@ -48,7 +48,7 @@ const Index = () => {
       </div>
       
       {isDrawing && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center animate-[fade-in_0.5s_ease-out]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
           <Canvas 
             onDrawingComplete={handleDrawingComplete}
             penSize={penSize}
@@ -68,7 +68,7 @@ const Index = () => {
 
       {hasDrawn && (
         <button
-          className="absolute bottom-8 right-8 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity animate-[fade-in_0.5s_ease-out]"
+          className="absolute bottom-8 right-8 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity animate-fade-in"
         >
           Submit
         </button>
