@@ -6,7 +6,7 @@ import { DrawingTools } from "@/components/DrawingTools";
 const Index = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [penSize, setPenSize] = useState(2);
+  const [penSize, setPenSize] = useState(5);
   const [penColor, setPenColor] = useState("#000000");
   const [isEraser, setIsEraser] = useState(false);
 

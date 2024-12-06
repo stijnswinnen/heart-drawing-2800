@@ -18,7 +18,7 @@ export const DrawingTools = ({
   isEraser,
   setIsEraser,
 }: DrawingToolsProps) => {
-  const penSizes = [2, 4, 8];
+  const penSizes = [5, 10, 20];
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-white rounded-lg shadow-lg animate-[fade-in_0.5s_ease-out]">
@@ -34,7 +34,7 @@ export const DrawingTools = ({
             }}
             className="w-10 h-10"
           >
-            <Pen className={`w-${size} h-${size}`} />
+            <Pen className={`w-${size < 10 ? '4' : size < 15 ? '5' : '6'} h-${size < 10 ? '4' : size < 15 ? '5' : '6'}`} />
           </Button>
         ))}
       </div>

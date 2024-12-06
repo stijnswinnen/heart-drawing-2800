@@ -16,24 +16,18 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
     if (!canvasRef.current) return;
 
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: window.innerWidth * 0.8,
+      width: window.innerWidth,
       height: window.innerHeight * 0.7,
       backgroundColor: "transparent",
       isDrawingMode: true,
     });
-
-    // Set up the drawing brush
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.width = penSize;
-      canvas.freeDrawingBrush.color = penColor;
-    }
 
     setFabricCanvas(canvas);
     toast("Draw your heart! Be creative ❤️");
 
     const handleResize = () => {
       canvas.setDimensions({
-        width: window.innerWidth * 0.8,
+        width: window.innerWidth,
         height: window.innerHeight * 0.7,
       });
     };
@@ -49,7 +43,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
   useEffect(() => {
     if (!fabricCanvas?.freeDrawingBrush) return;
     fabricCanvas.freeDrawingBrush.width = penSize;
-    fabricCanvas.freeDrawingBrush.color = penColor;
+    fabricCanvas.freeDrawingBrush.color = penColor || "#000000";
   }, [fabricCanvas, penSize, penColor]);
 
   useEffect(() => {
@@ -61,7 +55,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
   }, [fabricCanvas, onDrawingComplete]);
 
   return (
-    <div className="relative w-full max-w-[80vw] mx-auto">
+    <div className="relative w-full mx-auto">
       <canvas ref={canvasRef} className="cursor-pen" />
     </div>
   );
