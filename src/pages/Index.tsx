@@ -15,6 +15,7 @@ const Index = () => {
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [savedImages, setSavedImages] = useState<string[]>([]);
+  const [canvasKey, setCanvasKey] = useState(0); // Add this to force canvas remount
 
   const handleHeartClick = () => {
     setIsDrawing(true);
@@ -31,7 +32,6 @@ const Index = () => {
       const randomHash = Math.random().toString(36).substring(2, 15);
       const fileName = `heart-${randomHash}.png`;
       
-      // In a real app, you would upload the image to a server here
       setSavedImages(prev => [...prev, dataUrl]);
       
       toast.success("Your heart has been saved! ❤️");
@@ -45,6 +45,7 @@ const Index = () => {
       const context = canvas.getContext('2d');
       context?.clearRect(0, 0, canvas.width, canvas.height);
       setHasDrawn(false);
+      setCanvasKey(prev => prev + 1); // Force canvas remount on reset
       toast.info("Canvas cleared!");
     }
   };
@@ -53,7 +54,7 @@ const Index = () => {
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden">
       <div 
         className={`flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
-          isDrawing ? 'md:translate-x-[-100%] md:ml-8 translate-y-[-30vh]' : 'translate-y-0'
+          isDrawing ? 'md:translate-x-[-100%] md:ml-8 translate-y-[-30vh] md:translate-y-0' : 'translate-y-0'
         }`}
       >
         <h1 
@@ -81,6 +82,7 @@ const Index = () => {
       {isDrawing && (
         <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
           <Canvas 
+            key={canvasKey} // Add key to force remount
             onDrawingComplete={handleDrawingComplete}
             penSize={penSize}
             penColor={isEraser ? "#FFFFFF" : penColor}
