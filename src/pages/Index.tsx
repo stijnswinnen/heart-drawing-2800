@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Canvas } from "@/components/Canvas";
 import { Heart } from "lucide-react";
 import { DrawingTools } from "@/components/DrawingTools";
 import { SubmitForm } from "@/components/SubmitForm";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -15,7 +19,23 @@ const Index = () => {
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [savedImages, setSavedImages] = useState<string[]>([]);
-  const [canvasKey, setCanvasKey] = useState(0); // Add this to force canvas remount
+  const [canvasKey, setCanvasKey] = useState(0);
+  const [session, setSession] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleHeartClick = () => {
     setIsDrawing(true);
@@ -26,6 +46,11 @@ const Index = () => {
   };
 
   const handleSubmit = async ({ name, email, newsletter }) => {
+    if (!session) {
+      toast.error("Please sign in to submit your heart");
+      return;
+    }
+
     const canvas = document.querySelector('canvas');
     if (canvas) {
       const dataUrl = canvas.toDataURL('image/png');
@@ -45,10 +70,25 @@ const Index = () => {
       const context = canvas.getContext('2d');
       context?.clearRect(0, 0, canvas.width, canvas.height);
       setHasDrawn(false);
-      setCanvasKey(prev => prev + 1); // Force canvas remount on reset
+      setCanvasKey(prev => prev + 1);
       toast.info("Canvas cleared!");
     }
   };
+
+  if (!session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          <Auth
+            supabaseClient={supabase}
+            appearance={{ theme: ThemeSupa }}
+            providers={[]}
+            redirectTo={window.location.origin}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden">
@@ -82,7 +122,7 @@ const Index = () => {
       {isDrawing && (
         <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
           <Canvas 
-            key={canvasKey} // Add key to force remount
+            key={canvasKey}
             onDrawingComplete={handleDrawingComplete}
             penSize={penSize}
             penColor={isEraser ? "#FFFFFF" : penColor}
