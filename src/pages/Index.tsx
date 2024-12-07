@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import { DrawingTools } from "@/components/DrawingTools";
 import { SubmitForm } from "@/components/SubmitForm";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -31,7 +32,6 @@ const Index = () => {
       const fileName = `heart-${randomHash}.png`;
       
       // In a real app, you would upload the image to a server here
-      // For now, we'll just store it in state
       setSavedImages(prev => [...prev, dataUrl]);
       
       toast.success("Your heart has been saved! ❤️");
@@ -39,11 +39,21 @@ const Index = () => {
     }
   };
 
+  const handleReset = () => {
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      context?.clearRect(0, 0, canvas.width, canvas.height);
+      setHasDrawn(false);
+      toast.info("Canvas cleared!");
+    }
+  };
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-white overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden">
       <div 
-        className={`flex items-center gap-4 transition-all duration-700 ${
-          isDrawing ? 'translate-x-[-100%] ml-8' : 'translate-x-0'
+        className={`flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
+          isDrawing ? 'md:translate-x-[-100%] md:ml-8 translate-y-[-30vh]' : 'translate-y-0'
         }`}
       >
         <h1 
@@ -57,7 +67,7 @@ const Index = () => {
         {!isDrawing && (
           <div 
             onClick={handleHeartClick} 
-            className="cursor-pointer transform hover:scale-105 transition-transform"
+            className="cursor-pointer transform hover:scale-105 transition-transform mt-4 md:mt-0"
           >
             <Heart 
               size={200} 
@@ -84,24 +94,23 @@ const Index = () => {
             isEraser={isEraser}
             setIsEraser={setIsEraser}
           />
-        </div>
-      )}
 
-      {hasDrawn && (
-        <div className="absolute bottom-8 right-8 flex gap-4 animate-fade-in">
-          <button
-            onClick={() => setShowSubmitForm(true)}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Submit
-          </button>
-          {showGallery && (
-            <button
-              onClick={() => setShowGallery(true)}
-              className="px-6 py-3 bg-secondary text-secondary-foreground rounded-lg hover:opacity-90 transition-opacity"
-            >
-              Show gallery
-            </button>
+          {hasDrawn && (
+            <div className="fixed bottom-24 md:bottom-8 md:right-8 flex gap-4 animate-fade-in">
+              <Button
+                onClick={() => setShowSubmitForm(true)}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Submit
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleReset}
+                className="px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Reset
+              </Button>
+            </div>
           )}
         </div>
       )}
@@ -115,12 +124,12 @@ const Index = () => {
 
       {showGallery && savedImages.length > 0 && (
         <div className="fixed inset-0 bg-white z-50 p-8 overflow-auto">
-          <button
+          <Button
             onClick={() => setShowGallery(false)}
             className="absolute top-4 right-4 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg"
           >
             Close
-          </button>
+          </Button>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-12">
             {savedImages.map((image, index) => (
               <img
