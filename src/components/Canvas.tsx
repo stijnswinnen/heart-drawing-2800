@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas } from "fabric";
+import { Canvas as FabricCanvas, PencilBrush } from "fabric";
 import { toast } from "sonner";
 
 interface CanvasProps {
@@ -23,7 +23,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
     });
 
     // Create and initialize the brush
-    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+    canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.width = penSize;
     canvas.freeDrawingBrush.color = penColor || "#000000";
 
