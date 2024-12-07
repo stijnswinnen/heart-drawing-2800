@@ -22,7 +22,8 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
       isDrawingMode: true,
     });
 
-    // Initialize the brush before setting properties
+    // Create and initialize the brush
+    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
     canvas.freeDrawingBrush.width = penSize;
     canvas.freeDrawingBrush.color = penColor || "#000000";
 
