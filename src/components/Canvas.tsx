@@ -63,7 +63,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
 
   return (
     <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
-      <canvas ref={canvasRef} className="cursor-crosshair border border-gray-200" />
+      <canvas ref={canvasRef} className={`cursor-crosshair ${isMobile ? 'border border-gray-200' : ''}`} />
     </div>
   );
 };
