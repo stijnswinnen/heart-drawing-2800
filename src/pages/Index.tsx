@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Canvas } from "@/components/Canvas";
-import { Heart } from "lucide-react";
+import { Heart, Lock } from "lucide-react";
 import { DrawingTools } from "@/components/DrawingTools";
 import { SubmitForm } from "@/components/SubmitForm";
 import { toast } from "sonner";
@@ -17,9 +17,7 @@ const Index = () => {
   const [penColor, setPenColor] = useState("#000000");
   const [isEraser, setIsEraser] = useState(false);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
-  const [savedImages, setSavedImages] = useState<string[]>([]);
-  const [canvasKey, setCanvasKey] = useState(0);
+  const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState(null);
   const navigate = useNavigate();
 
@@ -46,21 +44,55 @@ const Index = () => {
   };
 
   const handleSubmit = async ({ name, email, newsletter }) => {
-    if (!session) {
-      toast.error("Please sign in to submit your heart");
-      return;
-    }
+    try {
+      const canvas = document.querySelector('canvas');
+      if (!canvas) {
+        toast.error("No drawing found!");
+        return;
+      }
 
-    const canvas = document.querySelector('canvas');
-    if (canvas) {
-      const dataUrl = canvas.toDataURL('image/png');
-      const randomHash = Math.random().toString(36).substring(2, 15);
-      const fileName = `heart-${randomHash}.png`;
-      
-      setSavedImages(prev => [...prev, dataUrl]);
-      
+      // Convert canvas to blob
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) {
+        toast.error("Failed to process drawing");
+        return;
+      }
+
+      // Create unique filename
+      const fileName = `${session?.user?.id}/${crypto.randomUUID()}.png`;
+
+      // Upload to Storage
+      const { error: uploadError, data } = await supabase.storage
+        .from('hearts')
+        .upload(fileName, blob);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error("Failed to upload drawing");
+        return;
+      }
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('drawings')
+        .insert({
+          user_id: session?.user?.id,
+          image_path: fileName,
+          name,
+          email,
+        });
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        toast.error("Failed to save drawing information");
+        return;
+      }
+
       toast.success("Your heart has been saved! ❤️");
-      setShowGallery(true);
+      setShowSubmitForm(false);
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("An unexpected error occurred");
     }
   };
 
@@ -70,28 +102,40 @@ const Index = () => {
       const context = canvas.getContext('2d');
       context?.clearRect(0, 0, canvas.width, canvas.height);
       setHasDrawn(false);
-      setCanvasKey(prev => prev + 1);
       toast.info("Canvas cleared!");
     }
   };
 
-  if (!session) {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
-            providers={[]}
-            redirectTo={window.location.origin}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden">
+      {/* Lock Icon */}
+      <button
+        onClick={() => setShowAuth(true)}
+        className="fixed bottom-4 left-4 p-2 text-gray-300 hover:text-gray-500 transition-colors"
+      >
+        <Lock className="w-5 h-5" />
+      </button>
+
+      {/* Auth Dialog */}
+      {showAuth && !session && (
+        <div className="fixed inset-0 bg-white/95 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white p-6 rounded-lg shadow-lg">
+            <button
+              onClick={() => setShowAuth(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+            <Auth
+              supabaseClient={supabase}
+              appearance={{ theme: ThemeSupa }}
+              providers={[]}
+              redirectTo={window.location.origin}
+            />
+          </div>
+        </div>
+      )}
+
       <div 
         className={`flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
           isDrawing ? 'md:translate-x-[-100%] md:ml-8 translate-y-[-30vh] md:translate-y-0' : 'translate-y-0'
@@ -122,7 +166,6 @@ const Index = () => {
       {isDrawing && (
         <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
           <Canvas 
-            key={canvasKey}
             onDrawingComplete={handleDrawingComplete}
             penSize={penSize}
             penColor={isEraser ? "#FFFFFF" : penColor}
@@ -140,7 +183,7 @@ const Index = () => {
           {hasDrawn && (
             <div className="fixed bottom-24 md:bottom-8 md:right-8 flex gap-4 animate-fade-in">
               <Button
-                onClick={() => setShowSubmitForm(true)}
+                onClick={() => session ? setShowSubmitForm(true) : setShowAuth(true)}
                 className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
               >
                 Submit
@@ -162,27 +205,6 @@ const Index = () => {
           onClose={() => setShowSubmitForm(false)}
           onSubmit={handleSubmit}
         />
-      )}
-
-      {showGallery && savedImages.length > 0 && (
-        <div className="fixed inset-0 bg-white z-50 p-8 overflow-auto">
-          <Button
-            onClick={() => setShowGallery(false)}
-            className="absolute top-4 right-4 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg"
-          >
-            Close
-          </Button>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-12">
-            {savedImages.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Heart drawing ${index + 1}`}
-                className="w-full h-auto rounded-lg shadow-md"
-              />
-            ))}
-          </div>
-        </div>
       )}
     </div>
   );
