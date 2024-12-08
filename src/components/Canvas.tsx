@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas, PencilBrush } from "fabric";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CanvasProps {
   onDrawingComplete: () => void;
@@ -11,12 +12,13 @@ interface CanvasProps {
 export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: window.innerWidth,
+      width: isMobile ? window.innerWidth : window.innerWidth * 0.6,
       height: window.innerHeight * 0.7,
       backgroundColor: "#FFFFFF",
       isDrawingMode: true,
@@ -32,7 +34,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
 
     const handleResize = () => {
       canvas.setDimensions({
-        width: window.innerWidth,
+        width: isMobile ? window.innerWidth : window.innerWidth * 0.6,
         height: window.innerHeight * 0.7,
       });
     };
@@ -43,7 +45,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
       canvas.dispose();
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!fabricCanvas?.freeDrawingBrush) return;
@@ -60,7 +62,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) =>
   }, [fabricCanvas, onDrawingComplete]);
 
   return (
-    <div className="relative w-full mx-auto">
+    <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
       <canvas ref={canvasRef} className="cursor-crosshair border border-gray-200" />
     </div>
   );
