@@ -6,6 +6,7 @@ import { AuthDialog } from "@/components/AuthDialog";
 import { DrawingCanvas } from "@/components/DrawingCanvas";
 import { LockButton } from "@/components/LockButton";
 import { SubmitForm } from "@/components/SubmitForm";
+import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
 
 const Index = () => {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -17,6 +18,8 @@ const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState(null);
   const [canvasKey, setCanvasKey] = useState(0);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [pendingSubmission, setPendingSubmission] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,6 +44,28 @@ const Index = () => {
   };
 
   const handleSubmit = async ({ name, email, newsletter }) => {
+    try {
+      // Check if user has already submitted a drawing
+      const { data: existingDrawings } = await supabase
+        .from('drawings')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (existingDrawings) {
+        setPendingSubmission({ name, email, newsletter });
+        setShowReplaceDialog(true);
+        return;
+      }
+
+      await submitDrawing({ name, email, newsletter });
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("An unexpected error occurred");
+    }
+  };
+
+  const submitDrawing = async ({ name, email, newsletter }) => {
     try {
       const canvas = document.querySelector('canvas');
       if (!canvas) {
@@ -87,6 +112,45 @@ const Index = () => {
     }
   };
 
+  const handleReplaceDrawing = async () => {
+    if (!pendingSubmission) return;
+
+    try {
+      const { data: existingDrawing } = await supabase
+        .from('drawings')
+        .select('*')
+        .eq('email', pendingSubmission.email)
+        .single();
+
+      if (existingDrawing) {
+        // Delete the old image from storage
+        await supabase.storage
+          .from('hearts')
+          .remove([existingDrawing.image_path]);
+
+        // Delete the old drawing record
+        await supabase
+          .from('drawings')
+          .delete()
+          .eq('id', existingDrawing.id);
+      }
+
+      // Submit the new drawing
+      await submitDrawing(pendingSubmission);
+      setShowReplaceDialog(false);
+      setPendingSubmission(null);
+    } catch (error) {
+      console.error('Replace drawing error:', error);
+      toast.error("Failed to replace drawing");
+    }
+  };
+
+  const handleCancelReplace = () => {
+    setShowReplaceDialog(false);
+    setPendingSubmission(null);
+    handleReset();
+  };
+
   const handleReset = () => {
     setHasDrawn(false);
     setCanvasKey(prev => prev + 1);
@@ -124,6 +188,13 @@ const Index = () => {
         <SubmitForm
           onClose={() => setShowSubmitForm(false)}
           onSubmit={handleSubmit}
+        />
+      )}
+
+      {showReplaceDialog && (
+        <ReplaceDrawingDialog
+          onConfirm={handleReplaceDrawing}
+          onCancel={handleCancelReplace}
         />
       )}
     </div>
