@@ -28,44 +28,14 @@ export default function Index() {
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
-      if (!session?.user?.id) {
-        toast.error("You must be logged in to submit a drawing");
-        return;
-      }
-
-      console.log('Checking for existing drawings...');
-      const { data: existingDrawings, error } = await supabase
-        .from('drawings')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .limit(1);
-
-      if (error) {
-        console.error('Error checking for existing drawings:', error);
-        toast.error("An error occurred while checking for existing drawings");
-        return;
-      }
-
-      console.log('Existing drawings:', existingDrawings);
-      if (existingDrawings && existingDrawings.length > 0) {
-        setExistingDrawing(existingDrawings[0]);
-        setShowReplaceDialog(true);
-        setShowSubmitForm(false);
-        return;
-      }
-
       const canvas = document.querySelector('canvas');
-      const fileName = await submitDrawing(canvas, session.user.id, data);
+      const fileName = await submitDrawing(canvas, session?.user?.id, data);
       console.log('Drawing submitted successfully:', fileName);
-      toast.success("Drawing submitted successfully!");
       setShowSubmitForm(false);
-      setShowReplaceDialog(false); // Reset replace dialog state
       setIsDrawing(false);
       setHasDrawn(false);
-      setExistingDrawing(null); // Reset existing drawing state
     } catch (error) {
       console.error('Error submitting drawing:', error);
-      toast.error("Failed to submit drawing");
     }
   };
 
@@ -119,10 +89,7 @@ export default function Index() {
       {showReplaceDialog && (
         <ReplaceDrawingDialog 
           onConfirm={handleReplaceDrawing} 
-          onCancel={() => {
-            setShowReplaceDialog(false);
-            setShowSubmitForm(false);
-          }} 
+          onCancel={() => setShowReplaceDialog(false)} 
         />
       )}
     </div>
