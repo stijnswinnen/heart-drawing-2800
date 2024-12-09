@@ -29,21 +29,14 @@ export default function Index() {
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
       // Check if user has already submitted a drawing
-      const { data: existingDrawings, error } = await supabase
+      const { data: existingDrawings } = await supabase
         .from('drawings')
         .select('*')
         .eq('user_id', session?.user?.id)
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .single();
 
-      if (error) {
-        console.error('Error checking for existing drawings:', error);
-        toast.error("Failed to check for existing drawings");
-        return;
-      }
-
-      if (existingDrawings && existingDrawings.length > 0) {
-        setExistingDrawing(existingDrawings[0]);
+      if (existingDrawings) {
+        setExistingDrawing(existingDrawings);
         setShowReplaceDialog(true);
         setShowSubmitForm(false);
         return;
@@ -57,7 +50,6 @@ export default function Index() {
       setHasDrawn(false);
     } catch (error) {
       console.error('Error submitting drawing:', error);
-      toast.error("Failed to submit drawing");
     }
   };
 
