@@ -33,7 +33,7 @@ export default function Index() {
         return;
       }
 
-      // Check if user has already submitted a drawing
+      console.log('Checking for existing drawings...');
       const { data: existingDrawings, error } = await supabase
         .from('drawings')
         .select('*')
@@ -46,6 +46,7 @@ export default function Index() {
         return;
       }
 
+      console.log('Existing drawings:', existingDrawings);
       if (existingDrawings && existingDrawings.length > 0) {
         setExistingDrawing(existingDrawings[0]);
         setShowReplaceDialog(true);
@@ -56,9 +57,12 @@ export default function Index() {
       const canvas = document.querySelector('canvas');
       const fileName = await submitDrawing(canvas, session.user.id, data);
       console.log('Drawing submitted successfully:', fileName);
+      toast.success("Drawing submitted successfully!");
       setShowSubmitForm(false);
+      setShowReplaceDialog(false); // Reset replace dialog state
       setIsDrawing(false);
       setHasDrawn(false);
+      setExistingDrawing(null); // Reset existing drawing state
     } catch (error) {
       console.error('Error submitting drawing:', error);
       toast.error("Failed to submit drawing");
@@ -115,7 +119,10 @@ export default function Index() {
       {showReplaceDialog && (
         <ReplaceDrawingDialog 
           onConfirm={handleReplaceDrawing} 
-          onCancel={() => setShowReplaceDialog(false)} 
+          onCancel={() => {
+            setShowReplaceDialog(false);
+            setShowSubmitForm(false);
+          }} 
         />
       )}
     </div>
