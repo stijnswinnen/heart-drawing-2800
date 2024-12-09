@@ -111,7 +111,7 @@ const Index = () => {
         <Lock className="w-5 h-5" />
       </button>
 
-      {showAuth && !session && (
+      {showAuth && (
         <AuthDialog onClose={() => setShowAuth(false)} />
       )}
 
