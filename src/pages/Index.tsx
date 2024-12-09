@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { Canvas } from "@/components/Canvas";
-import { Lock } from "lucide-react";
-import { DrawingTools } from "@/components/DrawingTools";
-import { SubmitForm } from "@/components/SubmitForm";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { DrawingTitle } from "@/components/DrawingTitle";
 import { AuthDialog } from "@/components/AuthDialog";
+import { DrawingCanvas } from "@/components/DrawingCanvas";
+import { LockButton } from "@/components/LockButton";
+import { SubmitForm } from "@/components/SubmitForm";
 
 const Index = () => {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -18,7 +16,7 @@ const Index = () => {
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState(null);
-  const [canvasKey, setCanvasKey] = useState(0); // Add this line to force canvas re-renders
+  const [canvasKey, setCanvasKey] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -91,18 +89,13 @@ const Index = () => {
 
   const handleReset = () => {
     setHasDrawn(false);
-    setCanvasKey(prev => prev + 1); // Add this line to force canvas re-render
+    setCanvasKey(prev => prev + 1);
     toast.info("Canvas cleared!");
   };
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden">
-      <button
-        onClick={() => setShowAuth(true)}
-        className="fixed bottom-4 left-4 p-2 text-gray-300 hover:text-gray-500 transition-colors"
-      >
-        <Lock className="w-5 h-5" />
-      </button>
+      <LockButton onClick={() => setShowAuth(true)} />
 
       {showAuth && (
         <AuthDialog onClose={() => setShowAuth(false)} />
@@ -110,43 +103,22 @@ const Index = () => {
 
       <DrawingTitle isDrawing={isDrawing} onHeartClick={handleHeartClick} />
       
-      {isDrawing && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
-          <Canvas 
-            key={canvasKey} // Add this line to force canvas re-render
-            onDrawingComplete={handleDrawingComplete}
-            penSize={penSize}
-            penColor={isEraser ? "#FFFFFF" : penColor}
-          />
-          
-          <DrawingTools
-            penSize={penSize}
-            setPenSize={setPenSize}
-            penColor={penColor}
-            setPenColor={setPenColor}
-            isEraser={isEraser}
-            setIsEraser={setIsEraser}
-          />
-
-          {hasDrawn && (
-            <div className="fixed bottom-24 md:bottom-8 md:right-8 flex gap-4 animate-fade-in">
-              <Button
-                onClick={() => session ? setShowSubmitForm(true) : setShowAuth(true)}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-              >
-                Submit
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={handleReset}
-                className="px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
-              >
-                Reset
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
+      <DrawingCanvas 
+        isDrawing={isDrawing}
+        hasDrawn={hasDrawn}
+        penSize={penSize}
+        setPenSize={setPenSize}
+        penColor={penColor}
+        setPenColor={setPenColor}
+        isEraser={isEraser}
+        setIsEraser={setIsEraser}
+        canvasKey={canvasKey}
+        onDrawingComplete={handleDrawingComplete}
+        onReset={handleReset}
+        onSubmit={() => setShowSubmitForm(true)}
+        session={session}
+        setShowAuth={setShowAuth}
+      />
 
       {showSubmitForm && (
         <SubmitForm
