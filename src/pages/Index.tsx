@@ -18,6 +18,7 @@ const Index = () => {
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState(null);
+  const [canvasKey, setCanvasKey] = useState(0); // Add this line to force canvas re-renders
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -49,15 +50,12 @@ const Index = () => {
         return;
       }
 
-      // Convert canvas to blob with explicit type assertion
       const blob = await new Promise<Blob>((resolve) => 
         canvas.toBlob((b) => resolve(b!), 'image/png')
       );
 
-      // Create unique filename
       const fileName = `${session?.user?.id}/${crypto.randomUUID()}.png`;
 
-      // Upload to Storage
       const { error: uploadError } = await supabase.storage
         .from('hearts')
         .upload(fileName, blob);
@@ -68,7 +66,6 @@ const Index = () => {
         return;
       }
 
-      // Save to database
       const { error: dbError } = await supabase
         .from('drawings')
         .insert({
@@ -93,13 +90,9 @@ const Index = () => {
   };
 
   const handleReset = () => {
-    const canvas = document.querySelector('canvas');
-    if (canvas) {
-      const context = canvas.getContext('2d');
-      context?.clearRect(0, 0, canvas.width, canvas.height);
-      setHasDrawn(false);
-      toast.info("Canvas cleared!");
-    }
+    setHasDrawn(false);
+    setCanvasKey(prev => prev + 1); // Add this line to force canvas re-render
+    toast.info("Canvas cleared!");
   };
 
   return (
@@ -120,6 +113,7 @@ const Index = () => {
       {isDrawing && (
         <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
           <Canvas 
+            key={canvasKey} // Add this line to force canvas re-render
             onDrawingComplete={handleDrawingComplete}
             penSize={penSize}
             penColor={isEraser ? "#FFFFFF" : penColor}

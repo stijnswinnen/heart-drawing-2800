@@ -7,6 +7,7 @@ interface CanvasProps {
   onDrawingComplete: () => void;
   penSize: number;
   penColor: string;
+  key?: string; // Add key prop to force re-render when needed
 }
 
 export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) => {
