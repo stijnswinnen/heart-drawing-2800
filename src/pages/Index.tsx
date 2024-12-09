@@ -16,6 +16,7 @@ export default function Index() {
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [existingDrawing, setExistingDrawing] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -52,10 +53,19 @@ export default function Index() {
     }
   };
 
+  const handleHeartClick = () => {
+    setIsDrawing(true);
+  };
+
   return (
     <div>
-      <DrawingTitle />
-      <AuthDialog session={session} setSession={setSession} />
+      <DrawingTitle 
+        isDrawing={isDrawing} 
+        onHeartClick={handleHeartClick}
+      />
+      {showAuth && (
+        <AuthDialog onClose={() => setShowAuth(false)} />
+      )}
       <DrawingCanvas
         isDrawing={isDrawing}
         hasDrawn={hasDrawn}
@@ -70,14 +80,17 @@ export default function Index() {
         onReset={() => setHasDrawn(false)}
         onSubmit={() => setShowSubmitForm(true)}
         session={session}
-        setShowAuth={() => {}}
+        setShowAuth={setShowAuth}
       />
       <LockButton onClick={() => setIsDrawing(true)} />
       {showSubmitForm && (
         <SubmitForm onClose={() => setShowSubmitForm(false)} onSubmit={handleSubmit} />
       )}
       {showReplaceDialog && (
-        <ReplaceDrawingDialog onConfirm={handleReplaceDrawing} onCancel={() => setShowReplaceDialog(false)} />
+        <ReplaceDrawingDialog 
+          onConfirm={handleReplaceDrawing} 
+          onCancel={() => setShowReplaceDialog(false)} 
+        />
       )}
     </div>
   );
