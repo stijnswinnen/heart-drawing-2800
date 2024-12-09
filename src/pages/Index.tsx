@@ -28,28 +28,40 @@ export default function Index() {
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
+      if (!session?.user?.id) {
+        toast.error("You must be logged in to submit a drawing");
+        return;
+      }
+
       // Check if user has already submitted a drawing
-      const { data: existingDrawings } = await supabase
+      const { data: existingDrawings, error } = await supabase
         .from('drawings')
         .select('*')
-        .eq('user_id', session?.user?.id)
-        .single();
+        .eq('user_id', session.user.id)
+        .limit(1);
 
-      if (existingDrawings) {
-        setExistingDrawing(existingDrawings);
+      if (error) {
+        console.error('Error checking for existing drawings:', error);
+        toast.error("An error occurred while checking for existing drawings");
+        return;
+      }
+
+      if (existingDrawings && existingDrawings.length > 0) {
+        setExistingDrawing(existingDrawings[0]);
         setShowReplaceDialog(true);
         setShowSubmitForm(false);
         return;
       }
 
       const canvas = document.querySelector('canvas');
-      const fileName = await submitDrawing(canvas, session?.user?.id, data);
+      const fileName = await submitDrawing(canvas, session.user.id, data);
       console.log('Drawing submitted successfully:', fileName);
       setShowSubmitForm(false);
       setIsDrawing(false);
       setHasDrawn(false);
     } catch (error) {
       console.error('Error submitting drawing:', error);
+      toast.error("Failed to submit drawing");
     }
   };
 
