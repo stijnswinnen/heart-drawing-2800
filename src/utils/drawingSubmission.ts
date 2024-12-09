@@ -54,7 +54,6 @@ export const submitDrawing = async (
 };
 
 export const deleteDrawing = async (imagePath: string) => {
-  console.log('Attempting to delete file:', imagePath);
   const { error: storageError } = await supabase.storage
     .from('hearts')
     .remove([imagePath]);
