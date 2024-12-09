@@ -7,10 +7,10 @@ interface CanvasProps {
   onDrawingComplete: () => void;
   penSize: number;
   penColor: string;
-  key?: string; // Add key prop to force re-render when needed
+  key?: number | string; // Update the type to allow both number and string
 }
 
-export const Canvas = ({ onDrawingComplete, penSize, penColor }: CanvasProps) => {
+export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const isMobile = useIsMobile();
