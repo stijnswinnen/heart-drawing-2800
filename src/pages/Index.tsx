@@ -28,6 +28,20 @@ export default function Index() {
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
+      // Check if user has already submitted a drawing
+      const { data: existingDrawings } = await supabase
+        .from('drawings')
+        .select('*')
+        .eq('user_id', session?.user?.id)
+        .single();
+
+      if (existingDrawings) {
+        setExistingDrawing(existingDrawings);
+        setShowReplaceDialog(true);
+        setShowSubmitForm(false);
+        return;
+      }
+
       const canvas = document.querySelector('canvas');
       const fileName = await submitDrawing(canvas, session?.user?.id, data);
       console.log('Drawing submitted successfully:', fileName);
