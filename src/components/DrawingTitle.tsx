@@ -8,8 +8,8 @@ interface DrawingTitleProps {
 export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => {
   return (
     <div 
-      className={`flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
-        isDrawing ? 'md:translate-x-[-100%] md:ml-8 translate-y-[-30vh] md:translate-y-0' : 'translate-y-0'
+      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
+        isDrawing ? 'md:translate-x-[-100%] md:ml-8 translate-y-[-30vh] md:translate-y-0' : ''
       }`}
     >
       <h1 
