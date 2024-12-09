@@ -7,72 +7,78 @@ import { DrawingCanvas } from "@/components/DrawingCanvas";
 import { LockButton } from "@/components/LockButton";
 import { SubmitForm } from "@/components/SubmitForm";
 import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
+import { submitDrawing, deleteDrawing } from "@/utils/drawingSubmission";
 
-// Since Index.tsx is getting large, let's extract the submission logic into a separate file
-<lov-write file_path="src/utils/drawingSubmission.ts">
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+export default function Index() {
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [existingDrawing, setExistingDrawing] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
 
-interface SubmissionData {
-  name: string;
-  email: string;
-  newsletter: boolean;
-}
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    };
+    fetchSession();
+  }, []);
 
-export const submitDrawing = async (
-  canvas: HTMLCanvasElement | null,
-  userId: string | undefined,
-  data: SubmissionData
-) => {
-  if (!canvas) {
-    toast.error("No drawing found!");
-    return;
-  }
+  const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
+    try {
+      const canvas = document.querySelector('canvas');
+      const fileName = await submitDrawing(canvas, session?.user?.id, data);
+      console.log('Drawing submitted successfully:', fileName);
+      setShowSubmitForm(false);
+      setIsDrawing(false);
+      setHasDrawn(false);
+    } catch (error) {
+      console.error('Error submitting drawing:', error);
+    }
+  };
 
-  const blob = await new Promise<Blob>((resolve) => 
-    canvas.toBlob((b) => resolve(b!), 'image/png')
+  const handleReplaceDrawing = async () => {
+    try {
+      if (existingDrawing?.image_path) {
+        await deleteDrawing(existingDrawing.image_path);
+        console.log('Old drawing deleted successfully');
+      }
+      setShowReplaceDialog(false);
+      setShowSubmitForm(true);
+    } catch (error) {
+      console.error('Error replacing drawing:', error);
+      toast.error("Failed to replace drawing");
+    }
+  };
+
+  return (
+    <div>
+      <DrawingTitle />
+      <AuthDialog session={session} setSession={setSession} />
+      <DrawingCanvas
+        isDrawing={isDrawing}
+        hasDrawn={hasDrawn}
+        penSize={5}
+        setPenSize={() => {}}
+        penColor="#000000"
+        setPenColor={() => {}}
+        isEraser={false}
+        setIsEraser={() => {}}
+        canvasKey={1}
+        onDrawingComplete={() => setHasDrawn(true)}
+        onReset={() => setHasDrawn(false)}
+        onSubmit={() => setShowSubmitForm(true)}
+        session={session}
+        setShowAuth={() => {}}
+      />
+      <LockButton onClick={() => setIsDrawing(true)} />
+      {showSubmitForm && (
+        <SubmitForm onClose={() => setShowSubmitForm(false)} onSubmit={handleSubmit} />
+      )}
+      {showReplaceDialog && (
+        <ReplaceDrawingDialog onConfirm={handleReplaceDrawing} onCancel={() => setShowReplaceDialog(false)} />
+      )}
+    </div>
   );
-
-  const fileName = `${userId}/${crypto.randomUUID()}.png`;
-
-  const { error: uploadError } = await supabase.storage
-    .from('hearts')
-    .upload(fileName, blob);
-
-  if (uploadError) {
-    console.error('Upload error:', uploadError);
-    toast.error("Failed to upload drawing");
-    throw uploadError;
-  }
-
-  const { error: dbError } = await supabase
-    .from('drawings')
-    .insert({
-      user_id: userId,
-      image_path: fileName,
-      name: data.name,
-      email: data.email,
-    });
-
-  if (dbError) {
-    console.error('Database error:', dbError);
-    // If database insert fails, clean up the uploaded file
-    await supabase.storage.from('hearts').remove([fileName]);
-    toast.error("Failed to save drawing information");
-    throw dbError;
-  }
-
-  return fileName;
-};
-
-export const deleteDrawing = async (imagePath: string) => {
-  console.log('Attempting to delete file:', imagePath);
-  const { error: storageError } = await supabase.storage
-    .from('hearts')
-    .remove([imagePath]);
-
-  if (storageError) {
-    console.error('Storage deletion error:', storageError);
-    throw storageError;
-  }
-};
+}
