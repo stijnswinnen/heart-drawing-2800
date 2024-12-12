@@ -13,6 +13,7 @@ export default function Index() {
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(1);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -24,6 +25,11 @@ export default function Index() {
 
   const handleHeartClick = () => {
     setIsDrawing(true);
+  };
+
+  const handleReset = () => {
+    setHasDrawn(false);
+    setCanvasKey(prev => prev + 1);
   };
 
   return (
@@ -41,9 +47,9 @@ export default function Index() {
         <DrawingCanvas
           isDrawing={isDrawing}
           hasDrawn={hasDrawn}
-          canvasKey={1}
+          canvasKey={canvasKey}
           onDrawingComplete={() => setHasDrawn(true)}
-          onReset={() => setHasDrawn(false)}
+          onReset={handleReset}
           onSubmit={() => setShowSubmitForm(true)}
           session={session}
           setShowAuth={setShowAuth}
