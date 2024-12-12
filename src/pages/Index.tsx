@@ -17,6 +17,9 @@ export default function Index() {
   const [existingDrawing, setExistingDrawing] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [penSize, setPenSize] = useState(5);
+  const [penColor, setPenColor] = useState("#000000");
+  const [isEraser, setIsEraser] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -95,12 +98,12 @@ export default function Index() {
       <DrawingCanvas
         isDrawing={isDrawing}
         hasDrawn={hasDrawn}
-        penSize={5}
-        setPenSize={() => {}}
-        penColor="#000000"
-        setPenColor={() => {}}
-        isEraser={false}
-        setIsEraser={() => {}}
+        penSize={penSize}
+        setPenSize={setPenSize}
+        penColor={penColor}
+        setPenColor={setPenColor}
+        isEraser={isEraser}
+        setIsEraser={setIsEraser}
         canvasKey={1}
         onDrawingComplete={() => setHasDrawn(true)}
         onReset={() => setHasDrawn(false)}
