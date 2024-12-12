@@ -9,7 +9,7 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
   return (
     <div 
       className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
-        isDrawing ? 'md:translate-x-[-150%] md:ml-8' : ''
+        isDrawing ? 'md:translate-x-[-150%] md:ml-8 mobile:top-8 mobile:-translate-y-0' : ''
       }`}
     >
       <h1 

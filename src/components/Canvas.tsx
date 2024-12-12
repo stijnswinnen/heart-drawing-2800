@@ -7,7 +7,7 @@ interface CanvasProps {
   onDrawingComplete: () => void;
   penSize: number;
   penColor: string;
-  key?: number | string; // Update the type to allow both number and string
+  key?: number | string;
 }
 
 export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProps) => {
@@ -64,7 +64,10 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
 
   return (
     <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
-      <canvas ref={canvasRef} className={`cursor-crosshair ${isMobile ? 'border border-gray-200' : ''}`} />
+      <canvas 
+        ref={canvasRef} 
+        className={`cursor-crosshair border border-dashed border-gray-300 ${isMobile ? '' : ''}`} 
+      />
     </div>
   );
 };
