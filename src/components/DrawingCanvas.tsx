@@ -1,16 +1,11 @@
 import { Canvas } from "@/components/Canvas";
 import { DrawingTools } from "@/components/DrawingTools";
 import { Button } from "@/components/ui/button";
+import { useDrawing } from "@/components/DrawingProvider";
 
 interface DrawingCanvasProps {
   isDrawing: boolean;
   hasDrawn: boolean;
-  penSize: number;
-  setPenSize: (size: number) => void;
-  penColor: string;
-  setPenColor: (color: string) => void;
-  isEraser: boolean;
-  setIsEraser: (isEraser: boolean) => void;
   canvasKey: number;
   onDrawingComplete: () => void;
   onReset: () => void;
@@ -22,12 +17,6 @@ interface DrawingCanvasProps {
 export const DrawingCanvas = ({
   isDrawing,
   hasDrawn,
-  penSize,
-  setPenSize,
-  penColor,
-  setPenColor,
-  isEraser,
-  setIsEraser,
   canvasKey,
   onDrawingComplete,
   onReset,
@@ -35,6 +24,15 @@ export const DrawingCanvas = ({
   session,
   setShowAuth,
 }: DrawingCanvasProps) => {
+  const {
+    penSize,
+    setPenSize,
+    penColor,
+    setPenColor,
+    isEraser,
+    setIsEraser,
+  } = useDrawing();
+
   if (!isDrawing) return null;
 
   return (
