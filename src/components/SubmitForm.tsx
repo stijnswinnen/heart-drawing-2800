@@ -49,7 +49,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
     <Dialog defaultOpen onOpenChange={onClose}>
       <DialogContent aria-describedby="submit-form-description">
         <DialogHeader>
-          <DialogTitle>Submit Your Drawing</DialogTitle>
+          <DialogTitle>Submit Your Heart</DialogTitle>
           <DialogDescription id="submit-form-description">
             Please provide your information to submit your heart drawing.
           </DialogDescription>
@@ -105,7 +105,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit">Submit Drawing</Button>
+              <Button type="submit">Submit Heart</Button>
             </div>
           </form>
         </Form>
