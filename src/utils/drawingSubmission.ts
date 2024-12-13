@@ -12,6 +12,8 @@ export const submitDrawing = async (
   data: SubmissionData
 ) => {
   console.log('Starting drawing submission process...');
+  console.log('User ID:', userId);
+  console.log('Submission data:', data);
   
   if (!canvas) {
     console.error('No canvas element found');
@@ -21,6 +23,7 @@ export const submitDrawing = async (
   // Validate that the canvas actually contains a drawing
   const context = canvas.getContext('2d');
   if (!context) {
+    console.error('Could not get canvas context');
     throw new Error("Could not get canvas context");
   }
 
@@ -40,10 +43,9 @@ export const submitDrawing = async (
     }, 'image/png');
   });
 
-  // Generate a unique filename, using userId if available
-  const fileName = userId 
-    ? `${userId}/${crypto.randomUUID()}.png`
-    : `anonymous/${crypto.randomUUID()}.png`;
+  // Generate a unique filename
+  const folder = userId ? userId : 'anonymous';
+  const fileName = `${folder}/${crypto.randomUUID()}.png`;
     
   console.log('Uploading to storage with filename:', fileName);
 
@@ -90,6 +92,7 @@ export const submitDrawing = async (
 };
 
 export const deleteDrawing = async (imagePath: string) => {
+  console.log('Attempting to delete drawing:', imagePath);
   const { error: storageError } = await supabase.storage
     .from('hearts')
     .remove([imagePath]);
@@ -98,4 +101,5 @@ export const deleteDrawing = async (imagePath: string) => {
     console.error('Storage deletion error:', storageError);
     throw new Error("Failed to delete drawing: " + storageError.message);
   }
+  console.log('Successfully deleted drawing from storage');
 };

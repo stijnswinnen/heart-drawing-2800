@@ -25,15 +25,18 @@ export const DrawingSubmissionHandler = ({
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
+      console.log('Starting submission process with data:', data);
+      
       const canvas = document.querySelector('canvas');
       if (!canvas) {
+        console.error('No canvas element found');
         toast.error("No canvas found");
         return;
       }
 
       // If user is logged in, check for existing drawings
       if (session?.user?.id) {
-        console.log('Checking for existing drawings...');
+        console.log('Checking for existing drawings for user:', session.user.id);
         const { data: existingDrawings, error: checkError } = await supabase
           .from('drawings')
           .select('*')
@@ -45,7 +48,7 @@ export const DrawingSubmissionHandler = ({
           return;
         }
 
-        console.log('Existing drawings:', existingDrawings);
+        console.log('Existing drawings found:', existingDrawings);
 
         if (existingDrawings && existingDrawings.length > 0) {
           setExistingDrawing(existingDrawings[0]);
@@ -55,16 +58,16 @@ export const DrawingSubmissionHandler = ({
         }
       }
 
-      console.log('Submitting new drawing...');
-      // Pass the session.user.id if it exists, otherwise pass null
+      console.log('Proceeding with drawing submission...');
       const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
       
       if (!fileName) {
+        console.error('No filename returned from submitDrawing');
         toast.error("Failed to submit drawing");
         return;
       }
 
-      console.log('Drawing submitted successfully:', fileName);
+      console.log('Drawing submitted successfully with filename:', fileName);
       toast.success("Thank you for your submission! ❤️");
       setShowSubmitForm(false);
       setIsDrawing(false);
@@ -78,6 +81,7 @@ export const DrawingSubmissionHandler = ({
   const handleReplaceDrawing = async () => {
     try {
       if (!existingDrawing?.image_path) {
+        console.error('No existing drawing found to replace');
         toast.error("No existing drawing found");
         return;
       }
