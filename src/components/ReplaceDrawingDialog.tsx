@@ -14,22 +14,20 @@ interface ReplaceDrawingDialogProps {
   onCancel: () => void;
 }
 
-export const ReplaceDrawingDialog = ({
-  onConfirm,
-  onCancel,
-}: ReplaceDrawingDialogProps) => {
+export const ReplaceDrawingDialog = ({ onConfirm, onCancel }: ReplaceDrawingDialogProps) => {
   return (
     <AlertDialog defaultOpen>
-      <AlertDialogContent>
+      <AlertDialogContent aria-describedby="replace-drawing-description">
         <AlertDialogHeader>
           <AlertDialogTitle>Replace Existing Drawing?</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have already submitted a heart drawing. Would you like to replace it with your new drawing?
+          <AlertDialogDescription id="replace-drawing-description">
+            You already have a drawing submitted. Would you like to replace it with your new drawing?
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>No, Keep Original</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Yes, Replace</AlertDialogAction>
+          <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Replace Drawing</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

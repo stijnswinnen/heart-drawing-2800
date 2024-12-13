@@ -1,95 +1,114 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
-import { z } from "zod";
+
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  newsletter: z.boolean().default(false),
+});
 
 interface SubmitFormProps {
   onClose: () => void;
-  onSubmit: (data: { name: string; email: string; newsletter: boolean }) => void;
+  onSubmit: (data: z.infer<typeof formSchema>) => void;
 }
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-});
-
 export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [newsletter, setNewsletter] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      formSchema.parse({ name, email });
-      onSubmit({ name, email, newsletter });
-      toast.success("Thank you for your submission! ❤️");
-      onClose();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const formattedErrors = {};
-        error.errors.forEach((err) => {
-          formattedErrors[err.path[0]] = err.message;
-        });
-        setErrors(formattedErrors);
-      }
-    }
-  };
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      newsletter: false,
+    },
+  });
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog defaultOpen onOpenChange={onClose}>
+      <DialogContent aria-describedby="submit-form-description">
         <DialogHeader>
-          <DialogTitle>Submit Your Heart</DialogTitle>
+          <DialogTitle>Submit Your Drawing</DialogTitle>
+          <DialogDescription id="submit-form-description">
+            Please provide your information to submit your heart drawing.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="your.email@example.com" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email}</p>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="newsletter"
-              checked={newsletter}
-              onCheckedChange={(checked) => setNewsletter(checked as boolean)}
+            <FormField
+              control={form.control}
+              name="newsletter"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Subscribe to newsletter
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )}
             />
-            <Label htmlFor="newsletter" className="text-sm">
-              Yes, I want to receive news and updates on the 2800.love project.
-            </Label>
-          </div>
-          <button
-            type="submit"
-            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Submit
-          </button>
-        </form>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit">Submit Drawing</Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
