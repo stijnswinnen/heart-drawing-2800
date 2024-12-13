@@ -18,16 +18,22 @@ const Admin = () => {
   const [selectedStatus, setSelectedStatus] = useState<DrawingStatus>("new");
   const queryClient = useQueryClient();
 
+  // Only fetch profile if we have a session
   const { data: profile } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
+      if (!session?.user?.id) {
+        navigate('/');
+        return null;
+      }
       const { data } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", session?.user?.id)
+        .eq("id", session.user.id)
         .single();
       return data;
     },
+    enabled: !!session?.user?.id, // Only run query if we have a user ID
   });
 
   const { data: drawings } = useQuery({
@@ -45,12 +51,21 @@ const Admin = () => {
   useEffect(() => {
     if (!session) {
       navigate("/");
-    } else if (profile && profile.role !== "admin") {
+    }
+  }, [session, navigate]);
+
+  // Add a separate effect for profile role check
+  useEffect(() => {
+    if (profile && profile.role !== "admin") {
+      toast.error("You don't have permission to access this page");
       navigate("/");
     }
-  }, [session, profile, navigate]);
+  }, [profile, navigate]);
 
-  if (!profile || profile.role !== "admin") return null;
+  // Don't render anything until we have confirmed the user is an admin
+  if (!session || !profile || profile.role !== "admin") {
+    return null;
+  }
 
   const handleApprove = async (drawing: Tables<"drawings">) => {
     try {
