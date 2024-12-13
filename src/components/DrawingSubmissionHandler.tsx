@@ -30,14 +30,20 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
+      const canvas = document.querySelector('canvas');
+      if (!canvas) {
+        toast.error("No canvas found");
+        return;
+      }
+
       console.log('Checking for existing drawings...');
-      const { data: existingDrawings, error } = await supabase
+      const { data: existingDrawings, error: checkError } = await supabase
         .from('drawings')
         .select('*')
         .eq('user_id', session.user.id);
 
-      if (error) {
-        console.error('Error checking for existing drawings:', error);
+      if (checkError) {
+        console.error('Error checking for existing drawings:', checkError);
         toast.error("Failed to check for existing drawings");
         return;
       }
@@ -51,31 +57,53 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      const canvas = document.querySelector('canvas');
+      console.log('Submitting new drawing...');
       const fileName = await submitDrawing(canvas, session.user.id, data);
+      
+      if (!fileName) {
+        toast.error("Failed to submit drawing");
+        return;
+      }
+
       console.log('Drawing submitted successfully:', fileName);
       toast.success("Thank you for your submission! ❤️");
       setShowSubmitForm(false);
       setIsDrawing(false);
       setHasDrawn(false);
-    } catch (error) {
-      console.error('Error submitting drawing:', error);
-      toast.error("Failed to submit drawing");
+    } catch (error: any) {
+      console.error('Error in handleSubmit:', error);
+      toast.error(error.message || "Failed to submit drawing");
     }
   };
 
   const handleReplaceDrawing = async () => {
     try {
-      if (existingDrawing?.image_path) {
-        console.log('Attempting to delete file:', existingDrawing.image_path);
-        await deleteDrawing(existingDrawing.image_path);
-        console.log('Old drawing deleted successfully');
-        setShowReplaceDialog(false);
-        setShowSubmitForm(true);
+      if (!existingDrawing?.image_path) {
+        toast.error("No existing drawing found");
+        return;
       }
-    } catch (error) {
+
+      console.log('Attempting to delete file:', existingDrawing.image_path);
+      await deleteDrawing(existingDrawing.image_path);
+      
+      // Delete the database record
+      const { error: deleteError } = await supabase
+        .from('drawings')
+        .delete()
+        .eq('user_id', session?.user?.id);
+
+      if (deleteError) {
+        console.error('Error deleting drawing record:', deleteError);
+        toast.error("Failed to delete existing drawing");
+        return;
+      }
+
+      console.log('Old drawing deleted successfully');
+      setShowReplaceDialog(false);
+      setShowSubmitForm(true);
+    } catch (error: any) {
       console.error('Error replacing drawing:', error);
-      toast.error("Failed to replace drawing");
+      toast.error(error.message || "Failed to replace drawing");
     }
   };
 

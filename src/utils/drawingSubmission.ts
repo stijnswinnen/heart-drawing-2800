@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface SubmissionData {
   name: string;
@@ -26,8 +25,12 @@ export const submitDrawing = async (
 
   // Validate that the canvas actually contains a drawing
   const context = canvas.getContext('2d');
-  const imageData = context?.getImageData(0, 0, canvas.width, canvas.height).data;
-  const hasDrawing = imageData?.some((pixel, index) => index % 4 === 3 && pixel !== 0);
+  if (!context) {
+    throw new Error("Could not get canvas context");
+  }
+
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  const hasDrawing = imageData.some((pixel, index) => index % 4 === 3 && pixel !== 0);
 
   if (!hasDrawing) {
     console.error('Canvas is empty');
@@ -47,16 +50,19 @@ export const submitDrawing = async (
 
   try {
     // Upload to storage
-    const { error: uploadError, data: uploadData } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('hearts')
-      .upload(fileName, blob);
+      .upload(fileName, blob, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError);
-      throw uploadError;
+      throw new Error("Failed to upload drawing: " + uploadError.message);
     }
 
-    console.log('Successfully uploaded to storage:', uploadData);
+    console.log('Successfully uploaded to storage');
 
     // Insert into database
     const { error: dbError } = await supabase
@@ -73,7 +79,7 @@ export const submitDrawing = async (
       console.error('Database insert error:', dbError);
       // If database insert fails, clean up the uploaded file
       await supabase.storage.from('hearts').remove([fileName]);
-      throw dbError;
+      throw new Error("Failed to save drawing information: " + dbError.message);
     }
 
     console.log('Successfully inserted into database');
@@ -91,6 +97,6 @@ export const deleteDrawing = async (imagePath: string) => {
 
   if (storageError) {
     console.error('Storage deletion error:', storageError);
-    throw storageError;
+    throw new Error("Failed to delete drawing: " + storageError.message);
   }
 };
