@@ -12,45 +12,76 @@ export const submitDrawing = async (
   userId: string | undefined,
   data: SubmissionData
 ) => {
+  console.log('Starting drawing submission process...');
+  
   if (!canvas) {
-    toast.error("No drawing found!");
-    return;
+    console.error('No canvas element found');
+    throw new Error("No drawing found!");
   }
 
-  const blob = await new Promise<Blob>((resolve) => 
-    canvas.toBlob((b) => resolve(b!), 'image/png')
-  );
+  if (!userId) {
+    console.error('No user ID provided');
+    throw new Error("User ID is required!");
+  }
+
+  // Validate that the canvas actually contains a drawing
+  const context = canvas.getContext('2d');
+  const imageData = context?.getImageData(0, 0, canvas.width, canvas.height).data;
+  const hasDrawing = imageData?.some((pixel, index) => index % 4 === 3 && pixel !== 0);
+
+  if (!hasDrawing) {
+    console.error('Canvas is empty');
+    throw new Error("Please draw something before submitting!");
+  }
+
+  console.log('Converting canvas to blob...');
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((b) => {
+      if (b) resolve(b);
+      else reject(new Error('Failed to convert canvas to blob'));
+    }, 'image/png');
+  });
 
   const fileName = `${userId}/${crypto.randomUUID()}.png`;
+  console.log('Uploading to storage with filename:', fileName);
 
-  const { error: uploadError } = await supabase.storage
-    .from('hearts')
-    .upload(fileName, blob);
+  try {
+    // Upload to storage
+    const { error: uploadError, data: uploadData } = await supabase.storage
+      .from('hearts')
+      .upload(fileName, blob);
 
-  if (uploadError) {
-    console.error('Upload error:', uploadError);
-    toast.error("Failed to upload drawing");
-    throw uploadError;
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      throw uploadError;
+    }
+
+    console.log('Successfully uploaded to storage:', uploadData);
+
+    // Insert into database
+    const { error: dbError } = await supabase
+      .from('drawings')
+      .insert({
+        user_id: userId,
+        image_path: fileName,
+        name: data.name,
+        email: data.email,
+        status: 'new'
+      });
+
+    if (dbError) {
+      console.error('Database insert error:', dbError);
+      // If database insert fails, clean up the uploaded file
+      await supabase.storage.from('hearts').remove([fileName]);
+      throw dbError;
+    }
+
+    console.log('Successfully inserted into database');
+    return fileName;
+  } catch (error) {
+    console.error('Error in submission process:', error);
+    throw error;
   }
-
-  const { error: dbError } = await supabase
-    .from('drawings')
-    .insert({
-      user_id: userId,
-      image_path: fileName,
-      name: data.name,
-      email: data.email,
-    });
-
-  if (dbError) {
-    console.error('Database error:', dbError);
-    // If database insert fails, clean up the uploaded file
-    await supabase.storage.from('hearts').remove([fileName]);
-    toast.error("Failed to save drawing information");
-    throw dbError;
-  }
-
-  return fileName;
 };
 
 export const deleteDrawing = async (imagePath: string) => {
