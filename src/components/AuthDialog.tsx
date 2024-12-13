@@ -3,22 +3,36 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface AuthDialogProps {
   onClose: () => void;
 }
 
 export const AuthDialog = ({ onClose }: AuthDialogProps) => {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
+        // Check if user is admin
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
         toast.success('Successfully signed in!');
         onClose();
+
+        if (profile?.role === 'admin') {
+          navigate('/admin');
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [onClose]);
+  }, [onClose, navigate]);
 
   return (
     <div className="fixed inset-0 bg-white/95 z-50 flex items-center justify-center p-4">
