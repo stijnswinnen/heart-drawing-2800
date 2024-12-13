@@ -51,6 +51,11 @@ const Admin = () => {
 
   if (!profile || profile.role !== "admin") return null;
 
+  const getImageUrl = (imagePath: string) => {
+    const { data } = supabase.storage.from('hearts').getPublicUrl(imagePath);
+    return data.publicUrl;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -131,9 +136,7 @@ const Admin = () => {
                   className="border border-dashed rounded-lg p-4 aspect-square"
                 >
                   <img
-                    src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/hearts/${
-                      drawing.image_path
-                    }`}
+                    src={getImageUrl(drawing.image_path)}
                     alt="Heart drawing"
                     className="w-full h-full object-contain"
                   />
