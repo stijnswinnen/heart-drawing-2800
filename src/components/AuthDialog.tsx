@@ -14,19 +14,30 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        // Check if user is admin
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
+      if (event === 'SIGNED_IN' && session?.user?.id) {
+        try {
+          // Check if user is admin
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
 
-        toast.success('Successfully signed in!');
-        onClose();
+          if (error) {
+            console.error('Error fetching profile:', error);
+            toast.error('Error checking user role');
+            return;
+          }
 
-        if (profile?.role === 'admin') {
-          navigate('/admin');
+          toast.success('Successfully signed in!');
+          onClose();
+
+          if (profile?.role === 'admin') {
+            navigate('/admin');
+          }
+        } catch (error) {
+          console.error('Error in auth state change:', error);
+          toast.error('An error occurred during sign in');
         }
       }
     });
