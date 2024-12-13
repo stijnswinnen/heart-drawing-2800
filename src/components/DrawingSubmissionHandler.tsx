@@ -25,40 +25,39 @@ export const DrawingSubmissionHandler = ({
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
-      if (!session?.user?.id) {
-        toast.error("You must be signed in to submit a drawing");
-        return;
-      }
-
       const canvas = document.querySelector('canvas');
       if (!canvas) {
         toast.error("No canvas found");
         return;
       }
 
-      console.log('Checking for existing drawings...');
-      const { data: existingDrawings, error: checkError } = await supabase
-        .from('drawings')
-        .select('*')
-        .eq('user_id', session.user.id);
+      // If user is logged in, check for existing drawings
+      if (session?.user?.id) {
+        console.log('Checking for existing drawings...');
+        const { data: existingDrawings, error: checkError } = await supabase
+          .from('drawings')
+          .select('*')
+          .eq('user_id', session.user.id);
 
-      if (checkError) {
-        console.error('Error checking for existing drawings:', checkError);
-        toast.error("Failed to check for existing drawings");
-        return;
-      }
+        if (checkError) {
+          console.error('Error checking for existing drawings:', checkError);
+          toast.error("Failed to check for existing drawings");
+          return;
+        }
 
-      console.log('Existing drawings:', existingDrawings);
+        console.log('Existing drawings:', existingDrawings);
 
-      if (existingDrawings && existingDrawings.length > 0) {
-        setExistingDrawing(existingDrawings[0]);
-        setShowReplaceDialog(true);
-        setShowSubmitForm(false);
-        return;
+        if (existingDrawings && existingDrawings.length > 0) {
+          setExistingDrawing(existingDrawings[0]);
+          setShowReplaceDialog(true);
+          setShowSubmitForm(false);
+          return;
+        }
       }
 
       console.log('Submitting new drawing...');
-      const fileName = await submitDrawing(canvas, session.user.id, data);
+      // Pass the session.user.id if it exists, otherwise pass null
+      const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
       
       if (!fileName) {
         toast.error("Failed to submit drawing");

@@ -8,7 +8,7 @@ interface SubmissionData {
 
 export const submitDrawing = async (
   canvas: HTMLCanvasElement | null,
-  userId: string | undefined,
+  userId: string | null,
   data: SubmissionData
 ) => {
   console.log('Starting drawing submission process...');
@@ -16,11 +16,6 @@ export const submitDrawing = async (
   if (!canvas) {
     console.error('No canvas element found');
     throw new Error("No drawing found!");
-  }
-
-  if (!userId) {
-    console.error('No user ID provided');
-    throw new Error("User ID is required!");
   }
 
   // Validate that the canvas actually contains a drawing
@@ -45,7 +40,11 @@ export const submitDrawing = async (
     }, 'image/png');
   });
 
-  const fileName = `${userId}/${crypto.randomUUID()}.png`;
+  // Generate a unique filename, using userId if available
+  const fileName = userId 
+    ? `${userId}/${crypto.randomUUID()}.png`
+    : `anonymous/${crypto.randomUUID()}.png`;
+    
   console.log('Uploading to storage with filename:', fileName);
 
   try {
