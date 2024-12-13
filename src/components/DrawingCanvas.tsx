@@ -33,6 +33,14 @@ export const DrawingCanvas = ({
     setIsEraser,
   } = useDrawing();
 
+  const handleSubmit = () => {
+    if (session) {
+      onSubmit();
+    } else {
+      setShowAuth(true);
+    }
+  };
+
   if (!isDrawing) return null;
 
   return (
@@ -56,7 +64,7 @@ export const DrawingCanvas = ({
       {hasDrawn && (
         <div className="fixed md:top-8 md:bottom-auto md:right-8 bottom-24 flex gap-4 animate-fade-in mt-2 md:mt-0">
           <Button
-            onClick={() => session ? onSubmit() : setShowAuth(true)}
+            onClick={handleSubmit}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
           >
             Submit

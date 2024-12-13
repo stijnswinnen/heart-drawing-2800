@@ -25,31 +25,34 @@ export const DrawingSubmissionHandler = ({
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
-      if (session?.user?.id) {
-        console.log('Checking for existing drawings...');
-        const { data: existingDrawings, error } = await supabase
-          .from('drawings')
-          .select('*')
-          .eq('user_id', session.user.id);
+      if (!session?.user?.id) {
+        toast.error("You must be signed in to submit a drawing");
+        return;
+      }
 
-        if (error) {
-          console.error('Error checking for existing drawings:', error);
-          toast.error("Failed to check for existing drawings");
-          return;
-        }
+      console.log('Checking for existing drawings...');
+      const { data: existingDrawings, error } = await supabase
+        .from('drawings')
+        .select('*')
+        .eq('user_id', session.user.id);
 
-        console.log('Existing drawings:', existingDrawings);
+      if (error) {
+        console.error('Error checking for existing drawings:', error);
+        toast.error("Failed to check for existing drawings");
+        return;
+      }
 
-        if (existingDrawings && existingDrawings.length > 0) {
-          setExistingDrawing(existingDrawings[0]);
-          setShowReplaceDialog(true);
-          setShowSubmitForm(false);
-          return;
-        }
+      console.log('Existing drawings:', existingDrawings);
+
+      if (existingDrawings && existingDrawings.length > 0) {
+        setExistingDrawing(existingDrawings[0]);
+        setShowReplaceDialog(true);
+        setShowSubmitForm(false);
+        return;
       }
 
       const canvas = document.querySelector('canvas');
-      const fileName = await submitDrawing(canvas, session?.user?.id, data);
+      const fileName = await submitDrawing(canvas, session.user.id, data);
       console.log('Drawing submitted successfully:', fileName);
       toast.success("Thank you for your submission! ❤️");
       setShowSubmitForm(false);
@@ -84,7 +87,10 @@ export const DrawingSubmissionHandler = ({
       {showReplaceDialog && (
         <ReplaceDrawingDialog 
           onConfirm={handleReplaceDrawing} 
-          onCancel={() => setShowReplaceDialog(false)} 
+          onCancel={() => {
+            setShowReplaceDialog(false);
+            setShowSubmitForm(false);
+          }} 
         />
       )}
     </>
