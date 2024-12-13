@@ -1,11 +1,13 @@
 import { useSession } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, CheckCircle, XCircle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 type DrawingStatus = "new" | "approved";
 
@@ -13,6 +15,7 @@ const Admin = () => {
   const session = useSession();
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState<DrawingStatus>("new");
+  const queryClient = useQueryClient();
 
   // Fetch profile to check admin status
   const { data: profile } = useQuery({
@@ -54,6 +57,48 @@ const Admin = () => {
   const getImageUrl = (imagePath: string) => {
     const { data } = supabase.storage.from('hearts').getPublicUrl(imagePath);
     return data.publicUrl;
+  };
+
+  const handleApprove = async (drawing: Tables<"drawings">) => {
+    try {
+      const { error } = await supabase
+        .from("drawings")
+        .update({ status: "approved" })
+        .eq("id", drawing.id);
+
+      if (error) throw error;
+
+      toast.success("Drawing approved successfully");
+      queryClient.invalidateQueries({ queryKey: ["drawings"] });
+    } catch (error) {
+      console.error("Error approving drawing:", error);
+      toast.error("Failed to approve drawing");
+    }
+  };
+
+  const handleDecline = async (drawing: Tables<"drawings">) => {
+    try {
+      // Delete the image from storage
+      const { error: storageError } = await supabase.storage
+        .from("hearts")
+        .remove([drawing.image_path]);
+
+      if (storageError) throw storageError;
+
+      // Delete the drawing record from the database
+      const { error: dbError } = await supabase
+        .from("drawings")
+        .delete()
+        .eq("id", drawing.id);
+
+      if (dbError) throw dbError;
+
+      toast.success("Drawing declined and removed");
+      queryClient.invalidateQueries({ queryKey: ["drawings"] });
+    } catch (error) {
+      console.error("Error declining drawing:", error);
+      toast.error("Failed to decline drawing");
+    }
   };
 
   return (
@@ -133,13 +178,35 @@ const Admin = () => {
               {drawings?.map((drawing) => (
                 <div
                   key={drawing.id}
-                  className="border border-dashed rounded-lg p-4 aspect-square"
+                  className="border border-dashed rounded-lg p-4"
                 >
-                  <img
-                    src={getImageUrl(drawing.image_path)}
-                    alt="Heart drawing"
-                    className="w-full h-full object-contain"
-                  />
+                  <div className="aspect-square mb-4">
+                    <img
+                      src={getImageUrl(drawing.image_path)}
+                      alt="Heart drawing"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  {selectedStatus === "new" && (
+                    <div className="flex justify-between gap-4">
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={() => handleApprove(drawing)}
+                      >
+                        <CheckCircle className="mr-2" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDecline(drawing)}
+                      >
+                        <XCircle className="mr-2" />
+                        Decline
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
