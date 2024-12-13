@@ -55,7 +55,7 @@ export default function Index() {
           setShowAuth={setShowAuth}
         />
 
-        <LockButton onClick={() => setIsDrawing(true)} />
+        <LockButton onClick={() => setShowAuth(true)} />
 
         <DrawingSubmissionHandler
           session={session}
