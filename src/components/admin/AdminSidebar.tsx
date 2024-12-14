@@ -8,9 +8,9 @@ interface AdminSidebarProps {
 }
 
 export const AdminSidebar = ({ selectedStatus, setSelectedStatus, drawings }: AdminSidebarProps) => {
-  // Always filter drawings by status, regardless of which status is selected
-  const newDrawingsCount = drawings?.filter(d => d.status === "new").length || 0;
-  const approvedDrawingsCount = drawings?.filter(d => d.status === "approved").length || 0;
+  // Calculate counts regardless of selected status
+  const newDrawingsCount = drawings?.filter(drawing => drawing.status === "new").length || 0;
+  const approvedDrawingsCount = drawings?.filter(drawing => drawing.status === "approved").length || 0;
 
   return (
     <aside className="w-64 flex-shrink-0">
