@@ -23,25 +23,20 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
       await onApprove(drawing);
 
       // Then, optimize the image
-      const response = await fetch('/functions/v1/optimize-heart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          imagePath: drawing.image_path,
-        }),
+      const { data, error } = await supabase.functions.invoke('optimize-heart', {
+        body: { imagePath: drawing.image_path }
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to optimize image');
+      if (error) {
+        console.error('Error optimizing image:', error);
+        toast.error("Heart approved but optimization failed");
+        return;
       }
 
+      console.log('Optimization response:', data);
       toast.success("Heart approved and optimized successfully");
     } catch (error) {
-      console.error('Error optimizing image:', error);
+      console.error('Error in handleApprove:', error);
       toast.error("Heart approved but optimization failed");
     }
   };
