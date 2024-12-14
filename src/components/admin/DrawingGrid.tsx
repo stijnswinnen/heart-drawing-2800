@@ -2,6 +2,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface DrawingGridProps {
   drawings: Tables<"drawings">[] | null;
@@ -11,9 +12,38 @@ interface DrawingGridProps {
 }
 
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
-  const getImageUrl = (imagePath: string) => {
-    const { data } = supabase.storage.from('hearts').getPublicUrl(imagePath);
+  const getImageUrl = (imagePath: string, bucket: "hearts" | "optimized" = "hearts") => {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(imagePath);
     return data.publicUrl;
+  };
+
+  const handleApprove = async (drawing: Tables<"drawings">) => {
+    try {
+      // First, approve the drawing
+      await onApprove(drawing);
+
+      // Then, optimize the image
+      const response = await fetch('/functions/v1/optimize-heart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          imagePath: drawing.image_path,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to optimize image');
+      }
+
+      toast.success("Heart approved and optimized successfully");
+    } catch (error) {
+      console.error('Error optimizing image:', error);
+      toast.error("Heart approved but optimization failed");
+    }
   };
 
   return (
@@ -25,7 +55,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
         >
           <div className="aspect-square mb-4">
             <img
-              src={getImageUrl(drawing.image_path)}
+              src={getImageUrl(drawing.image_path, drawing.status === "approved" ? "optimized" : "hearts")}
               alt="Heart drawing"
               className="w-full h-full object-contain"
             />
@@ -35,7 +65,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
               <Button
                 variant="outline"
                 className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                onClick={() => onApprove(drawing)}
+                onClick={() => handleApprove(drawing)}
               >
                 <CheckCircle className="mr-2" />
                 Approve
