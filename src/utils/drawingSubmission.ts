@@ -35,19 +35,28 @@ export const submitDrawing = async (
     throw new Error("Please draw something before submitting!");
   }
 
-  // Check if user with this email already exists
-  const { data: existingDrawings, error: checkError } = await supabase
+  // Check if user with this email has an active drawing
+  const { data: existingUser } = await supabase
     .from('heart_users')
     .select('id')
-    .eq('email', data.email);
+    .eq('email', data.email)
+    .single();
 
-  if (checkError) {
-    console.error('Error checking existing user:', checkError);
-    throw new Error("Failed to check existing submissions");
-  }
+  if (existingUser) {
+    // Check if there's an active drawing for this user
+    const { data: existingDrawings, error: checkError } = await supabase
+      .from('drawings')
+      .select('id')
+      .eq('heart_user_id', existingUser.id);
 
-  if (existingDrawings && existingDrawings.length > 0) {
-    throw new Error("You have already submitted a heart with this email address");
+    if (checkError) {
+      console.error('Error checking existing drawings:', checkError);
+      throw new Error("Failed to check existing submissions");
+    }
+
+    if (existingDrawings && existingDrawings.length > 0) {
+      throw new Error("You already have an active heart submission. Please wait for admin review.");
+    }
   }
 
   console.log('Converting canvas to blob...');
@@ -80,39 +89,52 @@ export const submitDrawing = async (
 
     console.log('Successfully uploaded to storage');
 
-    // First, create the heart user
-    const { data: heartUser, error: userError } = await supabase
-      .from('heart_users')
-      .insert({
-        email: data.email,
-        name: data.name,
-        marketing_consent: data.newsletter
-      })
-      .select()
-      .single();
+    let heartUserId;
 
-    if (userError) {
-      console.error('Error creating heart user:', userError);
-      // Clean up the uploaded file
-      await supabase.storage.from('hearts').remove([fileName]);
-      throw new Error("Failed to save user information: " + userError.message);
+    // If user exists, use their ID, otherwise create new user
+    if (existingUser) {
+      heartUserId = existingUser.id;
+      // Update marketing consent if changed
+      await supabase
+        .from('heart_users')
+        .update({ marketing_consent: data.newsletter })
+        .eq('id', heartUserId);
+    } else {
+      // Create new heart user
+      const { data: heartUser, error: userError } = await supabase
+        .from('heart_users')
+        .insert({
+          email: data.email,
+          name: data.name,
+          marketing_consent: data.newsletter
+        })
+        .select()
+        .single();
+
+      if (userError) {
+        console.error('Error creating heart user:', userError);
+        // Clean up the uploaded file
+        await supabase.storage.from('hearts').remove([fileName]);
+        throw new Error("Failed to save user information: " + userError.message);
+      }
+
+      heartUserId = heartUser.id;
     }
 
-    // Then, create the drawing record
+    // Create the drawing record
     const { error: dbError } = await supabase
       .from('drawings')
       .insert({
         user_id: userId,
-        heart_user_id: heartUser.id,
+        heart_user_id: heartUserId,
         image_path: fileName,
         status: 'new'
       });
 
     if (dbError) {
       console.error('Database insert error:', dbError);
-      // Clean up the uploaded file and user record
+      // Clean up the uploaded file
       await supabase.storage.from('hearts').remove([fileName]);
-      await supabase.from('heart_users').delete().eq('id', heartUser.id);
       throw new Error("Failed to save drawing information: " + dbError.message);
     }
 
