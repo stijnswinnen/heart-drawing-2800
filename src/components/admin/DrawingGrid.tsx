@@ -12,7 +12,13 @@ interface DrawingGridProps {
 }
 
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
-  const getImageUrl = (imagePath: string, bucket: "hearts" | "optimized" = "hearts") => {
+  const getImageUrl = (drawing: Tables<"drawings">) => {
+    const bucket = drawing.status === "approved" ? "optimized" : "hearts";
+    const imagePath = drawing.status === "approved" 
+      ? `optimized/${drawing.image_path.split('/').pop()}`
+      : drawing.image_path;
+    
+    console.log('Getting image URL for:', { bucket, imagePath });
     const { data } = supabase.storage.from(bucket).getPublicUrl(imagePath);
     return data.publicUrl;
   };
@@ -50,7 +56,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
         >
           <div className="aspect-square mb-4">
             <img
-              src={getImageUrl(drawing.image_path, drawing.status === "approved" ? "optimized" : "hearts")}
+              src={getImageUrl(drawing)}
               alt="Heart drawing"
               className="w-full h-full object-contain"
             />
