@@ -35,37 +35,23 @@ export const submitDrawing = async (
     throw new Error("Please draw something before submitting!");
   }
 
-  // Check if user with this email exists
+  // First, create or get the heart user
+  let heartUserId;
   const { data: existingUsers } = await supabase
     .from('heart_users')
-    .select('id')
+    .select('id, marketing_consent')
     .eq('email', data.email);
-
-  let heartUserId;
 
   if (existingUsers && existingUsers.length > 0) {
     heartUserId = existingUsers[0].id;
     
-    // Check if there's an active drawing for this user
-    const { data: existingDrawings, error: checkError } = await supabase
-      .from('drawings')
-      .select('id')
-      .eq('heart_user_id', heartUserId);
-
-    if (checkError) {
-      console.error('Error checking existing drawings:', checkError);
-      throw new Error("Failed to check existing submissions");
-    }
-
-    if (existingDrawings && existingDrawings.length > 0) {
-      throw new Error("You already have an active heart submission. Please wait for admin review.");
-    }
-
     // Update marketing consent if changed
-    await supabase
-      .from('heart_users')
-      .update({ marketing_consent: data.newsletter })
-      .eq('id', heartUserId);
+    if (existingUsers[0].marketing_consent !== data.newsletter) {
+      await supabase
+        .from('heart_users')
+        .update({ marketing_consent: data.newsletter })
+        .eq('id', heartUserId);
+    }
   } else {
     // Create new heart user
     const { data: heartUser, error: userError } = await supabase
@@ -84,6 +70,21 @@ export const submitDrawing = async (
     }
 
     heartUserId = heartUser.id;
+  }
+
+  // Now check if there's an active drawing for this user
+  const { data: existingDrawings, error: checkError } = await supabase
+    .from('drawings')
+    .select('id')
+    .eq('heart_user_id', heartUserId);
+
+  if (checkError) {
+    console.error('Error checking existing drawings:', checkError);
+    throw new Error("Failed to check existing submissions");
+  }
+
+  if (existingDrawings && existingDrawings.length > 0) {
+    throw new Error("You already have an active heart submission. Please wait for admin review.");
   }
 
   console.log('Converting canvas to blob...');
