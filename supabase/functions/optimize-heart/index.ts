@@ -47,36 +47,63 @@ serve(async (req) => {
     // Process the image with ImageScript
     const image = await Image.decode(new Uint8Array(imageBuffer))
     
-    // Find the bounds of the non-white content
-    let minX = image.width, minY = image.height, maxX = 0, maxY = 0
+    console.log('Image dimensions:', image.width, 'x', image.height)
     
+    // Initialize bounds to the opposite extremes
+    let minX = image.width
+    let minY = image.height
+    let maxX = 0
+    let maxY = 0
+    let hasContent = false
+    
+    // Safely scan the image for non-white content
     for (let y = 0; y < image.height; y++) {
       for (let x = 0; x < image.width; x++) {
-        const pixel = image.getPixelAt(x, y)
-        const r = (pixel >> 24) & 255
-        const g = (pixel >> 16) & 255
-        const b = (pixel >> 8) & 255
-        const a = pixel & 255
-        
-        // Check if pixel is not white (allowing some tolerance)
-        if (a > 0 && (r < 250 || g < 250 || b < 250)) {
-          minX = Math.min(minX, x)
-          minY = Math.min(minY, y)
-          maxX = Math.max(maxX, x)
-          maxY = Math.max(maxY, y)
+        try {
+          const pixel = image.getPixelAt(x + 1, y + 1) // ImageScript uses 1-based indexing
+          const r = (pixel >> 24) & 255
+          const g = (pixel >> 16) & 255
+          const b = (pixel >> 8) & 255
+          const a = pixel & 255
+          
+          // Check if pixel is not white (allowing some tolerance)
+          if (a > 0 && (r < 250 || g < 250 || b < 250)) {
+            minX = Math.min(minX, x)
+            minY = Math.min(minY, y)
+            maxX = Math.max(maxX, x)
+            maxY = Math.max(maxY, y)
+            hasContent = true
+          }
+        } catch (error) {
+          console.error(`Error processing pixel at ${x},${y}:`, error)
+          continue
         }
       }
     }
     
-    // Add some padding
+    if (!hasContent) {
+      console.log('No content found in image, using full dimensions')
+      minX = 0
+      minY = 0
+      maxX = image.width - 1
+      maxY = image.height - 1
+    }
+    
+    // Add padding
     const padding = 10
     minX = Math.max(0, minX - padding)
     minY = Math.max(0, minY - padding)
     maxX = Math.min(image.width - 1, maxX + padding)
     maxY = Math.min(image.height - 1, maxY + padding)
     
+    console.log('Cropping bounds:', { minX, minY, maxX, maxY })
+    
+    // Ensure valid crop dimensions
+    const cropWidth = Math.max(1, maxX - minX + 1)
+    const cropHeight = Math.max(1, maxY - minY + 1)
+    
     // Crop the image
-    const croppedImage = image.crop(minX, minY, maxX - minX + 1, maxY - minY + 1)
+    const croppedImage = image.crop(minX + 1, minY + 1, cropWidth, cropHeight) // Adjust for 1-based indexing
     
     // Convert to PNG buffer
     const processedBuffer = await croppedImage.encode()
