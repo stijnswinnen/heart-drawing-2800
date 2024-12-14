@@ -8,6 +8,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -34,6 +35,7 @@ serve(async (req) => {
       .download(imagePath)
 
     if (downloadError) {
+      console.error('Download error:', downloadError)
       throw new Error(`Failed to download image: ${downloadError.message}`)
     }
 
@@ -92,6 +94,7 @@ serve(async (req) => {
       })
 
     if (uploadError) {
+      console.error('Upload error:', uploadError)
       throw new Error(`Failed to upload optimized image: ${uploadError.message}`)
     }
 
