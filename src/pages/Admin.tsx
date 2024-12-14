@@ -18,6 +18,18 @@ const Admin = () => {
   const [selectedStatus, setSelectedStatus] = useState<DrawingStatus>("new");
   const queryClient = useQueryClient();
 
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to log out");
+    }
+  };
+
   // Only fetch profile if we have a session
   const { data: profile } = useQuery({
     queryKey: ["profile", session?.user?.id],
@@ -118,7 +130,15 @@ const Admin = () => {
           <div className="flex items-center gap-3">
             <div className="text-right">
               <div className="font-medium">{profile.name}</div>
-              <div className="text-sm text-muted-foreground">Admin</div>
+              <div className="text-sm text-muted-foreground">
+                Admin{" "}
+                <button 
+                  onClick={handleLogout}
+                  className="text-blue-600 hover:underline ml-2"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
             <Avatar>
               <AvatarFallback>
