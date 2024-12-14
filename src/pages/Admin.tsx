@@ -132,6 +132,7 @@ const Admin = () => {
               <div className="font-medium">{profile.name}</div>
               <div className="text-sm text-muted-foreground">
                 Admin{" "}
+                <span className="text-muted-foreground">|</span>{" "}
                 <button 
                   onClick={handleLogout}
                   className="text-blue-600 hover:underline ml-2"
