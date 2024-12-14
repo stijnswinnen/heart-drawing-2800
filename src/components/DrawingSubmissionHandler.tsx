@@ -47,9 +47,9 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // If we found an existing user, check if they have any drawings
+      // If we found an existing user, check if they have any drawings (regardless of status)
       if (existingUsers && existingUsers.length > 0) {
-        console.log('Found existing heart user, checking for drawings');
+        console.log('Found existing heart user, checking for any drawings');
         const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
