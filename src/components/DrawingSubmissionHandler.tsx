@@ -34,23 +34,35 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // If user is logged in, check for existing drawings
-      if (session?.user?.id) {
-        console.log('Checking for existing drawings for user:', session.user.id);
-        const { data: existingDrawings, error: checkError } = await supabase
+      // First check if there's an existing heart user with this email
+      console.log('Checking for existing heart user with email:', data.email);
+      const { data: existingUsers, error: userError } = await supabase
+        .from('heart_users')
+        .select('id')
+        .eq('email', data.email);
+
+      if (userError) {
+        console.error('Error checking for existing heart user:', userError);
+        toast.error("Failed to check user information");
+        return;
+      }
+
+      // If we found an existing user, check if they have any drawings
+      if (existingUsers && existingUsers.length > 0) {
+        console.log('Found existing heart user, checking for drawings');
+        const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
-          .eq('user_id', session.user.id);
+          .eq('heart_user_id', existingUsers[0].id);
 
-        if (checkError) {
-          console.error('Error checking for existing drawings:', checkError);
-          toast.error("Failed to check for existing drawings");
+        if (drawingError) {
+          console.error('Error checking for existing drawings:', drawingError);
+          toast.error("Failed to check existing submissions");
           return;
         }
 
-        console.log('Existing drawings found:', existingDrawings);
-
         if (existingDrawings && existingDrawings.length > 0) {
+          console.log('Found existing drawing, showing replace dialog');
           setExistingDrawing(existingDrawings[0]);
           setShowReplaceDialog(true);
           setShowSubmitForm(false);
@@ -58,6 +70,7 @@ export const DrawingSubmissionHandler = ({
         }
       }
 
+      // If we get here, either the user is new or they don't have any drawings
       console.log('Proceeding with drawing submission...');
       const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
       
@@ -93,7 +106,7 @@ export const DrawingSubmissionHandler = ({
       const { error: deleteError } = await supabase
         .from('drawings')
         .delete()
-        .eq('user_id', session?.user?.id);
+        .eq('heart_user_id', existingDrawing.heart_user_id);
 
       if (deleteError) {
         console.error('Error deleting drawing record:', deleteError);
