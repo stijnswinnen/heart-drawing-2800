@@ -35,6 +35,21 @@ export const submitDrawing = async (
     throw new Error("Please draw something before submitting!");
   }
 
+  // Check if user with this email already exists
+  const { data: existingDrawings, error: checkError } = await supabase
+    .from('heart_users')
+    .select('id')
+    .eq('email', data.email);
+
+  if (checkError) {
+    console.error('Error checking existing user:', checkError);
+    throw new Error("Failed to check existing submissions");
+  }
+
+  if (existingDrawings && existingDrawings.length > 0) {
+    throw new Error("You have already submitted a heart with this email address");
+  }
+
   console.log('Converting canvas to blob...');
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((b) => {
@@ -65,21 +80,39 @@ export const submitDrawing = async (
 
     console.log('Successfully uploaded to storage');
 
-    // Insert into database
+    // First, create the heart user
+    const { data: heartUser, error: userError } = await supabase
+      .from('heart_users')
+      .insert({
+        email: data.email,
+        name: data.name,
+        marketing_consent: data.newsletter
+      })
+      .select()
+      .single();
+
+    if (userError) {
+      console.error('Error creating heart user:', userError);
+      // Clean up the uploaded file
+      await supabase.storage.from('hearts').remove([fileName]);
+      throw new Error("Failed to save user information: " + userError.message);
+    }
+
+    // Then, create the drawing record
     const { error: dbError } = await supabase
       .from('drawings')
       .insert({
         user_id: userId,
+        heart_user_id: heartUser.id,
         image_path: fileName,
-        name: data.name,
-        email: data.email,
         status: 'new'
       });
 
     if (dbError) {
       console.error('Database insert error:', dbError);
-      // If database insert fails, clean up the uploaded file
+      // Clean up the uploaded file and user record
       await supabase.storage.from('hearts').remove([fileName]);
+      await supabase.from('heart_users').delete().eq('id', heartUser.id);
       throw new Error("Failed to save drawing information: " + dbError.message);
     }
 

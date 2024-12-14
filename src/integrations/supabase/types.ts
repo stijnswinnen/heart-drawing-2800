@@ -12,10 +12,9 @@ export type Database = {
       drawings: {
         Row: {
           created_at: string
-          email: string
+          heart_user_id: string | null
           id: string
           image_path: string
-          name: string
           status: Database["public"]["Enums"]["drawing_status"]
           submitted_at: string
           updated_at: string
@@ -23,10 +22,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          email: string
+          heart_user_id?: string | null
           id?: string
           image_path: string
-          name: string
           status?: Database["public"]["Enums"]["drawing_status"]
           submitted_at?: string
           updated_at?: string
@@ -34,14 +32,48 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          email?: string
+          heart_user_id?: string | null
           id?: string
           image_path?: string
-          name?: string
           status?: Database["public"]["Enums"]["drawing_status"]
           submitted_at?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drawings_heart_user_id_fkey"
+            columns: ["heart_user_id"]
+            isOneToOne: false
+            referencedRelation: "heart_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      heart_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          marketing_consent: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          marketing_consent?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          marketing_consent?: boolean | null
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
