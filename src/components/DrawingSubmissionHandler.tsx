@@ -102,42 +102,44 @@ export const DrawingSubmissionHandler = ({
       }
 
       // Send verification email
-      const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
-        body: { 
-          heartUserId,
-          name: data.name,
-          email: data.email
-        }
-      });
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+          body: { 
+            heartUserId,
+            name: data.name,
+            email: data.email
+          }
+        });
 
-      if (emailError) {
-        let errorMessage = "Versturen van verificatie e-mail is mislukt";
-        
-        try {
-          // The error message is in the body property of the error
-          if (emailError.message) {
-            const errorData = JSON.parse(emailError.message);
-            if (errorData.body) {
-              const bodyData = JSON.parse(errorData.body);
+        if (emailError) {
+          // Try to parse the error message from the response
+          let errorMessage = "Versturen van verificatie e-mail is mislukt";
+          
+          try {
+            const errorBody = JSON.parse(emailError.message);
+            if (errorBody.body) {
+              const bodyData = JSON.parse(errorBody.body);
               if (bodyData.error) {
                 errorMessage = bodyData.error;
               }
             }
+          } catch (parseError) {
+            console.error('Error parsing email error:', parseError);
           }
-        } catch (parseError) {
-          console.error('Error parsing email error:', emailError);
-          console.error('Parse error:', parseError);
+          
+          toast.error(errorMessage);
+          return;
         }
-        
-        toast.error(errorMessage);
-        return;
-      }
 
-      console.log('Drawing submitted successfully with filename:', fileName);
-      toast.success("Controleer je e-mail om je tekening te bevestigen!");
-      setShowSubmitForm(false);
-      setIsDrawing(false);
-      setHasDrawn(false);
+        console.log('Drawing submitted successfully with filename:', fileName);
+        toast.success("Controleer je e-mail om je tekening te bevestigen!");
+        setShowSubmitForm(false);
+        setIsDrawing(false);
+        setHasDrawn(false);
+      } catch (emailError: any) {
+        console.error('Error sending verification email:', emailError);
+        toast.error("Versturen van verificatie e-mail is mislukt");
+      }
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
       toast.error("Versturen van tekening is mislukt");
