@@ -2,6 +2,7 @@ import { Canvas } from "@/components/Canvas";
 import { DrawingTools } from "@/components/DrawingTools";
 import { Button } from "@/components/ui/button";
 import { useDrawing } from "@/components/DrawingProvider";
+import { useCallback, useRef } from "react";
 
 interface DrawingCanvasProps {
   isDrawing: boolean;
@@ -35,9 +36,15 @@ export const DrawingCanvas = ({
     canUndo,
   } = useDrawing();
 
-  const handleUndo = () => {
-    // This function will be replaced by Canvas component's handleUndoAction
-  };
+  const undoFunctionRef = useRef<() => void>(() => {});
+
+  const handleUndo = useCallback((undoFn: () => void) => {
+    undoFunctionRef.current = undoFn;
+  }, []);
+
+  const triggerUndo = useCallback(() => {
+    undoFunctionRef.current();
+  }, []);
 
   if (!isDrawing) return null;
 
@@ -48,7 +55,7 @@ export const DrawingCanvas = ({
         onDrawingComplete={onDrawingComplete}
         penSize={penSize}
         penColor={isEraser ? "#FFFFFF" : penColor}
-        onUndo={handleUndo}
+        handleUndo={handleUndo}
       />
       
       <DrawingTools
@@ -58,7 +65,7 @@ export const DrawingCanvas = ({
         setPenColor={setPenColor}
         isEraser={isEraser}
         setIsEraser={setIsEraser}
-        onUndo={handleUndo}
+        onUndo={triggerUndo}
       />
 
       {hasDrawn && (

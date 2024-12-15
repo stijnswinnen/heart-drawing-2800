@@ -9,10 +9,10 @@ interface CanvasProps {
   penSize: number;
   penColor: string;
   key?: number | string;
-  onUndo: () => void;
+  handleUndo: (undoFn: () => void) => void;
 }
 
-export const Canvas = ({ onDrawingComplete, penSize, penColor, key, onUndo }: CanvasProps) => {
+export const Canvas = ({ onDrawingComplete, penSize, penColor, key, handleUndo }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const isMobile = useIsMobile();
@@ -89,19 +89,15 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key, onUndo }: Ca
         fabricCanvas.renderAll();
       });
     }
+
+    // Update undo availability
+    setCanUndo(historyRef.current.length > 0);
   };
 
-  // Connect the onUndo prop directly to handleUndoAction
+  // Register the undo function with the parent
   useEffect(() => {
-    if (!onUndo) return;
-    
-    const handleUndo = () => {
-      handleUndoAction();
-    };
-
-    // Override the onUndo function by updating DrawingCanvas's reference
-    onUndo = handleUndo;
-  }, [onUndo]);
+    handleUndo(handleUndoAction);
+  }, [handleUndo]);
 
   return (
     <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
