@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Eraser, Pen, Undo2 } from "lucide-react";
-import { useDrawing } from "./DrawingProvider";
+import { Eraser, Pen } from "lucide-react";
 
 interface DrawingToolsProps {
   penSize: number;
@@ -9,7 +8,6 @@ interface DrawingToolsProps {
   setPenColor: (color: string) => void;
   isEraser: boolean;
   setIsEraser: (isEraser: boolean) => void;
-  onUndo: () => void;
 }
 
 export const DrawingTools = ({
@@ -19,10 +17,8 @@ export const DrawingTools = ({
   setPenColor,
   isEraser,
   setIsEraser,
-  onUndo,
 }: DrawingToolsProps) => {
   const penSizes = [1, 5, 10];
-  const { canUndo } = useDrawing();
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-white rounded-lg shadow-lg animate-[fade-in_0.5s_ease-out]">
@@ -38,7 +34,7 @@ export const DrawingTools = ({
             }}
             className="w-10 h-10"
           >
-            <Pen className={`w-${size === 1 ? '2' : size < 8 ? '4' : '6'} h-${size === 1 ? '2' : size < 8 ? '4' : '6'}`} />
+            <Pen className={`w-${size < 5 ? '2' : size < 8 ? '4' : '6'} h-${size < 5 ? '2' : size < 8 ? '4' : '6'}`} />
           </Button>
         ))}
       </div>
@@ -52,18 +48,6 @@ export const DrawingTools = ({
         className="w-10 h-10"
       >
         <Eraser className="w-4 h-4" />
-      </Button>
-
-      <div className="w-px h-8 bg-gray-200" />
-
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onUndo}
-        disabled={!canUndo}
-        className="w-10 h-10"
-      >
-        <Undo2 className="w-4 h-4" />
       </Button>
 
       <div className="w-px h-8 bg-gray-200" />

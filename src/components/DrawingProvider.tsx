@@ -9,8 +9,6 @@ interface DrawingContextType {
   setIsEraser: (isEraser: boolean) => void;
   hasDrawn: boolean;
   setHasDrawn: (hasDrawn: boolean) => void;
-  canUndo: boolean;
-  setCanUndo: (canUndo: boolean) => void;
 }
 
 const DrawingContext = createContext<DrawingContextType | undefined>(undefined);
@@ -28,7 +26,6 @@ export const DrawingProvider = ({ children }: { children: React.ReactNode }) => 
   const [penColor, setPenColor] = useState("#000000");
   const [isEraser, setIsEraser] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [canUndo, setCanUndo] = useState(false);
 
   return (
     <DrawingContext.Provider
@@ -41,8 +38,6 @@ export const DrawingProvider = ({ children }: { children: React.ReactNode }) => 
         setIsEraser,
         hasDrawn,
         setHasDrawn,
-        canUndo,
-        setCanUndo,
       }}
     >
       {children}
