@@ -28,10 +28,10 @@ serve(async (req) => {
 
     console.log('Sending verification email to:', { heartUserId, name, email });
 
-    // Check if we can send a new verification email (10-second cooldown for debugging)
+    // Check if we can send a new verification email
     const { data: userData, error: userError } = await supabase
       .from('heart_users')
-      .select('last_verification_email_sent_at')
+      .select('last_verification_email_sent_at, verification_token')
       .eq('id', heartUserId)
       .single();
 
@@ -39,6 +39,8 @@ serve(async (req) => {
       console.error('Error fetching user data:', userError);
       throw new Error('User not found');
     }
+
+    console.log('User data retrieved:', userData);
 
     const lastSent = userData.last_verification_email_sent_at;
     if (lastSent) {
@@ -68,10 +70,12 @@ serve(async (req) => {
       .eq('id', heartUserId)
       .single();
 
-    if (tokenError || !tokenData) {
+    if (tokenError || !tokenData?.verification_token) {
       console.error('Error fetching verification token:', tokenError);
       throw new Error('Failed to fetch verification token');
     }
+
+    console.log('Successfully generated verification token');
 
     const verificationUrl = `${req.headers.get('origin')}/verify?token=${tokenData.verification_token}`;
 

@@ -73,6 +73,12 @@ export const DrawingSubmissionHandler = ({
         }
       } else {
         // Create new heart user
+        console.log('Creating new heart user with data:', {
+          email: data.email,
+          name: data.name,
+          marketing_consent: data.newsletter
+        });
+        
         const { data: newUser, error: createError } = await supabase
           .from('heart_users')
           .insert({
@@ -89,6 +95,7 @@ export const DrawingSubmissionHandler = ({
           return;
         }
 
+        console.log('Successfully created new heart user:', newUser);
         heartUserId = newUser.id;
       }
 
@@ -103,6 +110,7 @@ export const DrawingSubmissionHandler = ({
 
       // Send verification email
       try {
+        console.log('Sending verification email for heart user:', heartUserId);
         const response = await supabase.functions.invoke('send-verification-email', {
           body: { 
             heartUserId,
@@ -111,10 +119,16 @@ export const DrawingSubmissionHandler = ({
           }
         });
 
-        // Improved error handling
         if (response.error) {
-          const errorBody = JSON.parse(response.error.body || '{}');
-          const errorMessage = errorBody.error || "Versturen van verificatie e-mail is mislukt";
+          console.error('Error response from send-verification-email:', response.error);
+          let errorMessage = "Versturen van verificatie e-mail is mislukt";
+          
+          try {
+            const errorBody = JSON.parse(response.error.body);
+            errorMessage = errorBody.error || errorMessage;
+          } catch (parseError) {
+            console.error('Error parsing error body:', parseError);
+          }
           
           toast.error(errorMessage);
           return;
