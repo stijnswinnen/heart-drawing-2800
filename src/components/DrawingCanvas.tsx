@@ -33,6 +33,11 @@ export const DrawingCanvas = ({
     setIsEraser,
   } = useDrawing();
 
+  const handleUndo = () => {
+    // This function will be called by the Canvas component
+    console.log("Undo action triggered");
+  };
+
   if (!isDrawing) return null;
 
   return (
@@ -42,6 +47,7 @@ export const DrawingCanvas = ({
         onDrawingComplete={onDrawingComplete}
         penSize={penSize}
         penColor={isEraser ? "#FFFFFF" : penColor}
+        onUndo={handleUndo}
       />
       
       <DrawingTools
@@ -51,6 +57,7 @@ export const DrawingCanvas = ({
         setPenColor={setPenColor}
         isEraser={isEraser}
         setIsEraser={setIsEraser}
+        onUndo={handleUndo}
       />
 
       {hasDrawn && (
