@@ -1,70 +1,80 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { DrawingTitle } from "@/components/DrawingTitle";
-import { AuthDialog } from "@/components/AuthDialog";
+import { useEffect, useState } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { cleanupPendingVerificationFiles } from "@/utils/storageCleanup";
 import { DrawingCanvas } from "@/components/DrawingCanvas";
-import { LockButton } from "@/components/LockButton";
-import { DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
+import { AuthDialog } from "@/components/AuthDialog";
+import { Button } from "@/components/ui/button";
+import { Heart } from "lucide-react";
 
-export default function Index() {
+const Index = () => {
+  const session = useSession();
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(0);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
-  const [session, setSession] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
-  const [canvasKey, setCanvasKey] = useState(1);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-    };
-    fetchSession();
+    cleanupPendingVerificationFiles();
   }, []);
 
-  const handleHeartClick = () => {
-    setIsDrawing(true);
+  const handleDrawingComplete = () => {
+    setHasDrawn(true);
   };
 
   const handleReset = () => {
+    setCanvasKey((prev) => prev + 1);
     setHasDrawn(false);
-    setCanvasKey(prev => prev + 1);
+  };
+
+  const handleSubmit = () => {
+    if (!session) {
+      setShowAuth(true);
+    } else {
+      setShowSubmitForm(true);
+    }
   };
 
   return (
-    <DrawingProvider>
-      <div>
-        <DrawingTitle 
-          isDrawing={isDrawing} 
-          onHeartClick={handleHeartClick}
-        />
-        
-        {showAuth && (
-          <AuthDialog onClose={() => setShowAuth(false)} />
-        )}
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-semibold">2800</span>
+            <Heart className="text-red-500" />
+          </div>
+          {!isDrawing && (
+            <Button onClick={() => setIsDrawing(true)}>Teken een hartje</Button>
+          )}
+        </div>
+      </header>
 
-        <DrawingCanvas
-          isDrawing={isDrawing}
-          hasDrawn={hasDrawn}
-          canvasKey={canvasKey}
-          onDrawingComplete={() => setHasDrawn(true)}
-          onReset={handleReset}
-          onSubmit={() => setShowSubmitForm(true)}
-          session={session}
-          setShowAuth={setShowAuth}
-        />
+      <DrawingCanvas
+        isDrawing={isDrawing}
+        hasDrawn={hasDrawn}
+        canvasKey={canvasKey}
+        onDrawingComplete={handleDrawingComplete}
+        onReset={handleReset}
+        onSubmit={handleSubmit}
+        session={session}
+        setShowAuth={setShowAuth}
+      />
 
-        <LockButton onClick={() => setShowAuth(true)} />
+      <DrawingSubmissionHandler
+        session={session}
+        showSubmitForm={showSubmitForm}
+        setShowSubmitForm={setShowSubmitForm}
+        setIsDrawing={setIsDrawing}
+        setHasDrawn={setHasDrawn}
+      />
 
-        <DrawingSubmissionHandler
-          session={session}
-          showSubmitForm={showSubmitForm}
-          setShowSubmitForm={setShowSubmitForm}
-          setIsDrawing={setIsDrawing}
-          setHasDrawn={setHasDrawn}
-        />
-      </div>
-    </DrawingProvider>
+      <AuthDialog
+        show={showAuth}
+        onClose={() => setShowAuth(false)}
+      />
+    </div>
   );
-}
+};
+
+export default Index;
