@@ -69,41 +69,39 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key, onUndo }: Ca
     });
   }, [fabricCanvas, onDrawingComplete, setCanUndo]);
 
-  // Handle undo functionality
-  useEffect(() => {
-    if (!fabricCanvas) return;
+  // Handle the undo functionality
+  const handleUndoAction = () => {
+    if (!fabricCanvas || historyRef.current.length === 0) return;
 
-    const handleUndoAction = () => {
-      if (historyRef.current.length > 0) {
-        // Remove the last state
-        historyRef.current.pop();
-        
-        if (historyRef.current.length === 0) {
-          // If no more history, clear canvas
-          fabricCanvas.clear();
-          fabricCanvas.backgroundColor = "#FFFFFF";
-          fabricCanvas.renderAll();
-          setCanUndo(false);
-        } else {
-          // Load the previous state
-          const previousState = historyRef.current[historyRef.current.length - 1];
-          fabricCanvas.loadFromJSON(previousState, () => {
-            fabricCanvas.renderAll();
-          });
-        }
-      }
+    // Remove the last state
+    historyRef.current.pop();
+    
+    if (historyRef.current.length === 0) {
+      // If no more history, clear canvas
+      fabricCanvas.clear();
+      fabricCanvas.backgroundColor = "#FFFFFF";
+      fabricCanvas.renderAll();
+      setCanUndo(false);
+    } else {
+      // Load the previous state
+      const previousState = historyRef.current[historyRef.current.length - 1];
+      fabricCanvas.loadFromJSON(previousState, () => {
+        fabricCanvas.renderAll();
+      });
+    }
+  };
+
+  // Connect the onUndo prop directly to handleUndoAction
+  useEffect(() => {
+    if (!onUndo) return;
+    
+    const handleUndo = () => {
+      handleUndoAction();
     };
 
-    // Connect the onUndo prop to our handleUndoAction
-    if (onUndo) {
-      // Override the onUndo function
-      const originalOnUndo = onUndo;
-      onUndo = () => {
-        handleUndoAction();
-        originalOnUndo();
-      };
-    }
-  }, [fabricCanvas, onUndo, setCanUndo]);
+    // Override the onUndo function by updating DrawingCanvas's reference
+    onUndo = handleUndo;
+  }, [onUndo]);
 
   return (
     <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>

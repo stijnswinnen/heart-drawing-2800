@@ -32,10 +32,11 @@ export const DrawingCanvas = ({
     isEraser,
     setIsEraser,
     setCanUndo,
+    canUndo,
   } = useDrawing();
 
   const handleUndo = () => {
-    setCanUndo(false);
+    // This function will be replaced by Canvas component's handleUndoAction
   };
 
   if (!isDrawing) return null;
