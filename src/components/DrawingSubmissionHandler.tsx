@@ -111,20 +111,22 @@ export const DrawingSubmissionHandler = ({
       });
 
       if (emailError) {
-        // Parse the error response from the edge function
         let errorMessage = "Versturen van verificatie e-mail is mislukt";
         
-        // The error message is in emailError.message as a JSON string
         try {
-          // First parse the message which contains the response body
-          const responseBody = JSON.parse(emailError.message);
-          // The actual error message is in the body property as a JSON string
-          const errorBody = JSON.parse(responseBody.body);
-          if (errorBody?.error) {
-            errorMessage = errorBody.error;
+          // The error message is in the body property of the error
+          if (emailError.message) {
+            const errorData = JSON.parse(emailError.message);
+            if (errorData.body) {
+              const bodyData = JSON.parse(errorData.body);
+              if (bodyData.error) {
+                errorMessage = bodyData.error;
+              }
+            }
           }
         } catch (parseError) {
           console.error('Error parsing email error:', emailError);
+          console.error('Parse error:', parseError);
         }
         
         toast.error(errorMessage);
