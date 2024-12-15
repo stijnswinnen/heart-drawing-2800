@@ -115,15 +115,11 @@ export const DrawingSubmissionHandler = ({
           let errorMessage = "Versturen van verificatie e-mail is mislukt";
           
           try {
-            // Parse the error message from the response body
-            if (response.error.message) {
-              const errorData = JSON.parse(response.error.message);
-              if (errorData.body) {
-                const bodyData = JSON.parse(errorData.body);
-                if (bodyData.error) {
-                  errorMessage = bodyData.error;
-                }
-              }
+            // Try to parse the error message directly from the response body
+            const errorBody = JSON.parse(response.error.message);
+            if (errorBody.body) {
+              const bodyData = JSON.parse(errorBody.body);
+              errorMessage = bodyData.error || errorMessage;
             }
           } catch (parseError) {
             console.error('Error parsing email error response:', parseError);
