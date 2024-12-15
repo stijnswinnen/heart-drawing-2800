@@ -59,7 +59,7 @@ export const DrawingCanvas = ({
             onClick={onSubmit}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
           >
-            Submit
+            Verzenden
           </Button>
           <Button
             variant="secondary"

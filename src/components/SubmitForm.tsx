@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Link } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -23,14 +22,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "Naam moet minstens 2 karakters bevatten.",
   }),
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: "Gelieve een geldig e-mailadres in te vullen.",
   }),
   newsletter: z.boolean().default(false),
   privacyConsent: z.boolean().refine((val) => val === true, {
-    message: "You must accept the privacy policy to continue.",
+    message: "Je moet akkoord gaan met de privacyverklaring om verder te gaan.",
   }),
 });
 
@@ -54,9 +53,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
     <Dialog defaultOpen onOpenChange={onClose}>
       <DialogContent aria-describedby="submit-form-description">
         <DialogHeader>
-          <DialogTitle>Submit Your Heart</DialogTitle>
+          <DialogTitle>Verstuur je hart</DialogTitle>
           <DialogDescription id="submit-form-description">
-            Please provide your information to submit your heart drawing.
+            Gelieve onderstaande gegevens in te vullen om jouw hart tekening te versturen.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -66,9 +65,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Naam</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your name" {...field} />
+                    <Input placeholder="Jouw naam" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,9 +78,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>E-mailadres</FormLabel>
                   <FormControl>
-                    <Input placeholder="your.email@example.com" type="email" {...field} />
+                    <Input placeholder="jouw.mail@voorbeeld.be" type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,7 +99,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>
-                      Subscribe to newsletter
+                      Ik schrijf me in op de nieuwsbrief
                     </FormLabel>
                   </div>
                 </FormItem>
@@ -137,9 +136,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
             />
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                Annuleer
               </Button>
-              <Button type="submit">Submit Heart</Button>
+              <Button type="submit">Verzend hart</Button>
             </div>
           </form>
         </Form>
