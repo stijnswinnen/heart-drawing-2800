@@ -9,10 +9,12 @@ interface SubmissionData {
 export const submitDrawing = async (
   canvas: HTMLCanvasElement | null,
   userId: string | null,
-  data: SubmissionData
+  data: SubmissionData,
+  heartUserId: string
 ) => {
   console.log('Starting drawing submission process...');
   console.log('User ID:', userId);
+  console.log('Heart User ID:', heartUserId);
   console.log('Submission data:', data);
   
   if (!canvas) {
@@ -33,58 +35,6 @@ export const submitDrawing = async (
   if (!hasDrawing) {
     console.error('Canvas is empty');
     throw new Error("Please draw something before submitting!");
-  }
-
-  // First, create or get the heart user
-  let heartUserId;
-  const { data: existingUsers } = await supabase
-    .from('heart_users')
-    .select('id, marketing_consent')
-    .eq('email', data.email);
-
-  if (existingUsers && existingUsers.length > 0) {
-    heartUserId = existingUsers[0].id;
-    
-    // Update marketing consent if changed
-    if (existingUsers[0].marketing_consent !== data.newsletter) {
-      await supabase
-        .from('heart_users')
-        .update({ marketing_consent: data.newsletter })
-        .eq('id', heartUserId);
-    }
-  } else {
-    // Create new heart user
-    const { data: heartUser, error: userError } = await supabase
-      .from('heart_users')
-      .insert({
-        email: data.email,
-        name: data.name,
-        marketing_consent: data.newsletter
-      })
-      .select()
-      .single();
-
-    if (userError) {
-      console.error('Error creating heart user:', userError);
-      throw new Error("Failed to save user information: " + userError.message);
-    }
-
-    heartUserId = heartUser.id;
-  }
-
-  // Now check if there's an active drawing for this user
-  const { data: existingDrawings, error: checkError } = await supabase
-    .from('drawings')
-    .select('id')
-    .eq('heart_user_id', heartUserId);
-
-  if (checkError) {
-    console.error('Error checking existing drawings:', checkError);
-    throw new Error("Failed to check existing submissions");
-  }
-
-  if (existingDrawings && existingDrawings.length > 0) {
-    throw new Error("You already have an active heart submission. Please wait for admin review.");
   }
 
   console.log('Converting canvas to blob...');
@@ -117,14 +67,14 @@ export const submitDrawing = async (
 
     console.log('Successfully uploaded to storage');
 
-    // Create the drawing record
+    // Create the drawing record with pending_verification status
     const { error: dbError } = await supabase
       .from('drawings')
       .insert({
         user_id: userId,
         heart_user_id: heartUserId,
         image_path: fileName,
-        status: 'new'
+        status: 'pending_verification'
       });
 
     if (dbError) {

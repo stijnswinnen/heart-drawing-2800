@@ -38,7 +38,7 @@ export const DrawingSubmissionHandler = ({
       console.log('Checking for existing heart user with email:', data.email);
       const { data: existingUsers, error: userError } = await supabase
         .from('heart_users')
-        .select('id')
+        .select('id, email_verified')
         .eq('email', data.email);
 
       if (userError) {
@@ -47,13 +47,16 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // If we found an existing user, check if they have any drawings (regardless of status)
+      let heartUserId;
+
       if (existingUsers && existingUsers.length > 0) {
-        console.log('Found existing heart user, checking for any drawings');
+        heartUserId = existingUsers[0].id;
+        
+        // Check if they have any drawings (regardless of status)
         const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
-          .eq('heart_user_id', existingUsers[0].id);
+          .eq('heart_user_id', heartUserId);
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
@@ -68,11 +71,29 @@ export const DrawingSubmissionHandler = ({
           setShowSubmitForm(false);
           return;
         }
+      } else {
+        // Create new heart user
+        const { data: newUser, error: createError } = await supabase
+          .from('heart_users')
+          .insert({
+            email: data.email,
+            name: data.name,
+            marketing_consent: data.newsletter
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating heart user:', createError);
+          toast.error("Versturen van tekening is mislukt");
+          return;
+        }
+
+        heartUserId = newUser.id;
       }
 
-      // If we get here, either the user is new or they don't have any drawings
-      console.log('Proceeding with drawing submission...');
-      const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
+      // Submit the drawing with pending_verification status
+      const fileName = await submitDrawing(canvas, session?.user?.id || null, data, heartUserId);
       
       if (!fileName) {
         console.error('No filename returned from submitDrawing');
@@ -80,8 +101,23 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
+      // Send verification email
+      const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+        body: { 
+          heartUserId,
+          name: data.name,
+          email: data.email
+        }
+      });
+
+      if (emailError) {
+        console.error('Error sending verification email:', emailError);
+        toast.error("Versturen van verificatie e-mail is mislukt");
+        return;
+      }
+
       console.log('Drawing submitted successfully with filename:', fileName);
-      toast.success("Tekening werd met succes doorgestuurd!");
+      toast.success("Controleer je e-mail om je tekening te bevestigen!");
       setShowSubmitForm(false);
       setIsDrawing(false);
       setHasDrawn(false);
