@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Privacy from "./pages/Privacy";
-import Verify from "./pages/Verify";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +22,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/privacy" element={<Privacy />} />
-            <Route path="/verify" element={<Verify />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

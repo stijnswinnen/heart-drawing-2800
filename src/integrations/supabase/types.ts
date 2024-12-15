@@ -54,38 +54,26 @@ export type Database = {
         Row: {
           created_at: string
           email: string
-          email_verified: boolean | null
           id: string
-          last_verification_email_sent_at: string | null
           marketing_consent: boolean | null
           name: string
           updated_at: string
-          verification_token: string | null
-          verification_token_expires_at: string | null
         }
         Insert: {
           created_at?: string
           email: string
-          email_verified?: boolean | null
           id?: string
-          last_verification_email_sent_at?: string | null
           marketing_consent?: boolean | null
           name: string
           updated_at?: string
-          verification_token?: string | null
-          verification_token_expires_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string
-          email_verified?: boolean | null
           id?: string
-          last_verification_email_sent_at?: string | null
           marketing_consent?: boolean | null
           name?: string
           updated_at?: string
-          verification_token?: string | null
-          verification_token_expires_at?: string | null
         }
         Relationships: []
       }
@@ -129,7 +117,7 @@ export type Database = {
       }
     }
     Enums: {
-      drawing_status: "new" | "approved" | "pending_verification"
+      drawing_status: "new" | "approved"
       user_role: "user" | "admin"
     }
     CompositeTypes: {

@@ -38,7 +38,7 @@ export const DrawingSubmissionHandler = ({
       console.log('Checking for existing heart user with email:', data.email);
       const { data: existingUsers, error: userError } = await supabase
         .from('heart_users')
-        .select('id, email_verified')
+        .select('id')
         .eq('email', data.email);
 
       if (userError) {
@@ -47,16 +47,13 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      let heartUserId;
-
+      // If we found an existing user, check if they have any drawings (regardless of status)
       if (existingUsers && existingUsers.length > 0) {
-        heartUserId = existingUsers[0].id;
-        
-        // Check if they have any drawings (regardless of status)
+        console.log('Found existing heart user, checking for any drawings');
         const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
-          .eq('heart_user_id', heartUserId);
+          .eq('heart_user_id', existingUsers[0].id);
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
@@ -71,36 +68,11 @@ export const DrawingSubmissionHandler = ({
           setShowSubmitForm(false);
           return;
         }
-      } else {
-        // Create new heart user
-        console.log('Creating new heart user with data:', {
-          email: data.email,
-          name: data.name,
-          marketing_consent: data.newsletter
-        });
-        
-        const { data: newUser, error: createError } = await supabase
-          .from('heart_users')
-          .insert({
-            email: data.email,
-            name: data.name,
-            marketing_consent: data.newsletter
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating heart user:', createError);
-          toast.error("Versturen van tekening is mislukt");
-          return;
-        }
-
-        console.log('Successfully created new heart user:', newUser);
-        heartUserId = newUser.id;
       }
 
-      // Submit the drawing with pending_verification status
-      const fileName = await submitDrawing(canvas, session?.user?.id || null, data, heartUserId);
+      // If we get here, either the user is new or they don't have any drawings
+      console.log('Proceeding with drawing submission...');
+      const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
       
       if (!fileName) {
         console.error('No filename returned from submitDrawing');
@@ -108,46 +80,11 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // Send verification email
-      try {
-        console.log('Sending verification email for heart user:', heartUserId);
-        const response = await supabase.functions.invoke('send-verification-email', {
-          body: { 
-            heartUserId,
-            name: data.name,
-            email: data.email
-          }
-        });
-
-        if (response.error) {
-          console.error('Error response from send-verification-email:', response.error);
-          let errorMessage = "Versturen van verificatie e-mail is mislukt";
-          
-          try {
-            const errorBody = JSON.parse(response.error.body);
-            if (errorBody.error && errorBody.error.includes("Please wait")) {
-              // This is a cooldown message - show it as a warning instead of an error
-              toast.warning(errorBody.error);
-              return;
-            }
-            errorMessage = errorBody.error || errorMessage;
-          } catch (parseError) {
-            console.error('Error parsing error body:', parseError);
-          }
-          
-          toast.error(errorMessage);
-          return;
-        }
-
-        console.log('Drawing submitted successfully with filename:', fileName);
-        toast.success("Controleer je e-mail om je tekening te bevestigen!");
-        setShowSubmitForm(false);
-        setIsDrawing(false);
-        setHasDrawn(false);
-      } catch (emailError: any) {
-        console.error('Error in email verification:', emailError);
-        toast.error("Versturen van verificatie e-mail is mislukt");
-      }
+      console.log('Drawing submitted successfully with filename:', fileName);
+      toast.success("Tekening werd met succes doorgestuurd!");
+      setShowSubmitForm(false);
+      setIsDrawing(false);
+      setHasDrawn(false);
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
       toast.error("Versturen van tekening is mislukt");
