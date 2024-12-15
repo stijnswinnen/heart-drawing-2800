@@ -30,7 +30,7 @@ export const DrawingSubmissionHandler = ({
       const canvas = document.querySelector('canvas');
       if (!canvas) {
         console.error('No canvas element found');
-        toast.error("No canvas found");
+        toast.error("Versturen van tekening is mislukt");
         return;
       }
 
@@ -43,7 +43,7 @@ export const DrawingSubmissionHandler = ({
 
       if (userError) {
         console.error('Error checking for existing heart user:', userError);
-        toast.error("Failed to check user information");
+        toast.error("Versturen van tekening is mislukt");
         return;
       }
 
@@ -57,7 +57,7 @@ export const DrawingSubmissionHandler = ({
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
-          toast.error("Failed to check existing submissions");
+          toast.error("Versturen van tekening is mislukt");
           return;
         }
 
@@ -76,18 +76,18 @@ export const DrawingSubmissionHandler = ({
       
       if (!fileName) {
         console.error('No filename returned from submitDrawing');
-        toast.error("Failed to submit drawing");
+        toast.error("Versturen van tekening is mislukt");
         return;
       }
 
       console.log('Drawing submitted successfully with filename:', fileName);
-      toast.success("Thank you for your submission! ❤️");
+      toast.success("Tekening werd met succes doorgestuurd!");
       setShowSubmitForm(false);
       setIsDrawing(false);
       setHasDrawn(false);
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
-      toast.error(error.message || "Failed to submit drawing");
+      toast.error("Versturen van tekening is mislukt");
     }
   };
 

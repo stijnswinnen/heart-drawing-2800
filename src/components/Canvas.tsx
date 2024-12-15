@@ -31,7 +31,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     canvas.freeDrawingBrush.color = penColor || "#000000";
 
     setFabricCanvas(canvas);
-    toast("Draw your heart! Be creative ❤️");
+    toast("Teken jouw hart! Wees creatief ❤️");
 
     const handleResize = () => {
       canvas.setDimensions({
