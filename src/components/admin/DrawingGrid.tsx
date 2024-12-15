@@ -25,7 +25,10 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
 
   const handleApprove = async (drawing: Tables<"drawings">) => {
     try {
+      // First, approve the drawing
       await onApprove(drawing);
+
+      // Then, optimize the image
       const { data, error } = await supabase.functions.invoke('optimize-heart', {
         body: { imagePath: drawing.image_path }
       });
@@ -45,7 +48,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-2 gap-6">
       {drawings?.map((drawing) => (
         <div
           key={drawing.id}

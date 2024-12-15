@@ -122,12 +122,12 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl font-semibold">2800</span>
             <Heart className="text-red-500" />
           </div>
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-3">
             <div className="text-right">
               <div className="font-medium">{profile.name}</div>
               <div className="text-sm text-muted-foreground">
@@ -151,7 +151,7 @@ const Admin = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex gap-8">
           <AdminSidebar
             selectedStatus={selectedStatus}
             setSelectedStatus={setSelectedStatus}
