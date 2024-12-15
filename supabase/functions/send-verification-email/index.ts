@@ -28,7 +28,7 @@ serve(async (req) => {
 
     console.log('Sending verification email to:', { heartUserId, name, email });
 
-    // Check if we can send a new verification email (5-minute cooldown)
+    // Check if we can send a new verification email (10-second cooldown for debugging)
     const { data: userData, error: userError } = await supabase
       .from('heart_users')
       .select('last_verification_email_sent_at')
@@ -42,12 +42,12 @@ serve(async (req) => {
 
     const lastSent = userData.last_verification_email_sent_at;
     if (lastSent) {
-      const cooldownPeriod = 5 * 60 * 1000; // 5 minutes in milliseconds
+      const cooldownPeriod = 10 * 1000; // 10 seconds in milliseconds
       const timeSinceLastEmail = Date.now() - new Date(lastSent).getTime();
       
       if (timeSinceLastEmail < cooldownPeriod) {
-        const waitTimeMinutes = Math.ceil((cooldownPeriod - timeSinceLastEmail) / 60000);
-        throw new Error(`Please wait ${waitTimeMinutes} minutes before requesting a new verification email`);
+        const waitTimeSeconds = Math.ceil((cooldownPeriod - timeSinceLastEmail) / 1000);
+        throw new Error(`Please wait ${waitTimeSeconds} seconds before requesting a new verification email`);
       }
     }
 
