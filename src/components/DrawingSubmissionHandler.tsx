@@ -125,6 +125,11 @@ export const DrawingSubmissionHandler = ({
           
           try {
             const errorBody = JSON.parse(response.error.body);
+            if (errorBody.error && errorBody.error.includes("Please wait")) {
+              // This is a cooldown message - show it as a warning instead of an error
+              toast.warning(errorBody.error);
+              return;
+            }
             errorMessage = errorBody.error || errorMessage;
           } catch (parseError) {
             console.error('Error parsing error body:', parseError);
