@@ -103,7 +103,7 @@ export const DrawingSubmissionHandler = ({
 
       // Send verification email
       try {
-        const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+        const response = await supabase.functions.invoke('send-verification-email', {
           body: { 
             heartUserId,
             name: data.name,
@@ -111,20 +111,22 @@ export const DrawingSubmissionHandler = ({
           }
         });
 
-        if (emailError) {
-          // Try to parse the error message from the response
+        if (response.error) {
           let errorMessage = "Versturen van verificatie e-mail is mislukt";
           
           try {
-            const errorBody = JSON.parse(emailError.message);
-            if (errorBody.body) {
-              const bodyData = JSON.parse(errorBody.body);
-              if (bodyData.error) {
-                errorMessage = bodyData.error;
+            // Parse the error message from the response body
+            if (response.error.message) {
+              const errorData = JSON.parse(response.error.message);
+              if (errorData.body) {
+                const bodyData = JSON.parse(errorData.body);
+                if (bodyData.error) {
+                  errorMessage = bodyData.error;
+                }
               }
             }
           } catch (parseError) {
-            console.error('Error parsing email error:', parseError);
+            console.error('Error parsing email error response:', parseError);
           }
           
           toast.error(errorMessage);
@@ -137,7 +139,7 @@ export const DrawingSubmissionHandler = ({
         setIsDrawing(false);
         setHasDrawn(false);
       } catch (emailError: any) {
-        console.error('Error sending verification email:', emailError);
+        console.error('Error in email verification:', emailError);
         toast.error("Versturen van verificatie e-mail is mislukt");
       }
     } catch (error: any) {

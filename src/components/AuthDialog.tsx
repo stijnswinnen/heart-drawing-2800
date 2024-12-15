@@ -39,10 +39,17 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
           console.error('Error in auth state change:', error);
           toast.error('An error occurred during sign in');
         }
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [onClose, navigate]);
 
   return (
