@@ -69,11 +69,11 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key, onUndo }: Ca
     });
   }, [fabricCanvas, onDrawingComplete, setCanUndo]);
 
-  // Expose undo functionality
+  // Handle undo functionality
   useEffect(() => {
     if (!fabricCanvas) return;
 
-    const handleUndo = () => {
+    const handleUndoAction = () => {
       if (historyRef.current.length > 0) {
         // Remove the last state
         historyRef.current.pop();
@@ -82,6 +82,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key, onUndo }: Ca
           // If no more history, clear canvas
           fabricCanvas.clear();
           fabricCanvas.backgroundColor = "#FFFFFF";
+          fabricCanvas.renderAll();
           setCanUndo(false);
         } else {
           // Load the previous state
@@ -93,11 +94,13 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key, onUndo }: Ca
       }
     };
 
-    // Attach the handleUndo function to the onUndo prop
+    // Connect the onUndo prop to our handleUndoAction
     if (onUndo) {
-      const unsubscribe = onUndo;
-      return () => {
-        unsubscribe();
+      // Override the onUndo function
+      const originalOnUndo = onUndo;
+      onUndo = () => {
+        handleUndoAction();
+        originalOnUndo();
       };
     }
   }, [fabricCanvas, onUndo, setCanUndo]);

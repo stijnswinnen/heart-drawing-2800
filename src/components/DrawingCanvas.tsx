@@ -31,11 +31,11 @@ export const DrawingCanvas = ({
     setPenColor,
     isEraser,
     setIsEraser,
+    setCanUndo,
   } = useDrawing();
 
   const handleUndo = () => {
-    // This function will be called by the Canvas component
-    console.log("Undo action triggered");
+    setCanUndo(false);
   };
 
   if (!isDrawing) return null;
