@@ -6,6 +6,7 @@ import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler"
 import { AuthDialog } from "@/components/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import { DrawingProvider } from "@/components/DrawingProvider";
 
 const Index = () => {
   const session = useSession();
@@ -37,43 +38,42 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-semibold">2800</span>
-            <Heart className="text-red-500" />
+    <DrawingProvider>
+      <div className="min-h-screen bg-background">
+        <header className="border-b">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-semibold">2800</span>
+              <Heart className="text-red-500" />
+            </div>
+            {!isDrawing && (
+              <Button onClick={() => setIsDrawing(true)}>Teken een hartje</Button>
+            )}
           </div>
-          {!isDrawing && (
-            <Button onClick={() => setIsDrawing(true)}>Teken een hartje</Button>
-          )}
-        </div>
-      </header>
+        </header>
 
-      <DrawingCanvas
-        isDrawing={isDrawing}
-        hasDrawn={hasDrawn}
-        canvasKey={canvasKey}
-        onDrawingComplete={handleDrawingComplete}
-        onReset={handleReset}
-        onSubmit={handleSubmit}
-        session={session}
-        setShowAuth={setShowAuth}
-      />
+        <DrawingCanvas
+          isDrawing={isDrawing}
+          hasDrawn={hasDrawn}
+          canvasKey={canvasKey}
+          onDrawingComplete={handleDrawingComplete}
+          onReset={handleReset}
+          onSubmit={handleSubmit}
+          session={session}
+          setShowAuth={setShowAuth}
+        />
 
-      <DrawingSubmissionHandler
-        session={session}
-        showSubmitForm={showSubmitForm}
-        setShowSubmitForm={setShowSubmitForm}
-        setIsDrawing={setIsDrawing}
-        setHasDrawn={setHasDrawn}
-      />
+        <DrawingSubmissionHandler
+          session={session}
+          showSubmitForm={showSubmitForm}
+          setShowSubmitForm={setShowSubmitForm}
+          setIsDrawing={setIsDrawing}
+          setHasDrawn={setHasDrawn}
+        />
 
-      <AuthDialog
-        show={showAuth}
-        onClose={() => setShowAuth(false)}
-      />
-    </div>
+        {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
+      </div>
+    </DrawingProvider>
   );
 };
 
