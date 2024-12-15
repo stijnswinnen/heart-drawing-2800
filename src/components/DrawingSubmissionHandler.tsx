@@ -111,19 +111,10 @@ export const DrawingSubmissionHandler = ({
           }
         });
 
+        // Improved error handling
         if (response.error) {
-          let errorMessage = "Versturen van verificatie e-mail is mislukt";
-          
-          try {
-            // Try to parse the error message directly from the response body
-            const errorBody = JSON.parse(response.error.message);
-            if (errorBody.body) {
-              const bodyData = JSON.parse(errorBody.body);
-              errorMessage = bodyData.error || errorMessage;
-            }
-          } catch (parseError) {
-            console.error('Error parsing email error response:', parseError);
-          }
+          const errorBody = JSON.parse(response.error.body || '{}');
+          const errorMessage = errorBody.error || "Versturen van verificatie e-mail is mislukt";
           
           toast.error(errorMessage);
           return;
