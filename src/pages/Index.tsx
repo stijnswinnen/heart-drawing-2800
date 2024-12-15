@@ -1,67 +1,61 @@
-import { useEffect, useState } from "react";
-import { useSession } from "@supabase/auth-helpers-react";
-import { cleanupPendingVerificationFiles } from "@/utils/storageCleanup";
-import { DrawingCanvas } from "@/components/DrawingCanvas";
-import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { DrawingTitle } from "@/components/DrawingTitle";
 import { AuthDialog } from "@/components/AuthDialog";
-import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { DrawingCanvas } from "@/components/DrawingCanvas";
+import { LockButton } from "@/components/LockButton";
 import { DrawingProvider } from "@/components/DrawingProvider";
+import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
 
-const Index = () => {
-  const session = useSession();
+export default function Index() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [canvasKey, setCanvasKey] = useState(0);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
+  const [session, setSession] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(1);
 
   useEffect(() => {
-    cleanupPendingVerificationFiles();
+    const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    };
+    fetchSession();
   }, []);
 
-  const handleDrawingComplete = () => {
-    setHasDrawn(true);
+  const handleHeartClick = () => {
+    setIsDrawing(true);
   };
 
   const handleReset = () => {
-    setCanvasKey((prev) => prev + 1);
     setHasDrawn(false);
-  };
-
-  const handleSubmit = () => {
-    if (!session) {
-      setShowAuth(true);
-    } else {
-      setShowSubmitForm(true);
-    }
+    setCanvasKey(prev => prev + 1);
   };
 
   return (
     <DrawingProvider>
-      <div className="min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-semibold">2800</span>
-              <Heart className="text-red-500" />
-            </div>
-            {!isDrawing && (
-              <Button onClick={() => setIsDrawing(true)}>Teken een hartje</Button>
-            )}
-          </div>
-        </header>
+      <div>
+        <DrawingTitle 
+          isDrawing={isDrawing} 
+          onHeartClick={handleHeartClick}
+        />
+        
+        {showAuth && (
+          <AuthDialog onClose={() => setShowAuth(false)} />
+        )}
 
         <DrawingCanvas
           isDrawing={isDrawing}
           hasDrawn={hasDrawn}
           canvasKey={canvasKey}
-          onDrawingComplete={handleDrawingComplete}
+          onDrawingComplete={() => setHasDrawn(true)}
           onReset={handleReset}
-          onSubmit={handleSubmit}
+          onSubmit={() => setShowSubmitForm(true)}
           session={session}
           setShowAuth={setShowAuth}
         />
+
+        <LockButton onClick={() => setShowAuth(true)} />
 
         <DrawingSubmissionHandler
           session={session}
@@ -70,11 +64,7 @@ const Index = () => {
           setIsDrawing={setIsDrawing}
           setHasDrawn={setHasDrawn}
         />
-
-        {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
       </div>
     </DrawingProvider>
   );
-};
-
-export default Index;
+}
