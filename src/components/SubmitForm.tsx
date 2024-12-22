@@ -57,19 +57,41 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       setIsVerifying(true);
+      console.log('Starting submission process with data:', data);
 
       // Check if email is already verified
       const { data: existingUser } = await supabase
         .from("heart_users")
         .select("email_verified")
         .eq("email", data.email)
-        .single();
+        .maybeSingle();
+
+      console.log('Existing user check result:', existingUser);
 
       if (existingUser?.email_verified) {
         // Email is already verified, proceed with submission
+        console.log('Email already verified, proceeding with submission');
         onSubmit(data);
         return;
       }
+
+      // Create or update heart_user
+      const { error: upsertError } = await supabase
+        .from("heart_users")
+        .upsert({
+          email: data.email,
+          name: data.name,
+          marketing_consent: data.newsletter,
+        }, {
+          onConflict: 'email'
+        });
+
+      if (upsertError) {
+        console.error('Error upserting heart_user:', upsertError);
+        throw new Error("Failed to create user record");
+      }
+
+      console.log('Heart user created/updated, sending verification email');
 
       // Send verification email
       const response = await supabase.functions.invoke("send-verification-email", {
@@ -77,6 +99,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       });
 
       if (response.error) {
+        console.error('Error sending verification email:', response.error);
         throw new Error(response.error.message || "Failed to send verification email");
       }
 

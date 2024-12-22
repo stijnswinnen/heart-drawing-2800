@@ -33,10 +33,15 @@ const handler = async (req: Request): Promise<Response> => {
       .from("heart_users")
       .select("verification_token, name")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
-    if (userError || !userData) {
+    if (userError) {
       console.error("Error fetching user:", userError);
+      throw new Error("Failed to fetch user data");
+    }
+
+    if (!userData) {
+      console.error("No user found for email:", email);
       throw new Error("User not found");
     }
 
