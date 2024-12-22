@@ -47,6 +47,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const verificationUrl = `${req.headers.get("origin")}/verify?token=${userData.verification_token}&email=${encodeURIComponent(email)}`;
 
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not set");
+      throw new Error("Email service configuration error");
+    }
+
+    console.log("Attempting to send email via Resend");
     // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
