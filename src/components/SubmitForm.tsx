@@ -19,6 +19,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -39,6 +42,8 @@ interface SubmitFormProps {
 }
 
 export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,6 +53,44 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       privacyConsent: false,
     },
   });
+
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      setIsVerifying(true);
+
+      // Check if email is already verified
+      const { data: existingUser } = await supabase
+        .from("heart_users")
+        .select("email_verified")
+        .eq("email", data.email)
+        .single();
+
+      if (existingUser?.email_verified) {
+        // Email is already verified, proceed with submission
+        onSubmit(data);
+        return;
+      }
+
+      // Send verification email
+      const response = await supabase.functions.invoke("send-verification-email", {
+        body: { email: data.email },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to send verification email");
+      }
+
+      toast.success(
+        "We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink."
+      );
+      onClose();
+    } catch (error: any) {
+      console.error("Error in form submission:", error);
+      toast.error(error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   return (
     <Dialog defaultOpen onOpenChange={onClose}>
@@ -59,7 +102,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -138,7 +181,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
               <Button type="button" variant="outline" onClick={onClose}>
                 Annuleer
               </Button>
-              <Button type="submit">Verzend hart</Button>
+              <Button type="submit" disabled={isVerifying}>
+                {isVerifying ? "Bezig met versturen..." : "Verzend hart"}
+              </Button>
             </div>
           </form>
         </Form>
