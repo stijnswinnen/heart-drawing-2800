@@ -25,6 +25,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if RESEND_API_KEY is set
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not set");
+      throw new Error("Email service configuration error: RESEND_API_KEY is not set");
+    }
+
     const { email }: EmailRequest = await req.json();
     console.log("Sending verification email to:", email);
 
@@ -45,12 +51,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("User not found");
     }
 
-    const verificationUrl = `${req.headers.get("origin")}/verify?token=${userData.verification_token}&email=${encodeURIComponent(email)}`;
+    console.log("User data retrieved:", { ...userData, verification_token: "REDACTED" });
 
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is not set");
-      throw new Error("Email service configuration error");
-    }
+    const verificationUrl = `${req.headers.get("origin")}/verify?token=${userData.verification_token}&email=${encodeURIComponent(email)}`;
+    console.log("Verification URL generated:", verificationUrl);
 
     console.log("Attempting to send email via Resend");
     // Send email using Resend
@@ -74,17 +78,24 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
+    const resendResponse = await res.text();
+    console.log("Resend API response:", resendResponse);
+
     if (!res.ok) {
-      const error = await res.text();
-      console.error("Resend API error:", error);
-      throw new Error("Failed to send verification email");
+      console.error("Resend API error:", resendResponse);
+      throw new Error(`Failed to send verification email: ${resendResponse}`);
     }
 
     // Update last verification email sent timestamp
-    await supabase
+    const { error: updateError } = await supabase
       .from("heart_users")
       .update({ last_verification_email_sent_at: new Date().toISOString() })
       .eq("email", email);
+
+    if (updateError) {
+      console.error("Error updating last_verification_email_sent_at:", updateError);
+      // Don't throw here as the email was sent successfully
+    }
 
     return new Response(JSON.stringify({ message: "Verification email sent" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -93,7 +104,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-verification-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({ 
+        error: error.message || "Internal server error",
+        details: error.stack
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
