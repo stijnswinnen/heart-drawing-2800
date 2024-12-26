@@ -65,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Heart Drawing <verify@lovable.dev>",
+        from: "verify@resend.dev", // Use a verified Resend domain
         to: [email],
         subject: "Verify your email address",
         html: `
