@@ -1,50 +1,50 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
 
 export function RandomApprovedHeart() {
-  const [heartImage, setHeartImage] = useState<string | null>(null);
+  const [hearts, setHearts] = useState<Tables<"drawings">[]>([]);
 
   useEffect(() => {
-    const fetchRandomHeart = async () => {
+    const fetchApprovedHearts = async () => {
       const { data, error } = await supabase
         .from('drawings')
-        .select('image_path')
-        .eq('status', 'approved')
-        .order('random()', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .select('*')
+        .eq('status', 'approved');
       
       if (error) {
-        console.error('Error fetching random heart:', error);
+        console.error('Error fetching approved hearts:', error);
         return;
       }
 
-      if (data) {
-        // Get just the filename from the original path
-        const filename = data.image_path.split('/').pop();
-        // Construct the correct path for optimized images
-        const optimizedPath = `optimized/${filename}`;
-        
-        const { data: imageUrl } = supabase.storage
-          .from('optimized')
-          .getPublicUrl(optimizedPath);
-        
-        setHeartImage(imageUrl.publicUrl);
-      }
+      setHearts(data || []);
     };
 
-    fetchRandomHeart();
+    fetchApprovedHearts();
   }, []);
 
-  if (!heartImage) return null;
+  const getImageUrl = (drawing: Tables<"drawings">) => {
+    const filename = drawing.image_path.split('/').pop();
+    const imagePath = `optimized/${filename}`;
+    const { data } = supabase.storage.from('optimized').getPublicUrl(imagePath);
+    return data.publicUrl;
+  };
+
+  if (hearts.length === 0) {
+    return <div className="text-center text-gray-500">No approved hearts found</div>;
+  }
 
   return (
-    <div className="w-[200px] h-[200px]">
-      <img
-        src={heartImage}
-        alt="Random approved heart"
-        className="w-full h-full object-contain"
-      />
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 max-w-7xl mx-auto">
+      {hearts.map((heart) => (
+        <div key={heart.id} className="aspect-square">
+          <img
+            src={getImageUrl(heart)}
+            alt="Approved heart"
+            className="w-full h-full object-contain rounded-lg"
+          />
+        </div>
+      ))}
     </div>
   );
 }
