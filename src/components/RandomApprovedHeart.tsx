@@ -50,7 +50,10 @@ export function RandomApprovedHeart() {
   const currentHeart = hearts[currentIndex];
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center gap-8">
+      <h1 className="text-[150px] font-bold font-['Montserrat_Alternates']">
+        2800
+      </h1>
       <div className="w-[300px] h-[300px] animate-fade-in">
         <img
           key={currentHeart.id}
