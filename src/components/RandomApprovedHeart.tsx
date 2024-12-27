@@ -4,6 +4,7 @@ import { Tables } from "@/integrations/supabase/types";
 
 export function RandomApprovedHeart() {
   const [hearts, setHearts] = useState<Tables<"drawings">[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchApprovedHearts = async () => {
@@ -23,6 +24,18 @@ export function RandomApprovedHeart() {
     fetchApprovedHearts();
   }, []);
 
+  useEffect(() => {
+    if (hearts.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => 
+        prevIndex === hearts.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [hearts.length]);
+
   const getImageUrl = (drawing: Tables<"drawings">) => {
     const filename = drawing.image_path.split('/').pop();
     const imagePath = `optimized/${filename}`;
@@ -34,17 +47,18 @@ export function RandomApprovedHeart() {
     return <div className="text-center text-gray-500">No approved hearts found</div>;
   }
 
+  const currentHeart = hearts[currentIndex];
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 max-w-7xl mx-auto">
-      {hearts.map((heart) => (
-        <div key={heart.id} className="aspect-square">
-          <img
-            src={getImageUrl(heart)}
-            alt="Approved heart"
-            className="w-full h-full object-contain rounded-lg"
-          />
-        </div>
-      ))}
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-[300px] h-[300px] animate-fade-in">
+        <img
+          key={currentHeart.id}
+          src={getImageUrl(currentHeart)}
+          alt={`Heart ${currentIndex + 1}`}
+          className="w-full h-full object-contain rounded-lg"
+        />
+      </div>
     </div>
   );
 }
