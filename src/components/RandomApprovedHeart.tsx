@@ -20,9 +20,14 @@ export function RandomApprovedHeart() {
       }
 
       if (data) {
+        // Get just the filename from the original path
+        const filename = data.image_path.split('/').pop();
+        // Construct the correct path for optimized images
+        const optimizedPath = `optimized/${filename}`;
+        
         const { data: imageUrl } = supabase.storage
           .from('optimized')
-          .getPublicUrl(data.image_path);
+          .getPublicUrl(optimizedPath);
         
         setHeartImage(imageUrl.publicUrl);
       }
