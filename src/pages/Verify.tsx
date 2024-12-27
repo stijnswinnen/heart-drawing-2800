@@ -74,7 +74,7 @@ export default function Verify() {
             <ApprovedHeartsCarousel />
           </div>
           <h1 className="text-[150px] font-bold mb-6 font-['Montserrat_Alternates'] text-center">
-            2800.love
+            2800
           </h1>
           <p className="text-lg mb-8">
             Bedankt voor jouw hart. Jouw bijdrage zal verschijnen zodra deze werd gevalideerd.
