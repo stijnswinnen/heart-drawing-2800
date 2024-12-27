@@ -10,7 +10,7 @@ export function RandomApprovedHeart() {
         .from('drawings')
         .select('image_path')
         .eq('status', 'approved')
-        .order('random()')
+        .order('random()', { ascending: true })
         .limit(1)
         .maybeSingle();
       
