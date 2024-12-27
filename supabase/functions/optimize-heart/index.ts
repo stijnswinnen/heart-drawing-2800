@@ -17,16 +17,22 @@ serve(async (req) => {
     const { imagePath } = await req.json()
     
     if (!imagePath) {
+      console.error('No image path provided')
       throw new Error('No image path provided')
     }
 
     console.log('Processing image:', imagePath)
 
     // Initialize Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase credentials')
+      throw new Error('Server configuration error')
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Download the original image
     const { data: fileData, error: downloadError } = await supabase
@@ -45,7 +51,14 @@ serve(async (req) => {
     const imageBuffer = await fileData.arrayBuffer()
     
     // Process the image with ImageScript
-    const image = await Image.decode(new Uint8Array(imageBuffer))
+    let image
+    try {
+      image = await Image.decode(new Uint8Array(imageBuffer))
+      console.log('Image decoded successfully')
+    } catch (error) {
+      console.error('Image decoding error:', error)
+      throw new Error('Failed to decode image')
+    }
     
     console.log('Image dimensions:', image.width, 'x', image.height)
     
@@ -57,9 +70,9 @@ serve(async (req) => {
     let hasContent = false
     
     // Safely scan the image for non-white content
-    for (let y = 0; y < image.height; y++) {
-      for (let x = 0; x < image.width; x++) {
-        try {
+    try {
+      for (let y = 0; y < image.height; y++) {
+        for (let x = 0; x < image.width; x++) {
           const pixel = image.getPixelAt(x + 1, y + 1) // ImageScript uses 1-based indexing
           const r = (pixel >> 24) & 255
           const g = (pixel >> 16) & 255
@@ -74,11 +87,11 @@ serve(async (req) => {
             maxY = Math.max(maxY, y)
             hasContent = true
           }
-        } catch (error) {
-          console.error(`Error processing pixel at ${x},${y}:`, error)
-          continue
         }
       }
+    } catch (error) {
+      console.error('Error processing pixels:', error)
+      throw new Error('Failed to process image content')
     }
     
     if (!hasContent) {
@@ -102,13 +115,25 @@ serve(async (req) => {
     const cropWidth = Math.max(1, maxX - minX + 1)
     const cropHeight = Math.max(1, maxY - minY + 1)
     
-    // Crop the image
-    const croppedImage = image.crop(minX + 1, minY + 1, cropWidth, cropHeight) // Adjust for 1-based indexing
+    let croppedImage
+    try {
+      // Crop the image
+      croppedImage = image.crop(minX + 1, minY + 1, cropWidth, cropHeight) // Adjust for 1-based indexing
+      console.log('Image cropped successfully')
+    } catch (error) {
+      console.error('Cropping error:', error)
+      throw new Error('Failed to crop image')
+    }
     
-    // Convert to PNG buffer
-    const processedBuffer = await croppedImage.encode()
-
-    console.log('Image processed successfully')
+    let processedBuffer
+    try {
+      // Convert to PNG buffer
+      processedBuffer = await croppedImage.encode()
+      console.log('Image encoded successfully')
+    } catch (error) {
+      console.error('Encoding error:', error)
+      throw new Error('Failed to encode processed image')
+    }
 
     // Upload to optimized bucket
     const optimizedPath = `optimized/${imagePath.split('/').pop()}`
@@ -140,7 +165,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error processing image:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Unknown error occurred',
+        details: error.stack
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
