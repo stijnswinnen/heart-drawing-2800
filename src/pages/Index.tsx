@@ -51,7 +51,8 @@ export default function Index() {
               <DialogDescription>
                 Klik op het hart om te starten.
               </DialogDescription>
-            </DialogContent>
+            </DialogHeader>
+          </DialogContent>
         </Dialog>
 
         <DrawingTitle 
