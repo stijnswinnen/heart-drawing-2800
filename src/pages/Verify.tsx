@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ApprovedHeartsCarousel } from "@/components/ApprovedHeartsCarousel";
+import { RandomApprovedHeart } from "@/components/RandomApprovedHeart";
 
 export default function Verify() {
   const [searchParams] = useSearchParams();
@@ -17,7 +18,6 @@ export default function Verify() {
         const email = searchParams.get("email");
         const preview = searchParams.get("preview");
 
-        // Allow preview mode
         if (preview === "true") {
           console.log("Preview mode activated");
           setVerificationComplete(true);
@@ -73,9 +73,12 @@ export default function Verify() {
           <div className="mb-8">
             <ApprovedHeartsCarousel />
           </div>
-          <h1 className="text-[150px] font-bold mb-6 font-['Montserrat_Alternates'] text-center">
-            2800
-          </h1>
+          <div className="flex items-center justify-center gap-8 mb-6">
+            <RandomApprovedHeart />
+            <h1 className="text-[150px] font-bold font-['Montserrat_Alternates']">
+              2800
+            </h1>
+          </div>
           <p className="text-lg mb-8">
             Bedankt voor jouw hart. Jouw bijdrage zal verschijnen zodra deze werd gevalideerd.
           </p>
