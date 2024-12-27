@@ -10,18 +10,19 @@ export function RandomApprovedHeart() {
         .from('drawings')
         .select('image_path')
         .eq('status', 'approved')
+        .order('random()')
         .limit(1)
-        .order('random()');
+        .single();
       
       if (error) {
         console.error('Error fetching random heart:', error);
         return;
       }
 
-      if (data && data.length > 0) {
+      if (data) {
         const { data: imageUrl } = supabase.storage
           .from('optimized')
-          .getPublicUrl(data[0].image_path);
+          .getPublicUrl(data.image_path);
         
         setHeartImage(imageUrl.publicUrl);
       }
