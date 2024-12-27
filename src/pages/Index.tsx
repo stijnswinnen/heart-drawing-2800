@@ -6,6 +6,13 @@ import { DrawingCanvas } from "@/components/DrawingCanvas";
 import { LockButton } from "@/components/LockButton";
 import { DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
 
 export default function Index() {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -14,6 +21,7 @@ export default function Index() {
   const [session, setSession] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [canvasKey, setCanvasKey] = useState(1);
+  const [showInfoDialog, setShowInfoDialog] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -25,6 +33,7 @@ export default function Index() {
 
   const handleHeartClick = () => {
     setIsDrawing(true);
+    setShowInfoDialog(false);
   };
 
   const handleReset = () => {
@@ -35,6 +44,16 @@ export default function Index() {
   return (
     <DrawingProvider>
       <div>
+        <Dialog open={showInfoDialog} onOpenChange={setShowInfoDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Welkom bij 2800</DialogTitle>
+              <DialogDescription>
+                Klik op het hart om te starten.
+              </DialogDescription>
+            </DialogContent>
+        </Dialog>
+
         <DrawingTitle 
           isDrawing={isDrawing} 
           onHeartClick={handleHeartClick}
