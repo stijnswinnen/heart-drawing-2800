@@ -26,7 +26,9 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
   
   const getImageUrl = (drawing: Tables<"drawings">) => {
     const bucket = drawing.status === "approved" ? "optimized" : "hearts";
-    const imagePath = drawing.image_path;
+    const imagePath = drawing.status === "approved" 
+      ? `optimized/${drawing.image_path.split('/').pop()}`
+      : drawing.image_path;
     
     console.log('Getting image URL for:', { bucket, imagePath });
     const { data } = supabase.storage.from(bucket).getPublicUrl(imagePath);
