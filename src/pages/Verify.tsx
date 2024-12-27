@@ -15,6 +15,15 @@ export default function Verify() {
       try {
         const token = searchParams.get("token");
         const email = searchParams.get("email");
+        const preview = searchParams.get("preview");
+
+        // Allow preview mode
+        if (preview === "true") {
+          console.log("Preview mode activated");
+          setVerificationComplete(true);
+          setIsVerifying(false);
+          return;
+        }
 
         if (!token || !email) {
           throw new Error("Invalid verification link");
@@ -26,7 +35,7 @@ export default function Verify() {
           .eq("email", email)
           .eq("verification_token", token)
           .select()
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
           throw new Error("Invalid or expired verification link");
