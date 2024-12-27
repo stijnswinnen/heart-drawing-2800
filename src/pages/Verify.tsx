@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ApprovedHeartsCarousel } from "@/components/ApprovedHeartsCarousel";
 
 export default function Verify() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
+  const [verificationComplete, setVerificationComplete] = useState(false);
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -31,7 +33,7 @@ export default function Verify() {
         }
 
         toast.success("E-mailadres succesvol geverifieerd!");
-        navigate("/");
+        setVerificationComplete(true);
       } catch (error: any) {
         console.error("Error verifying email:", error);
         toast.error(error.message || "Er is iets misgegaan bij het verifiëren van je e-mailadres");
@@ -50,6 +52,24 @@ export default function Verify() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">E-mailadres verifiëren...</h1>
           <p>Even geduld terwijl we je e-mailadres verifiëren.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (verificationComplete) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="mb-8">
+            <ApprovedHeartsCarousel />
+          </div>
+          <h1 className="text-3xl font-bold mb-6 font-['Montserrat_Alternates']">
+            E-mailadres geverifieerd
+          </h1>
+          <p className="text-lg mb-8">
+            Bedankt voor jouw hart. Jouw bijdrage zal verschijnen zodra deze werd gevalideerd.
+          </p>
         </div>
       </div>
     );
