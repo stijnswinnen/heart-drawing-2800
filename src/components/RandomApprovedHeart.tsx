@@ -12,7 +12,7 @@ export function RandomApprovedHeart() {
         .eq('status', 'approved')
         .order('random()')
         .limit(1)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching random heart:', error);
