@@ -74,7 +74,7 @@ export default function Verify() {
             <ApprovedHeartsCarousel />
           </div>
           <h1 className="text-3xl font-bold mb-6 font-['Montserrat_Alternates']">
-            E-mailadres geverifieerd
+            2800.love
           </h1>
           <p className="text-lg mb-8">
             Bedankt voor jouw hart. Jouw bijdrage zal verschijnen zodra deze werd gevalideerd.
