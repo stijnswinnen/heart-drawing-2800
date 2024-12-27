@@ -73,7 +73,7 @@ export default function Verify() {
           <div className="mb-8">
             <ApprovedHeartsCarousel />
           </div>
-          <h1 className="text-3xl font-bold mb-6 font-['Montserrat_Alternates']">
+          <h1 className="text-[180px] font-bold mb-6 font-['Montserrat_Alternates']">
             2800.love
           </h1>
           <p className="text-lg mb-8">
