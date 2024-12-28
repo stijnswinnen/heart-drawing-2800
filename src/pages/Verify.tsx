@@ -1,9 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ApprovedHeartsCarousel } from "@/components/ApprovedHeartsCarousel";
-import { RandomApprovedHeart } from "@/components/RandomApprovedHeart";
+import { Button } from "@/components/ui/button";
 
 export default function Verify() {
   const [searchParams] = useSearchParams();
@@ -70,18 +69,15 @@ export default function Verify() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <div className="text-center max-w-md mx-auto">
-          <div className="mb-8">
-            <ApprovedHeartsCarousel />
-          </div>
-          <div className="flex items-center justify-center gap-8 mb-6">
-            <RandomApprovedHeart />
-            <h1 className="text-[150px] font-bold font-['Montserrat_Alternates']">
-              2800
-            </h1>
-          </div>
           <p className="text-lg mb-8">
             Bedankt voor jouw hart. Jouw bijdrage zal verschijnen zodra deze werd gevalideerd.
           </p>
+          <Button 
+            onClick={() => navigate("/hearts")} 
+            className="mt-4"
+          >
+            Show me some love
+          </Button>
         </div>
       </div>
     );
