@@ -36,16 +36,10 @@ export function RandomApprovedHeart() {
     return () => clearInterval(interval);
   }, [hearts.length]);
 
-  const getImageUrl = (imagePath: string) => {
-    // Extract the filename from the full path
-    const filename = imagePath.split('/').pop();
-    if (!filename) return '';
-    
-    // Get the public URL directly from the optimized bucket
-    const { data } = supabase.storage
-      .from('optimized')
-      .getPublicUrl(filename);
-    
+  const getImageUrl = (drawing: Tables<"drawings">) => {
+    const filename = drawing.image_path.split('/').pop();
+    const imagePath = `optimized/${filename}`;
+    const { data } = supabase.storage.from('optimized').getPublicUrl(imagePath);
     return data.publicUrl;
   };
 
@@ -63,7 +57,7 @@ export function RandomApprovedHeart() {
       <div className="w-[300px] h-[300px] animate-fade-in">
         <img
           key={currentHeart.id}
-          src={getImageUrl(currentHeart.image_path)}
+          src={getImageUrl(currentHeart)}
           alt={`Heart ${currentIndex + 1}`}
           className="w-full h-full object-contain rounded-lg"
         />
