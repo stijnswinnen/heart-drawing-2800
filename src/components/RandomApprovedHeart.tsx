@@ -50,7 +50,7 @@ export function RandomApprovedHeart() {
 
   const getImageUrl = (drawing: Tables<"drawings">) => {
     try {
-      // The image is already in the optimized bucket, no need to modify the path
+      // Get the public URL directly from the optimized bucket using the full image path
       const { data } = supabase.storage
         .from('optimized')
         .getPublicUrl(drawing.image_path);
