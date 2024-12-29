@@ -27,7 +27,7 @@ const Over = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full py-12 px-4 md:px-8">
+    <div className="min-h-screen w-full px-4 md:px-8">
       <Navigation />
       <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left">
         <div className="space-y-8 font-['Montserrat_Alternates'] text-xl md:text-[70px] font-normal leading-[5rem]">
