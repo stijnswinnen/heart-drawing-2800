@@ -74,7 +74,7 @@ export function RandomApprovedHeart() {
   const currentHeart = hearts[currentIndex];
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 px-4 md:px-8">
+    <div className="flex flex-col md:flex-row items-center justify-center gap-8 px-4 md:px-8">
       <h1 className="text-[100px] md:text-[150px] font-bold font-['Montserrat_Alternates'] text-center">
         2800
       </h1>
