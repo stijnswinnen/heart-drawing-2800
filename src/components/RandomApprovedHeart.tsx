@@ -50,15 +50,15 @@ export function RandomApprovedHeart() {
 
   const getImageUrl = (drawing: Tables<"drawings">) => {
     try {
-      // Ensure the path includes the 'optimized' subfolder
+      // Construct path with optimized folder structure
       const imagePath = `optimized/${drawing.image_path}`;
-      console.log('Constructing image URL with path:', imagePath);
+      console.log('Getting image URL for:', imagePath);
       
       const { data } = supabase.storage
         .from('optimized')
         .getPublicUrl(imagePath);
       
-      console.log('Generated image URL:', data.publicUrl);
+      console.log('Generated URL:', data.publicUrl);
       return data.publicUrl;
     } catch (err) {
       console.error('Error generating image URL:', err);
