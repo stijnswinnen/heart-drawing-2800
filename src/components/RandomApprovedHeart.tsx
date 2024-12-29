@@ -1,24 +1,36 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
 export function RandomApprovedHeart() {
   const [hearts, setHearts] = useState<Tables<"drawings">[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchApprovedHearts = async () => {
-      const { data, error } = await supabase
-        .from('drawings')
-        .select('*')
-        .eq('status', 'approved');
-      
-      if (error) {
-        console.error('Error fetching approved hearts:', error);
-        return;
-      }
+      try {
+        console.log('Fetching approved hearts...');
+        const { data, error } = await supabase
+          .from('drawings')
+          .select('*')
+          .eq('status', 'approved');
+        
+        if (error) {
+          console.error('Error fetching approved hearts:', error);
+          toast.error("Failed to load approved hearts");
+          return;
+        }
 
-      setHearts(data || []);
+        console.log('Fetched hearts:', data?.length || 0);
+        setHearts(data || []);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        toast.error("An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchApprovedHearts();
@@ -37,11 +49,23 @@ export function RandomApprovedHeart() {
   }, [hearts.length]);
 
   const getImageUrl = (drawing: Tables<"drawings">) => {
-    const filename = drawing.image_path.split('/').pop();
-    const imagePath = `optimized/${filename}`;
-    const { data } = supabase.storage.from('optimized').getPublicUrl(imagePath);
-    return data.publicUrl;
+    try {
+      // The image is already in the optimized bucket, no need to modify the path
+      const { data } = supabase.storage
+        .from('optimized')
+        .getPublicUrl(drawing.image_path);
+      
+      console.log('Generated image URL:', data.publicUrl);
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Error generating image URL:', err);
+      return '';
+    }
   };
+
+  if (isLoading) {
+    return <div className="text-center text-gray-500">Loading hearts...</div>;
+  }
 
   if (hearts.length === 0) {
     return <div className="text-center text-gray-500">No approved hearts found</div>;
@@ -60,6 +84,10 @@ export function RandomApprovedHeart() {
           src={getImageUrl(currentHeart)}
           alt={`Heart ${currentIndex + 1}`}
           className="w-full h-full object-contain rounded-lg"
+          onError={(e) => {
+            console.error('Image failed to load:', currentHeart.image_path);
+            e.currentTarget.src = '/placeholder.svg';
+          }}
         />
       </div>
     </div>
