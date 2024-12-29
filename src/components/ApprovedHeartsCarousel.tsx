@@ -29,6 +29,21 @@ export function ApprovedHeartsCarousel() {
     fetchApprovedHearts();
   }, []);
 
+  const getImageUrl = (filename: string) => {
+    try {
+      console.log('Getting image URL for filename:', filename);
+      const { data } = supabase.storage
+        .from('optimized')
+        .getPublicUrl(`optimized/${filename}`);
+      
+      console.log('Generated URL:', data.publicUrl);
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Error generating image URL:', err);
+      return '';
+    }
+  };
+
   if (approvedHearts.length === 0) {
     return null;
   }
@@ -40,7 +55,7 @@ export function ApprovedHeartsCarousel() {
           <CarouselItem key={index}>
             <div className="p-1">
               <img
-                src={heart.image_path}
+                src={getImageUrl(heart.image_path)}
                 alt={`Approved heart ${index + 1}`}
                 className="w-full h-auto rounded-lg animate-pulse"
               />

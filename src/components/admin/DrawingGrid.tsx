@@ -24,15 +24,18 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   
-  const getImageUrl = (drawing: Tables<"drawings">) => {
-    const bucket = drawing.status === "approved" ? "optimized" : "hearts";
-    const imagePath = drawing.status === "approved" 
-      ? `optimized/${drawing.image_path.split('/').pop()}`
-      : drawing.image_path;
-    
-    console.log('Getting image URL for:', { bucket, imagePath });
-    const { data } = supabase.storage.from(bucket).getPublicUrl(imagePath);
-    return data.publicUrl;
+  const getImageUrl = (filename: string, status: string) => {
+    try {
+      const bucket = status === "approved" ? "optimized" : "hearts";
+      const path = status === "approved" ? `optimized/${filename}` : filename;
+      
+      console.log('Getting image URL for:', { bucket, path });
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Error generating image URL:', err);
+      return '';
+    }
   };
 
   const handleApprove = async (drawing: Tables<"drawings">) => {
@@ -76,7 +79,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
           >
             <div className="aspect-square mb-4">
               <img
-                src={getImageUrl(drawing)}
+                src={getImageUrl(drawing.image_path, drawing.status)}
                 alt="Heart drawing"
                 className="w-full h-full object-contain"
               />
