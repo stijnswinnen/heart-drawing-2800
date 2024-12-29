@@ -38,6 +38,7 @@ export default function Index() {
         <DrawingTitle 
           isDrawing={isDrawing} 
           onHeartClick={handleHeartClick}
+          className="font-semibold" // Added to ensure semibold weight
         />
         
         {showAuth && (
