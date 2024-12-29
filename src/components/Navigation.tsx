@@ -10,14 +10,14 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="w-full py-4 mb-8">
-      <ul className="flex justify-center items-center gap-8 font-['Montserrat_Alternates']">
+    <nav className="w-full py-8">
+      <ul className="flex justify-center items-center gap-8 font-['Inter']">
         {links.map((link) => (
           <li key={link.path}>
             <Link
               to={link.path}
               className={`text-lg hover:opacity-70 transition-opacity ${
-                location.pathname === link.path ? "underline" : ""
+                location.pathname === link.path ? "opacity-70" : "opacity-100"
               }`}
             >
               {link.label}
