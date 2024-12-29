@@ -30,10 +30,6 @@ const Over = () => {
     <div className="min-h-screen w-full py-12 px-4 md:px-8">
       <Navigation />
       <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left">
-        <h1 className="font-['Montserrat_Alternates'] text-4xl md:text-[70px] font-normal mb-12 opacity-0 fade-in-p">
-          Over 2800.love
-        </h1>
-        
         <div className="space-y-8 font-['Montserrat_Alternates'] text-xl md:text-[70px] font-normal leading-[5rem]">
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
             2800.love is een groeiend project dat de liefde voor Mechelen viert – en jij kan meedoen!
