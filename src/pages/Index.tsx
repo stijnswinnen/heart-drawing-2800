@@ -6,6 +6,7 @@ import { DrawingCanvas } from "@/components/DrawingCanvas";
 import { LockButton } from "@/components/LockButton";
 import { DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
+import { Navigation } from "@/components/Navigation";
 
 export default function Index() {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -35,6 +36,7 @@ export default function Index() {
   return (
     <DrawingProvider>
       <div>
+        <Navigation />
         <DrawingTitle 
           isDrawing={isDrawing} 
           onHeartClick={handleHeartClick}

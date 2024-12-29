@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Navigation } from "@/components/Navigation";
 
 const Over = () => {
   useEffect(() => {
@@ -27,6 +28,7 @@ const Over = () => {
 
   return (
     <div className="min-h-screen w-full py-12 px-4 md:px-8">
+      <Navigation />
       <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left">
         <h1 className="font-['Montserrat_Alternates'] text-4xl md:text-[70px] font-normal mb-12 opacity-0 fade-in-p">
           Over 2800.love
@@ -72,6 +74,6 @@ const Over = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Over;
