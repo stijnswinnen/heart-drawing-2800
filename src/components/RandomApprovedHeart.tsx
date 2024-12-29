@@ -74,11 +74,11 @@ export function RandomApprovedHeart() {
   const currentHeart = hearts[currentIndex];
 
   return (
-    <div className="min-h-screen flex items-center justify-center gap-8">
-      <h1 className="text-[150px] font-bold font-['Montserrat_Alternates']">
+    <div className="flex flex-col items-center justify-center gap-8 px-4 md:px-8">
+      <h1 className="text-[100px] md:text-[150px] font-bold font-['Montserrat_Alternates'] text-center">
         2800
       </h1>
-      <div className="w-[300px] h-[300px] animate-fade-in">
+      <div className="w-[250px] h-[250px] md:w-[300px] md:h-[300px] animate-fade-in">
         <img
           key={currentHeart.id}
           src={getImageUrl(currentHeart.image_path)}
