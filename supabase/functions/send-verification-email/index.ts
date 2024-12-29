@@ -65,15 +65,35 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "verify@2800.love", // Updated email address
+        from: "verify@2800.love",
         to: [email],
-        subject: "Verify your email address",
+        subject: "Bevestig jouw e-mail adres",
         html: `
-          <h2>Hello ${userData.name},</h2>
-          <p>Please verify your email address by clicking the link below:</p>
-          <p><a href="${verificationUrl}">Verify Email Address</a></p>
-          <p>This link will expire in 1 hour.</p>
-          <p>If you didn't request this verification, you can safely ignore this email.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <p>Beste ${userData.name},</p>
+            
+            <p>Bedankt om jouw hart te tekenen. Gelieve jouw e-mailadres te bevestigen door op onderstaande link te drukken.</p>
+            
+            <p style="margin: 30px 0;">
+              <a href="${verificationUrl}" 
+                 style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Valideer je e-mailadres
+              </a>
+            </p>
+            
+            <p>Na validatie van je e-mailadres kan je altijd een nieuwe bijdrage maken.</p>
+            <p>Het kan zijn dat jouw bijdrage niet onmiddellijk live verschijnt. Elke tekening wordt manueel nagekeken. Ongeldige bijdrages worden verwijderd.</p>
+            
+            <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+              Deze link is slechts 1 uur geldig.<br>
+              Indien je deze aanvraag niet het gedaan, kan je deze mail gewoon negeren.
+            </p>
+            
+            <p style="margin-top: 30px;">
+              Hartelijk dank<br>
+              2800.love
+            </p>
+          </div>
         `,
       }),
     });
