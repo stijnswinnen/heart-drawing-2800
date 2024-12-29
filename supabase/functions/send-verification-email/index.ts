@@ -53,7 +53,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("User data retrieved:", { ...userData, verification_token: "REDACTED" });
 
-    const verificationUrl = `${req.headers.get("origin")}/verify?token=${userData.verification_token}&email=${encodeURIComponent(email)}`;
+    // Use the custom domain instead of the preview URL
+    const verificationUrl = `https://2800.love/verify?token=${userData.verification_token}&email=${encodeURIComponent(email)}`;
     console.log("Verification URL generated:", verificationUrl);
 
     console.log("Attempting to send email via Resend");
