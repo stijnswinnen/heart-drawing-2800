@@ -10,6 +10,7 @@ import Admin from "./pages/Admin";
 import Privacy from "./pages/Privacy";
 import Verify from "./pages/Verify";
 import Hearts from "./pages/Hearts";
+import Over from "./pages/Over";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/hearts" element={<Hearts />} />
+            <Route path="/over" element={<Over />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
