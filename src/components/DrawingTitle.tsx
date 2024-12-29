@@ -13,7 +13,7 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
       }`}
     >
       <h1 
-        className={`text-[clamp(100px,20vw,200px)] font-['Montserrat_Alternates'] transition-all duration-700 ${
+        className={`text-[clamp(100px,20vw,200px)] font-['Montserrat_Alternates'] font-semibold transition-all duration-700 ${
           isDrawing ? 'opacity-20 md:opacity-20' : 'opacity-100'
         }`}
       >
