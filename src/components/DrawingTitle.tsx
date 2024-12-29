@@ -1,36 +1,37 @@
-import React from 'react';
-import { cn } from "@/lib/utils";
+import { Heart } from "lucide-react";
 
 interface DrawingTitleProps {
   isDrawing: boolean;
   onHeartClick: () => void;
-  className?: string;
 }
 
-export const DrawingTitle: React.FC<DrawingTitleProps> = ({ 
-  isDrawing, 
-  onHeartClick, 
-  className 
-}) => {
+export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => {
   return (
-    <h1 
-      className={cn(
-        "text-4xl md:text-[70px] font-['Montserrat_Alternates'] font-semibold text-center mb-8", 
-        className
-      )}
+    <div 
+      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
+        isDrawing ? 'md:translate-x-[-150%] md:ml-8 md:top-1/2 top-8 -translate-y-0 mt-4' : ''
+      }`}
     >
-      {!isDrawing ? (
-        <>
-          Draw a <span 
-            onClick={onHeartClick} 
-            className="text-primary cursor-pen hover:text-primary/80 transition-colors"
-          >
-            Heart
-          </span>
-        </>
-      ) : (
-        "Draw Your Heart"
+      <h1 
+        className={`text-[clamp(100px,20vw,200px)] font-['Montserrat_Alternates'] transition-all duration-700 ${
+          isDrawing ? 'opacity-20 md:opacity-20' : 'opacity-100'
+        }`}
+      >
+        2800
+      </h1>
+      
+      {!isDrawing && (
+        <div 
+          onClick={onHeartClick} 
+          className="cursor-pointer transform hover:scale-105 transition-transform mt-4 md:mt-0"
+        >
+          <Heart 
+            size={200} 
+            className="text-primary animate-pulse z-10" 
+            fill="#FFDEE2"
+          />
+        </div>
       )}
-    </h1>
+    </div>
   );
 };
