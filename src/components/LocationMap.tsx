@@ -58,16 +58,20 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       turf.polygon([[...coordinates]])
     );
     
-    return polygons.reduce((combined, polygon) => 
+    const combined = polygons.reduce((combined, polygon) => 
       combined ? turf.union(combined, polygon) : polygon
     );
+
+    // Convert the combined polygon to a FeatureCollection
+    return turf.featureCollection([combined]);
   };
 
   // Check if point is within combined polygon
   const isWithinMechelen = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
     const combinedPolygon = createCombinedPolygon();
-    return turf.booleanPointInPolygon(point, combinedPolygon);
+    // We need to check against the first (and only) feature in our collection
+    return turf.booleanPointInPolygon(point, combinedPolygon.features[0]);
   };
 
   useEffect(() => {
