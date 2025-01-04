@@ -17,14 +17,14 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
   const isWithinMechelen = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
     return mechelenDistricts.features.some(district => 
-      turf.booleanPointInPolygon(point, district.geometry)
+      turf.booleanPointInPolygon(point, turf.feature(district.geometry))
     );
   };
 
   const getDistrictName = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
     const district = mechelenDistricts.features.find(district => 
-      turf.booleanPointInPolygon(point, district.geometry)
+      turf.booleanPointInPolygon(point, turf.feature(district.geometry))
     );
     return district?.properties?.smun_name_nl?.[0] || 'Mechelen';
   };
@@ -51,9 +51,12 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
     // Add district boundaries
     newMap.on('load', () => {
+      // Convert the readonly GeoJSON to a mutable one
+      const mutableGeoJSON = JSON.parse(JSON.stringify(mechelenDistricts));
+      
       newMap.addSource('districts', {
         type: 'geojson',
-        data: mechelenDistricts
+        data: mutableGeoJSON
       });
 
       newMap.addLayer({
