@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { toast } from "sonner";
 import * as turf from '@turf/turf';
-import { mechelenDistricts, getDistrictName } from '@/data/mechelen-districts';
+import { mechelenDistricts } from '@/data/mechelen-districts';
 
 interface LocationMapProps {
   onLocationSelect: (lat: number, lng: number) => void;
@@ -14,28 +14,21 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
 
-  // Mechelen boundaries
-  const MECHELEN_BOUNDS: [[number, number], [number, number]] = [
-    [4.4400, 51.0060], // Southwest
-    [4.5200, 51.0500]  // Northeast
-  ];
-
-  const isWithinDistrict = (lng: number, lat: number) => {
+  const isWithinMechelen = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
-    
-    for (const feature of mechelenDistricts.features) {
-      if (turf.booleanPointInPolygon(point, feature.geometry)) {
-        return {
-          isValid: true,
-          districtName: getDistrictName(feature.properties)
-        };
-      }
-    }
-    
-    return {
-      isValid: false,
-      districtName: null
-    };
+    return mechelenDistricts.features.some(district => {
+      const polygonFeature = turf.polygon(district.geometry.coordinates as turf.Position[][]);
+      return turf.booleanPointInPolygon(point, polygonFeature);
+    });
+  };
+
+  const getDistrictName = (lng: number, lat: number) => {
+    const point = turf.point([lng, lat]);
+    const district = mechelenDistricts.features.find(district => {
+      const polygonFeature = turf.polygon(district.geometry.coordinates as turf.Position[][]);
+      return turf.booleanPointInPolygon(point, polygonFeature);
+    });
+    return district?.properties?.smun_name_nl?.[0] || 'Mechelen';
   };
 
   useEffect(() => {
@@ -47,9 +40,8 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     const newMap = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [4.4800, 51.0280], // Center on Mechelen
+      center: [4.48, 51.028], // Center on Mechelen
       zoom: 12,
-      maxBounds: MECHELEN_BOUNDS,
       minZoom: 11,
       maxZoom: 18
     });
@@ -59,33 +51,33 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     // Add navigation controls
     newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Add district boundaries when map loads
+    // Add district boundaries
     newMap.on('load', () => {
-      // Add districts source
+      // Convert the readonly GeoJSON to a mutable one
+      const mutableGeoJSON = JSON.parse(JSON.stringify(mechelenDistricts));
+      
       newMap.addSource('districts', {
         type: 'geojson',
-        data: mechelenDistricts
+        data: mutableGeoJSON
       });
 
-      // Add fill layer
       newMap.addLayer({
-        id: 'district-fills',
-        type: 'fill',
-        source: 'districts',
-        paint: {
-          'fill-color': '#088',
-          'fill-opacity': 0.1
-        }
-      });
-
-      // Add border layer
-      newMap.addLayer({
-        id: 'district-borders',
+        id: 'district-boundaries',
         type: 'line',
         source: 'districts',
         paint: {
-          'line-color': '#088',
+          'line-color': '#FF0000',
           'line-width': 2
+        }
+      });
+
+      newMap.addLayer({
+        id: 'district-fill',
+        type: 'fill',
+        source: 'districts',
+        paint: {
+          'fill-color': '#FF0000',
+          'fill-opacity': 0.1
         }
       });
     });
@@ -94,9 +86,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
       const { lng, lat } = e.lngLat;
       
-      const districtCheck = isWithinDistrict(lng, lat);
-      
-      if (!districtCheck.isValid) {
+      if (!isWithinMechelen(lng, lat)) {
         toast.error("Selecteer een locatie binnen Mechelen");
         return;
       }
@@ -113,7 +103,9 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
       setMarker(newMarker);
       onLocationSelect(lat, lng);
-      toast.success(`Locatie geselecteerd in ${districtCheck.districtName}!`);
+      
+      const districtName = getDistrictName(lng, lat);
+      toast.success(`Locatie geselecteerd in ${districtName}!`);
     };
 
     newMap.on('click', handleMapClick);
@@ -129,7 +121,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
-      <div ref={mapContainer} className="w-full h-full cursor-pin" />
+      <div ref={mapContainer} className="w-full h-full" />
     </div>
   );
 };
