@@ -9,8 +9,8 @@ interface LocationMapProps {
 
 const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const [map, setMap] = useState<mapboxgl.Map | null>(null);
+  const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
 
   // Mechelen boundaries
   const MECHELEN_BOUNDS: [[number, number], [number, number]] = [
@@ -31,7 +31,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     // Initialize map
     mapboxgl.accessToken = 'pk.eyJ1IjoiMjgwMGxvdmUiLCJhIjoiY201aWcyNDJpMHJpMTJrczZ6bjB5Z2toZiJ9.N8jmpZW9QoVFiWa2VFIJFg';
     
-    const map = new mapboxgl.Map({
+    const newMap = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [4.4800, 51.0280], // Center on Mechelen
@@ -41,10 +41,10 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       maxZoom: 18 // Allow detailed zoom
     });
 
-    mapRef.current = map;
+    setMap(newMap);
 
     // Add navigation controls
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     // Handle click events
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
@@ -56,32 +56,30 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       }
 
       // Remove existing marker if any
-      if (markerRef.current) {
-        markerRef.current.remove();
+      if (marker) {
+        marker.remove();
       }
 
       // Add new marker
-      const marker = new mapboxgl.Marker()
+      const newMarker = new mapboxgl.Marker()
         .setLngLat([lng, lat])
-        .addTo(map);
+        .addTo(newMap);
 
-      markerRef.current = marker;
-
+      setMarker(newMarker);
       onLocationSelect(lat, lng);
       toast.success("Locatie geselecteerd!");
     };
 
-    map.on('click', handleMapClick);
+    newMap.on('click', handleMapClick);
 
     // Cleanup function
     return () => {
-      map.off('click', handleMapClick);
-      if (markerRef.current) {
-        markerRef.current.remove();
+      if (marker) {
+        marker.remove();
       }
-      map.remove();
+      newMap.remove();
     };
-  }, [onLocationSelect]);
+  }, []);
 
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
