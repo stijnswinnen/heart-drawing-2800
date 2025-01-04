@@ -12,6 +12,19 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
 
+  // Mechelen boundaries
+  const MECHELEN_BOUNDS: [[number, number], [number, number]] = [
+    [4.4400, 51.0060], // Southwest
+    [4.5200, 51.0500]  // Northeast
+  ];
+
+  const isWithinMechelen = (lng: number, lat: number) => {
+    return lng >= MECHELEN_BOUNDS[0][0] && 
+           lng <= MECHELEN_BOUNDS[1][0] && 
+           lat >= MECHELEN_BOUNDS[0][1] && 
+           lat <= MECHELEN_BOUNDS[1][1];
+  };
+
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -21,8 +34,11 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [4.4699, 51.9244], // Default center on Antwerp
-      zoom: 11
+      center: [4.4800, 51.0280], // Center on Mechelen
+      zoom: 13, // Closer zoom for city level
+      maxBounds: MECHELEN_BOUNDS, // Restrict panning
+      minZoom: 12, // Prevent zooming out too far
+      maxZoom: 18 // Allow detailed zoom
     });
 
     mapRef.current = map;
@@ -34,6 +50,11 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
       const { lng, lat } = e.lngLat;
       
+      if (!isWithinMechelen(lng, lat)) {
+        toast.error("Selecteer een locatie binnen Mechelen");
+        return;
+      }
+
       // Remove existing marker if any
       if (markerRef.current) {
         markerRef.current.remove();
