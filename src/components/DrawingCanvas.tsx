@@ -43,18 +43,9 @@ export const DrawingCanvas = ({
         penSize={penSize}
         penColor={isEraser ? "#FFFFFF" : penColor}
       />
-      
-      <DrawingTools
-        penSize={penSize}
-        setPenSize={setPenSize}
-        penColor={penColor}
-        setPenColor={setPenColor}
-        isEraser={isEraser}
-        setIsEraser={setIsEraser}
-      />
 
       {hasDrawn && (
-        <div className="fixed md:top-8 md:bottom-auto md:right-8 bottom-24 flex gap-4 animate-fade-in mt-2 md:mt-0">
+        <div className="fixed md:top-8 md:bottom-auto bottom-[7.5rem] md:right-8 flex gap-4 animate-fade-in mt-2 md:mt-0">
           <Button
             onClick={onSubmit}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
@@ -70,6 +61,15 @@ export const DrawingCanvas = ({
           </Button>
         </div>
       )}
+      
+      <DrawingTools
+        penSize={penSize}
+        setPenSize={setPenSize}
+        penColor={penColor}
+        setPenColor={setPenColor}
+        isEraser={isEraser}
+        setIsEraser={setIsEraser}
+      />
     </div>
   );
 };
