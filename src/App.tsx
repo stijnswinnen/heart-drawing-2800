@@ -11,6 +11,7 @@ import Privacy from "./pages/Privacy";
 import Verify from "./pages/Verify";
 import Hearts from "./pages/Hearts";
 import Over from "./pages/Over";
+import FavoritePlek from "./pages/FavoritePlek";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/verify" element={<Verify />} />
             <Route path="/hearts" element={<Hearts />} />
             <Route path="/over" element={<Over />} />
+            <Route path="/mijn-favoriete-plek" element={<FavoritePlek />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

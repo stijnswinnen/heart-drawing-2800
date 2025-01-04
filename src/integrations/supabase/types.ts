@@ -89,6 +89,53 @@ export type Database = {
         }
         Relationships: []
       }
+      locations: {
+        Row: {
+          created_at: string
+          description: string | null
+          heart_user_id: string | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          status: Database["public"]["Enums"]["location_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          heart_user_id?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          status?: Database["public"]["Enums"]["location_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          heart_user_id?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          status?: Database["public"]["Enums"]["location_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_heart_user_id_fkey"
+            columns: ["heart_user_id"]
+            isOneToOne: false
+            referencedRelation: "heart_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -130,6 +177,7 @@ export type Database = {
     }
     Enums: {
       drawing_status: "new" | "approved" | "pending_verification"
+      location_status: "new" | "approved" | "pending_verification"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
