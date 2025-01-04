@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { toast } from "sonner";
+import { Heart } from 'lucide-react';
+import { createRoot } from 'react-dom/client';
 
 interface LocationMapProps {
   onLocationSelect: (lat: number, lng: number) => void;
@@ -23,6 +25,20 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
            lng <= MECHELEN_BOUNDS[1][0] && 
            lat >= MECHELEN_BOUNDS[0][1] && 
            lat <= MECHELEN_BOUNDS[1][1];
+  };
+
+  // Create a custom marker element using Lucide Heart icon
+  const createCustomMarker = () => {
+    const markerEl = document.createElement('div');
+    const root = createRoot(markerEl);
+    root.render(
+      <Heart 
+        className="text-red-500 animate-pulse" 
+        size={32} 
+        fill="currentColor"
+      />
+    );
+    return markerEl;
   };
 
   useEffect(() => {
@@ -60,8 +76,11 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
         marker.remove();
       }
 
-      // Add new marker
-      const newMarker = new mapboxgl.Marker()
+      // Add new marker with custom element
+      const newMarker = new mapboxgl.Marker({
+        element: createCustomMarker(),
+        anchor: 'bottom'
+      })
         .setLngLat([lng, lat])
         .addTo(newMap);
 
