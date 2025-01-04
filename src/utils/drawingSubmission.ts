@@ -95,9 +95,9 @@ export const submitDrawing = async (
     }, 'image/png');
   });
 
-  // Generate a unique filename
-  const folder = userId ? userId : 'anonymous';
-  const fileName = `${folder}/${crypto.randomUUID()}.png`;
+  // Generate a unique filename without folders
+  const prefix = userId ? `u${userId.slice(0, 8)}` : 'anon';
+  const fileName = `${prefix}_${crypto.randomUUID()}.png`;
     
   console.log('Uploading to storage with filename:', fileName);
 
