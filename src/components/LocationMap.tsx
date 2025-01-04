@@ -25,29 +25,6 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
            lat <= MECHELEN_BOUNDS[1][1];
   };
 
-  const createCustomMarker = () => {
-    const markerEl = document.createElement('div');
-    markerEl.className = 'mapboxgl-marker';
-    
-    const iconEl = document.createElement('div');
-    iconEl.innerHTML = `<svg
-      width="32"
-      height="32"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      stroke="currentColor"
-      class="heart-icon"
-    >
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-    </svg>`;
-    
-    iconEl.style.color = '#ef4444';
-    iconEl.style.animation = 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite';
-    
-    markerEl.appendChild(iconEl);
-    return markerEl;
-  };
-
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -84,10 +61,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       }
 
       // Add new marker
-      const newMarker = new mapboxgl.Marker({
-        element: createCustomMarker(),
-        anchor: 'bottom'
-      })
+      const newMarker = new mapboxgl.Marker()
         .setLngLat([lng, lat])
         .addTo(newMap);
 
@@ -105,7 +79,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       }
       newMap.remove();
     };
-  }, [marker]); // Add marker to dependencies to properly handle cleanup
+  }, []);
 
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">

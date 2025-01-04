@@ -37,7 +37,7 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       cursor: {
-        pin: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"10\" r=\"3\"/><path d=\"M12 2v1M12 21v-1M4.2 4.2l.7.7m12.1 12.1l.7.7M2 12h1m18 0h1M4.2 19.8l.7-.7m12.1-12.1l.7-.7\"/></svg>'), pointer",
+        pin: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z\"></path><circle cx=\"12\" cy=\"10\" r=\"3\"></circle></svg>'), pointer",
       },
       keyframes: {
         "fade-in": {
