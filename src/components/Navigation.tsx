@@ -17,7 +17,6 @@ export const Navigation = () => {
   const links = [
     { path: "/", label: "Teken een hart" },
     { path: "/hearts", label: "Designs" },
-    { path: "/mijn-favoriete-plek", label: "Mijn favoriete plek" },
     { path: "/over", label: "Over 2800.love" },
   ];
 
