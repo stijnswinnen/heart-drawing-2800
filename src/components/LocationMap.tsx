@@ -58,9 +58,16 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       turf.polygon([[...coordinates]])
     );
     
-    const combined = polygons.reduce((combined, polygon) => 
-      combined ? turf.union(combined, polygon) : polygon
-    );
+    // If we only have one polygon, wrap it in a FeatureCollection
+    if (polygons.length === 1) {
+      return turf.featureCollection([polygons[0]]);
+    }
+
+    // Combine polygons one by one
+    let combined = polygons[0];
+    for (let i = 1; i < polygons.length; i++) {
+      combined = turf.union(combined, polygons[i]);
+    }
 
     // Convert the combined polygon to a FeatureCollection
     return turf.featureCollection([combined]);
@@ -70,7 +77,6 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
   const isWithinMechelen = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
     const combinedPolygon = createCombinedPolygon();
-    // We need to check against the first (and only) feature in our collection
     return turf.booleanPointInPolygon(point, combinedPolygon.features[0]);
   };
 
