@@ -9,8 +9,8 @@ interface LocationMapProps {
 
 const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const marker = useRef<mapboxgl.Marker | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -18,36 +18,47 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     // Initialize map
     mapboxgl.accessToken = 'pk.eyJ1IjoiMjgwMGxvdmUiLCJhIjoiY201aWcyNDJpMHJpMTJrczZ6bjB5Z2toZiJ9.N8jmpZW9QoVFiWa2VFIJFg';
     
-    map.current = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [4.4699, 51.9244], // Default center on Antwerp
       zoom: 11
     });
 
+    mapRef.current = map;
+
     // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     // Handle click events
-    map.current.on('click', (e) => {
+    const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
       const { lng, lat } = e.lngLat;
       
       // Remove existing marker if any
-      if (marker.current) {
-        marker.current.remove();
+      if (markerRef.current) {
+        markerRef.current.remove();
       }
 
       // Add new marker
-      marker.current = new mapboxgl.Marker()
+      const marker = new mapboxgl.Marker()
         .setLngLat([lng, lat])
-        .addTo(map.current!);
+        .addTo(map);
+
+      markerRef.current = marker;
 
       onLocationSelect(lat, lng);
       toast.success("Locatie geselecteerd!");
-    });
+    };
 
+    map.on('click', handleMapClick);
+
+    // Cleanup function
     return () => {
-      map.current?.remove();
+      map.off('click', handleMapClick);
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+      map.remove();
     };
   }, [onLocationSelect]);
 
