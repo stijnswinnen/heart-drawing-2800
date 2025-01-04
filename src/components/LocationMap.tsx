@@ -85,7 +85,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
-      <div ref={mapContainer} className="w-full h-full" />
+      <div ref={mapContainer} className="w-full h-full cursor-pin" />
     </div>
   );
 };
