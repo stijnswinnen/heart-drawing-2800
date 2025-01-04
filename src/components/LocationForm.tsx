@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import LocationMap from "./LocationMap";
-import { useNavigate } from "react-router-dom";
 
 export const LocationForm = () => {
   const session = useSession();
-  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [description, setDescription] = useState("");
@@ -18,34 +16,29 @@ export const LocationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Redirect if not authenticated
-    if (!session?.user?.id) {
-      toast.error("Je moet ingelogd zijn om een locatie toe te voegen");
-      navigate("/");
-      return;
+    // If user is authenticated, pre-fill the form
+    if (session?.user?.id) {
+      const fetchUserProfile = async () => {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("name")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+          return;
+        }
+
+        if (profile) {
+          setName(profile.name);
+          setEmail(session.user.email || "");
+        }
+      };
+
+      fetchUserProfile();
     }
-
-    // Fetch user profile data
-    const fetchUserProfile = async () => {
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("name")
-        .eq("id", session.user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return;
-      }
-
-      if (profile) {
-        setName(profile.name);
-        setEmail(session.user.email || "");
-      }
-    };
-
-    fetchUserProfile();
-  }, [session, navigate]);
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,31 +53,49 @@ export const LocationForm = () => {
       return;
     }
 
-    if (!description.trim()) {
-      toast.error("Vul een beschrijving in voor de locatie");
+    if (!email.trim()) {
+      toast.error("Vul een e-mailadres in");
       return;
     }
 
-    if (!session?.user?.id) {
-      toast.error("Je moet ingelogd zijn om een locatie toe te voegen");
+    if (!description.trim()) {
+      toast.error("Vul een beschrijving in voor de locatie");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("locations").insert({
+      // First create or get heart_user
+      const { data: heartUser, error: heartUserError } = await supabase
+        .from("heart_users")
+        .upsert({
+          email,
+          name,
+          marketing_consent: false,
+        }, {
+          onConflict: 'email'
+        })
+        .select()
+        .single();
+
+      if (heartUserError) throw heartUserError;
+
+      // Then submit the location
+      const { error: locationError } = await supabase.from("locations").insert({
         name,
         description: description.trim(),
         latitude: coordinates.lat,
         longitude: coordinates.lng,
-        user_id: session.user.id,
+        user_id: session?.user?.id || null,
+        heart_user_id: heartUser.id,
       });
 
-      if (error) throw error;
+      if (locationError) throw locationError;
 
       toast.success("Locatie succesvol toegevoegd!");
       setName("");
+      setEmail("");
       setDescription("");
       setCoordinates(null);
     } catch (error: any) {
@@ -112,7 +123,7 @@ export const LocationForm = () => {
             onChange={(e) => setName(e.target.value)}
             placeholder="Jouw naam"
             required
-            disabled
+            disabled={!!session?.user?.id}
           />
         </div>
 
@@ -127,7 +138,7 @@ export const LocationForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Jouw e-mail adres"
             required
-            disabled
+            disabled={!!session?.user?.id}
           />
         </div>
 
