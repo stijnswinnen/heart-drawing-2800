@@ -21,7 +21,7 @@ export const DrawingTools = ({
   const penSizes = [1, 5, 10];
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-white rounded-lg shadow-lg animate-[fade-in_0.5s_ease-out]">
+    <div className="fixed md:bottom-8 bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-white rounded-lg shadow-lg animate-[fade-in_0.5s_ease-out]">
       <div className="flex gap-2">
         {penSizes.map((size) => (
           <Button
