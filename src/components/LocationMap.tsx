@@ -16,16 +16,18 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
   const isWithinMechelen = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
-    return mechelenDistricts.features.some(district => 
-      turf.booleanPointInPolygon(point, turf.feature(district.geometry))
-    );
+    return mechelenDistricts.features.some(district => {
+      const polygonFeature = turf.polygon(district.geometry.coordinates as turf.Position[][]);
+      return turf.booleanPointInPolygon(point, polygonFeature);
+    });
   };
 
   const getDistrictName = (lng: number, lat: number) => {
     const point = turf.point([lng, lat]);
-    const district = mechelenDistricts.features.find(district => 
-      turf.booleanPointInPolygon(point, turf.feature(district.geometry))
-    );
+    const district = mechelenDistricts.features.find(district => {
+      const polygonFeature = turf.polygon(district.geometry.coordinates as turf.Position[][]);
+      return turf.booleanPointInPolygon(point, polygonFeature);
+    });
     return district?.properties?.smun_name_nl?.[0] || 'Mechelen';
   };
 
