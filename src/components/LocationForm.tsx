@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -6,13 +6,46 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import LocationMap from "./LocationMap";
+import { useNavigate } from "react-router-dom";
 
 export const LocationForm = () => {
   const session = useSession();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [description, setDescription] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Redirect if not authenticated
+    if (!session?.user?.id) {
+      toast.error("Je moet ingelogd zijn om een locatie toe te voegen");
+      navigate("/");
+      return;
+    }
+
+    // Fetch user profile data
+    const fetchUserProfile = async () => {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+
+      if (profile) {
+        setName(profile.name);
+        setEmail(session.user.email || "");
+      }
+    };
+
+    fetchUserProfile();
+  }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,15 +60,25 @@ export const LocationForm = () => {
       return;
     }
 
+    if (!description.trim()) {
+      toast.error("Vul een beschrijving in voor de locatie");
+      return;
+    }
+
+    if (!session?.user?.id) {
+      toast.error("Je moet ingelogd zijn om een locatie toe te voegen");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { error } = await supabase.from("locations").insert({
         name,
-        description: description.trim() || null,
+        description: description.trim(),
         latitude: coordinates.lat,
         longitude: coordinates.lng,
-        user_id: session?.user?.id || null,
+        user_id: session.user.id,
       });
 
       if (error) throw error;
@@ -60,11 +103,40 @@ export const LocationForm = () => {
       
       <div className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
+          <label htmlFor="userName" className="block text-sm font-medium mb-1">
+            Jouw naam
+          </label>
+          <Input
+            id="userName"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Jouw naam"
+            required
+            disabled
+          />
+        </div>
+
+        <div>
+          <label htmlFor="userEmail" className="block text-sm font-medium mb-1">
+            Jouw e-mail adres
+          </label>
+          <Input
+            id="userEmail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Jouw e-mail adres"
+            required
+            disabled
+          />
+        </div>
+
+        <div>
+          <label htmlFor="locationName" className="block text-sm font-medium mb-1">
             Naam van de locatie
           </label>
           <Input
-            id="name"
+            id="locationName"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Geef deze plek een naam"
@@ -74,7 +146,7 @@ export const LocationForm = () => {
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium mb-1">
-            Beschrijving (optioneel)
+            Beschrijving
           </label>
           <Textarea
             id="description"
@@ -82,6 +154,7 @@ export const LocationForm = () => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Waarom is dit jouw favoriete plek?"
             rows={4}
+            required
           />
         </div>
 

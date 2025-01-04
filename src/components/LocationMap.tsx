@@ -79,7 +79,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       }
       newMap.remove();
     };
-  }, []);
+  }, [marker]); // Add marker to dependencies to properly handle cleanup
 
   return (
     <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
