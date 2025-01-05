@@ -62,6 +62,7 @@ export default function Index() {
           onSubmit={() => setShowSubmitForm(true)}
           session={session}
           setShowAuth={setShowAuth}
+          setIsDrawing={setIsDrawing}
         />
 
         <LockButton onClick={() => setShowAuth(true)} />
