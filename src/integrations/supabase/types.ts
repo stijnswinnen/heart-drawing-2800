@@ -89,6 +89,51 @@ export type Database = {
         }
         Relationships: []
       }
+      location_likes: {
+        Row: {
+          created_at: string
+          heart_user_id: string | null
+          id: string
+          location_id: string
+          status: Database["public"]["Enums"]["like_status"] | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          heart_user_id?: string | null
+          id?: string
+          location_id: string
+          status?: Database["public"]["Enums"]["like_status"] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          heart_user_id?: string | null
+          id?: string
+          location_id?: string
+          status?: Database["public"]["Enums"]["like_status"] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_likes_heart_user_id_fkey"
+            columns: ["heart_user_id"]
+            isOneToOne: false
+            referencedRelation: "heart_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_likes_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           created_at: string
@@ -180,6 +225,7 @@ export type Database = {
     }
     Enums: {
       drawing_status: "new" | "approved" | "pending_verification"
+      like_status: "active" | "removed"
       location_status: "new" | "approved" | "pending_verification"
       user_role: "user" | "admin"
     }
