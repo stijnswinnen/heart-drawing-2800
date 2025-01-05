@@ -4,6 +4,10 @@ import { Navigation } from "@/components/Navigation";
 
 const Over = () => {
   useEffect(() => {
+    document.title = "Over 2800.love";
+  }, []);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
