@@ -30,7 +30,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     
     const newMap = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [defaultLng, defaultLat],
       zoom: 12,
       minZoom: 11,
@@ -39,17 +39,15 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
     map.current = newMap;
 
-    const setupMap = () => {
-      if (!map.current) return;
-
+    newMap.on('load', () => {
       // Add the boundary layer
-      map.current.addSource('mechelen-boundary', {
+      newMap.addSource('mechelen-boundary', {
         type: 'geojson',
         data: boundary
       });
 
       // Add fill layer
-      map.current.addLayer({
+      newMap.addLayer({
         id: 'mechelen-fill',
         type: 'fill',
         source: 'mechelen-boundary',
@@ -60,7 +58,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       });
 
       // Add line layer
-      map.current.addLayer({
+      newMap.addLayer({
         id: 'mechelen-line',
         type: 'line',
         source: 'mechelen-boundary',
@@ -77,13 +75,11 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
           draggable: true
         })
           .setLngLat([defaultLng, defaultLat])
-          .addTo(map.current);
+          .addTo(newMap);
 
         // Handle marker drag end
-        const onDragEnd = () => {
-          if (!marker.current) return;
-          
-          const lngLat = marker.current.getLngLat();
+        marker.current.on('dragend', () => {
+          const lngLat = marker.current!.getLngLat();
           const draggedPoint = turf.point([lngLat.lng, lngLat.lat]);
           
           if (turf.booleanPointInPolygon(draggedPoint, polygon)) {
@@ -91,33 +87,25 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
             toast.success("Locatie bijgewerkt!");
           } else {
             // Reset marker to previous position if outside boundary
-            marker.current.setLngLat([defaultLng, defaultLat]);
+            marker.current!.setLngLat([defaultLng, defaultLat]);
             toast.error("Selecteer een locatie binnen Mechelen");
           }
-        };
-
-        marker.current.on('dragend', onDragEnd);
+        });
 
         // Trigger initial location select
         onLocationSelect(defaultLat, defaultLng);
       }
+    });
 
-      // Add navigation controls
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    };
-
-    newMap.on('load', setupMap);
+    // Add navigation controls
+    newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     // Cleanup function
     return () => {
       if (marker.current) {
         marker.current.remove();
-        marker.current = null;
       }
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
+      newMap.remove();
     };
   }, []);
 
