@@ -53,8 +53,8 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   };
 
   const NavLinks = () => (
-    <div className="flex flex-col md:flex-row justify-between items-center w-full">
-      <ul className="flex flex-col md:flex-row justify-center items-center gap-8 font-['Inter']">
+    <div className="flex flex-col md:flex-row items-center w-full relative">
+      <ul className="flex flex-col md:flex-row justify-center items-center gap-8 font-['Inter'] w-full">
         {links.map((link) => (
           <li key={link.path}>
             <Link
@@ -68,12 +68,11 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
           </li>
         ))}
       </ul>
-      <div className="mt-4 md:mt-0">
+      <div className="mt-4 md:mt-0 md:absolute md:right-0">
         {session ? (
           <Button 
             variant="outline" 
             onClick={handleLogout}
-            className="ml-4"
           >
             Uitloggen
           </Button>
@@ -81,7 +80,6 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
           <Button 
             variant="outline" 
             onClick={() => setShowAuth(true)}
-            className="ml-4"
           >
             Inloggen
           </Button>
