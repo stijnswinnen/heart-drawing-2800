@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 
@@ -48,7 +48,7 @@ const Over = () => {
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            Teken een hart en voeg het toe aan de collectie. We verzamelen 2800 hartjes! Met behulp van animatie en AI brengen we jouw hart later tot leven.
+            <Link to="/" className="underline hover:opacity-70 transition-opacity">Teken een hart</Link> en voeg het toe aan de collectie. We verzamelen 2800 hartjes! Met behulp van animatie en AI brengen we jouw hart later tot leven.
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
