@@ -16,7 +16,7 @@ export const Navigation = () => {
   
   const links = [
     { path: "/", label: "Teken een hart" },
-    { path: "/hearts", label: "Designs" },
+    { path: "/hearts", label: "Hartjes" },
     { path: "/over", label: "Over 2800.love" },
   ];
 
