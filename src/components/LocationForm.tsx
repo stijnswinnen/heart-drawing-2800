@@ -190,7 +190,7 @@ export const LocationForm = () => {
         </div>
 
         <Button type="submit" disabled={isSubmitting || !coordinates}>
-          {isSubmitting ? "Bezig met versturen..." : "Verstuur locatie"}
+          {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
         </Button>
       </div>
     </form>
