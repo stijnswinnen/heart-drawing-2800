@@ -2,10 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -32,6 +29,7 @@ interface SubmitFormProps {
 
 export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
+  const dialogDescriptionId = "submit-form-description";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -109,10 +107,10 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
 
   return (
     <Dialog defaultOpen onOpenChange={onClose}>
-      <DialogContent aria-describedby="submit-form-description">
+      <DialogContent aria-describedby={dialogDescriptionId}>
         <DialogHeader>
           <DialogTitle>Verstuur je hart</DialogTitle>
-          <DialogDescription id="submit-form-description">
+          <DialogDescription id={dialogDescriptionId}>
             Gelieve onderstaande gegevens in te vullen om jouw hart tekening te versturen.
           </DialogDescription>
         </DialogHeader>
