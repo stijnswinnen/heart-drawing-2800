@@ -12,14 +12,38 @@ interface Location {
   longitude: number;
 }
 
+interface Drawing {
+  image_path: string;
+}
+
 export const LocationsMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [approvedHearts, setApprovedHearts] = useState<Drawing[]>([]);
 
   // Default coordinates for Mechelen
   const defaultLng = 4.480469;
   const defaultLat = 51.028022;
+
+  useEffect(() => {
+    const fetchApprovedHearts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('drawings')
+          .select('image_path')
+          .eq('status', 'approved');
+        
+        if (error) throw error;
+        setApprovedHearts(data || []);
+      } catch (error) {
+        console.error('Error fetching approved hearts:', error);
+        toast.error("Er ging iets mis bij het ophalen van de hartjes");
+      }
+    };
+
+    fetchApprovedHearts();
+  }, []);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -41,6 +65,14 @@ export const LocationsMap = () => {
     fetchLocations();
   }, []);
 
+  const getRandomHeartUrl = () => {
+    if (approvedHearts.length === 0) return '';
+    const randomHeart = approvedHearts[Math.floor(Math.random() * approvedHearts.length)];
+    return supabase.storage
+      .from('optimized')
+      .getPublicUrl(`optimized/${randomHeart.image_path}`).data.publicUrl;
+  };
+
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -61,6 +93,20 @@ export const LocationsMap = () => {
     newMap.on('load', () => {
       // Add markers for each location
       locations.forEach((location) => {
+        // Create marker element
+        const markerEl = document.createElement('div');
+        markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden';
+        markerEl.style.border = '2px solid white';
+        
+        // Create and set heart image background
+        const heartUrl = getRandomHeartUrl();
+        if (heartUrl) {
+          markerEl.style.backgroundImage = `url(${heartUrl})`;
+          markerEl.style.backgroundSize = 'contain';
+          markerEl.style.backgroundPosition = 'center';
+          markerEl.style.backgroundRepeat = 'no-repeat';
+        }
+
         const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
           `<div class="p-2">
             <h3 class="font-bold mb-1">${location.name}</h3>
@@ -68,7 +114,7 @@ export const LocationsMap = () => {
           </div>`
         );
 
-        new mapboxgl.Marker()
+        new mapboxgl.Marker({ element: markerEl })
           .setLngLat([location.longitude, location.latitude])
           .setPopup(popup)
           .addTo(newMap);
@@ -82,7 +128,7 @@ export const LocationsMap = () => {
     return () => {
       newMap.remove();
     };
-  }, [locations]);
+  }, [locations, approvedHearts]);
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
