@@ -10,9 +10,14 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export const Navigation = () => {
+export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  
+  // Hide navigation when drawing on index page
+  if (location.pathname === "/" && isDrawing) {
+    return null;
+  }
   
   const links = [
     { path: "/", label: "Teken een hart" },

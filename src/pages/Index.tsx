@@ -36,7 +36,7 @@ export default function Index() {
   return (
     <DrawingProvider>
       <div>
-        <Navigation />
+        <Navigation isDrawing={isDrawing} />
         <DrawingTitle 
           isDrawing={isDrawing} 
           onHeartClick={handleHeartClick}
