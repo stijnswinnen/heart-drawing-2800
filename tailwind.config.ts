@@ -47,43 +47,11 @@ export default {
         "pulse": {
           "0%, 100%": { transform: "scale(1)" },
           "50%": { transform: "scale(1.1)" }
-        },
-        "pop-in": {
-          "0%": {
-            width: "0px",
-            height: "0px",
-            opacity: "0",
-            boxShadow: "none"
-          },
-          "70%": {
-            width: "55px",
-            height: "55px",
-            opacity: "1",
-            boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.4)"
-          },
-          "85%": {
-            width: "48px",
-            height: "48px",
-            boxShadow: "0px 0px 4px rgba(0, 0, 0, 0.3)"
-          },
-          "100%": {
-            width: "50px",
-            height: "50px",
-            boxShadow: "0px 0px 6px rgba(0, 0, 0, 0.3)"
-          }
-        },
-        "wobble": {
-          "0%": { transform: "rotate(0deg)" },
-          "20%": { transform: "rotate(2.5deg)" },
-          "50%": { transform: "rotate(-2deg)" },
-          "65%": { transform: "rotate(1deg)" },
-          "100%": { transform: "rotate(0deg)" }
         }
       },
       animation: {
         "fade-in": "fade-in 0.5s ease-out",
-        "pulse": "pulse 1.5s ease-in-out infinite",
-        "marker-pop": "pop-in 0.3s ease-out forwards, wobble 1.5s ease-in-out 0.3s forwards"
+        "pulse": "pulse 1.5s ease-in-out infinite"
       }
     },
   },

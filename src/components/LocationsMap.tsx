@@ -110,9 +110,8 @@ export const LocationsMap = () => {
     // Add new markers
     locations.forEach((location) => {
       const markerEl = document.createElement('div');
-      markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden animate-marker-pop';
+      markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden';
       markerEl.style.border = '2px solid white';
-      markerEl.style.transformOrigin = 'bottom center';
       
       const heartUrl = getRandomHeartUrl();
       if (heartUrl) {
