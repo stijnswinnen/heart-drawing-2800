@@ -2,6 +2,8 @@ import { Canvas } from "@/components/Canvas";
 import { DrawingTools } from "@/components/DrawingTools";
 import { Button } from "@/components/ui/button";
 import { useDrawing } from "@/components/DrawingProvider";
+import { X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface DrawingCanvasProps {
   isDrawing: boolean;
@@ -37,6 +39,16 @@ export const DrawingCanvas = ({
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
+      {!hasDrawn && (
+        <Link 
+          to="/" 
+          className="fixed top-8 right-8 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <X className="w-4 h-4" />
+          Sluiten
+        </Link>
+      )}
+
       <Canvas 
         key={canvasKey}
         onDrawingComplete={onDrawingComplete}
