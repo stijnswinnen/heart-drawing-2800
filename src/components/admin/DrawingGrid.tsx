@@ -1,9 +1,9 @@
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -20,10 +20,43 @@ interface DrawingGridProps {
   onDecline: (drawing: Tables<"drawings">) => Promise<void>;
 }
 
+interface HeartUser {
+  email_verified: boolean;
+}
+
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [heartUsers, setHeartUsers] = useState<Record<string, HeartUser>>({});
   const itemsPerPage = 20;
   
+  useEffect(() => {
+    const fetchHeartUsers = async () => {
+      if (!drawings?.length) return;
+      
+      const heartUserIds = drawings.map(d => d.heart_user_id).filter(Boolean);
+      if (!heartUserIds.length) return;
+
+      const { data, error } = await supabase
+        .from('heart_users')
+        .select('id, email_verified')
+        .in('id', heartUserIds);
+
+      if (error) {
+        console.error('Error fetching heart users:', error);
+        return;
+      }
+
+      const userMap = (data || []).reduce((acc, user) => ({
+        ...acc,
+        [user.id]: user
+      }), {});
+
+      setHeartUsers(userMap);
+    };
+
+    fetchHeartUsers();
+  }, [drawings]);
+
   const getImageUrl = (filename: string, status: string) => {
     try {
       const bucket = status === "approved" ? "optimized" : "hearts";
@@ -39,6 +72,11 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
   };
 
   const handleApprove = async (drawing: Tables<"drawings">) => {
+    if (!drawing.heart_user_id || !heartUsers[drawing.heart_user_id]?.email_verified) {
+      toast.error("Cannot approve drawing: Email not verified");
+      return;
+    }
+
     try {
       await onApprove(drawing);
       const { data, error } = await supabase.functions.invoke('optimize-heart', {
@@ -85,24 +123,35 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
               />
             </div>
             {selectedStatus === "new" && (
-              <div className="flex justify-between gap-4">
-                <Button
-                  variant="outline"
-                  className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                  onClick={() => handleApprove(drawing)}
-                >
-                  <CheckCircle className="mr-2" />
-                  Approve
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => onDecline(drawing)}
-                >
-                  <XCircle className="mr-2" />
-                  Decline
-                </Button>
-              </div>
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertCircle className={`w-4 h-4 ${drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified ? 'text-green-500' : 'text-amber-500'}`} />
+                  <span className="text-sm">
+                    {drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified 
+                      ? "Email verified" 
+                      : "Email not verified"}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    onClick={() => handleApprove(drawing)}
+                    disabled={!drawing.heart_user_id || !heartUsers[drawing.heart_user_id]?.email_verified}
+                  >
+                    <CheckCircle className="mr-2" />
+                    Approve
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => onDecline(drawing)}
+                  >
+                    <XCircle className="mr-2" />
+                    Decline
+                  </Button>
+                </div>
+              </>
             )}
           </div>
         ))}
