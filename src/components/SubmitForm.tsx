@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { FormFields } from "./form/FormFields";
 import { FormActions } from "./form/FormActions";
+import { NewsletterField } from "./form/NewsletterField";
+import { PrivacyConsentField } from "./form/PrivacyConsentField";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -46,7 +48,6 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       setIsVerifying(true);
       console.log('Starting submission process with data:', data);
 
-      // Create or update heart_user regardless of verification status
       const { error: upsertError } = await supabase
         .from("heart_users")
         .upsert({
@@ -62,14 +63,12 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         throw new Error("Failed to create user record");
       }
 
-      // Check if email needs verification
       const { data: existingUser } = await supabase
         .from("heart_users")
         .select("email_verified")
         .eq("email", data.email)
         .maybeSingle();
 
-      // If email is not verified, send verification email
       if (!existingUser?.email_verified) {
         console.log('Email not verified, sending verification email');
         const response = await supabase.functions.invoke("send-verification-email", {
@@ -82,7 +81,6 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         }
       }
 
-      // Always proceed with the submission
       onSubmit(data);
     } catch (error: any) {
       console.error("Error in form submission:", error);
@@ -104,6 +102,8 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormFields form={form} />
+            <NewsletterField form={form} />
+            <PrivacyConsentField form={form} />
             <FormActions onClose={onClose} isVerifying={isVerifying} />
           </form>
         </Form>
