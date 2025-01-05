@@ -111,7 +111,7 @@ export const LocationsMap = () => {
     locations.forEach((location) => {
       const markerEl = document.createElement('div');
       markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden';
-      markerEl.style.border = '2px solid white';
+      markerEl.style.border = '5px solid white';
       
       const heartUrl = getRandomHeartUrl();
       if (heartUrl) {
