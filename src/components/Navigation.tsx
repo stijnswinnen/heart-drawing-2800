@@ -9,10 +9,32 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
+import { AuthDialog } from "@/components/AuthDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [showAuth, setShowAuth] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  
+  useEffect(() => {
+    // Fetch initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   
   // Hide navigation when drawing on index page
   if (location.pathname === "/" && isDrawing) {
@@ -26,21 +48,46 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
     { path: "/over", label: "Over 2800.love" },
   ];
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   const NavLinks = () => (
-    <ul className="flex flex-col md:flex-row justify-center items-center gap-8 font-['Inter']">
-      {links.map((link) => (
-        <li key={link.path}>
-          <Link
-            to={link.path}
-            className={`text hover:opacity-70 transition-opacity ${
-              location.pathname === link.path ? "opacity-70" : "opacity-100"
-            }`}
+    <div className="flex flex-col md:flex-row justify-between items-center w-full">
+      <ul className="flex flex-col md:flex-row justify-center items-center gap-8 font-['Inter']">
+        {links.map((link) => (
+          <li key={link.path}>
+            <Link
+              to={link.path}
+              className={`text hover:opacity-70 transition-opacity ${
+                location.pathname === link.path ? "opacity-70" : "opacity-100"
+              }`}
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 md:mt-0">
+        {session ? (
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="ml-4"
           >
-            {link.label}
-          </Link>
-        </li>
-      ))}
-    </ul>
+            Uitloggen
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAuth(true)}
+            className="ml-4"
+          >
+            Inloggen
+          </Button>
+        )}
+      </div>
+    </div>
   );
 
   if (isMobile) {
@@ -61,13 +108,17 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
             </nav>
           </SheetContent>
         </Sheet>
+        {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
       </div>
     );
   }
 
   return (
-    <nav className="w-full py-8">
-      <NavLinks />
-    </nav>
+    <>
+      <nav className="w-full py-8">
+        <NavLinks />
+      </nav>
+      {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
+    </>
   );
 };
