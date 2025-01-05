@@ -3,8 +3,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import * as turf from '@turf/turf';
-import { mechelenBoundary } from '../data/mechelen-boundary';
 
 interface Location {
   id: string;
@@ -22,9 +20,6 @@ export const LocationsMap = () => {
   // Default coordinates for Mechelen
   const defaultLng = 4.480469;
   const defaultLat = 51.028022;
-
-  // Convert the GeoJSON coordinates to a mutable object
-  const boundary = JSON.parse(JSON.stringify(mechelenBoundary));
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -64,34 +59,6 @@ export const LocationsMap = () => {
     map.current = newMap;
 
     newMap.on('load', () => {
-      // Add the boundary layer
-      newMap.addSource('mechelen-boundary', {
-        type: 'geojson',
-        data: boundary
-      });
-
-      // Add fill layer
-      newMap.addLayer({
-        id: 'mechelen-fill',
-        type: 'fill',
-        source: 'mechelen-boundary',
-        paint: {
-          'fill-color': '#0080ff',
-          'fill-opacity': 0.1
-        }
-      });
-
-      // Add line layer
-      newMap.addLayer({
-        id: 'mechelen-line',
-        type: 'line',
-        source: 'mechelen-boundary',
-        paint: {
-          'line-color': '#0080ff',
-          'line-width': 2
-        }
-      });
-
       // Add markers for each location
       locations.forEach((location) => {
         const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
