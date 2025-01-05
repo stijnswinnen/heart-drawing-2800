@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import LocationMap from "./LocationMap";
+import { LocationMapSection } from "./LocationMapSection";
+import { UserInfoSection } from "./UserInfoSection";
+import { LocationDetailsSection } from "./LocationDetailsSection";
 
 export const LocationForm = () => {
   const session = useSession();
@@ -68,7 +67,6 @@ export const LocationForm = () => {
     setIsSubmitting(true);
 
     try {
-      // First, create or update heart_user
       const { data: heartUser, error: heartUserError } = await supabase
         .from("heart_users")
         .upsert({
@@ -83,7 +81,6 @@ export const LocationForm = () => {
 
       if (heartUserError) throw heartUserError;
 
-      // Then create the location
       const { error } = await supabase.from("locations").insert({
         name: locationName,
         description: description.trim(),
@@ -96,7 +93,6 @@ export const LocationForm = () => {
 
       if (error) throw error;
 
-      // Send email notification
       const { error: notificationError } = await supabase.functions.invoke('send-location-notification', {
         body: {
           name,
@@ -110,7 +106,6 @@ export const LocationForm = () => {
 
       if (notificationError) {
         console.error("Error sending notification:", notificationError);
-        // Don't throw here as the location was saved successfully
       }
 
       toast.success("Locatie succesvol toegevoegd!");
@@ -119,7 +114,6 @@ export const LocationForm = () => {
       setCoordinates(null);
       setShareConsent(false);
       
-      // Only reset name and email if not logged in
       if (!session) {
         setName("");
         setEmail("");
@@ -134,83 +128,27 @@ export const LocationForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <LocationMap
-        onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })}
-      />
+      <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
       
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Jouw naam
-          </label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Vul je naam in"
-            required
-          />
-        </div>
+      <UserInfoSection
+        name={name}
+        email={email}
+        onNameChange={setName}
+        onEmailChange={setEmail}
+      />
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Jouw e-mailadres
-          </label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Vul je e-mailadres in"
-            required
-          />
-        </div>
+      <LocationDetailsSection
+        locationName={locationName}
+        description={description}
+        shareConsent={shareConsent}
+        onLocationNameChange={setLocationName}
+        onDescriptionChange={setDescription}
+        onShareConsentChange={setShareConsent}
+      />
 
-        <div>
-          <label htmlFor="locationName" className="block text-sm font-medium mb-1">
-            Naam van de locatie
-          </label>
-          <Input
-            id="locationName"
-            value={locationName}
-            onChange={(e) => setLocationName(e.target.value)}
-            placeholder="Geef deze plek een naam"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1">
-            Beschrijving
-          </label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Waarom is dit jouw favoriete plek?"
-            rows={4}
-            required
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="shareConsent"
-            checked={shareConsent}
-            onCheckedChange={(checked) => setShareConsent(checked as boolean)}
-          />
-          <label
-            htmlFor="shareConsent"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Ja, ik wil mijn verhaal delen.
-          </label>
-        </div>
-
-        <Button type="submit" disabled={isSubmitting || !coordinates}>
-          {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
-        </Button>
-      </div>
+      <Button type="submit" disabled={isSubmitting || !coordinates}>
+        {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
+      </Button>
     </form>
   );
 };
