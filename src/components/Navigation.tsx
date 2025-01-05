@@ -68,7 +68,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
           </li>
         ))}
       </ul>
-      <div className="mt-4 md:mt-0 md:absolute md:right-0">
+      <div className="mt-4 md:mt-0 md:absolute md:right-4">
         {session ? (
           <Button 
             variant="outline" 
