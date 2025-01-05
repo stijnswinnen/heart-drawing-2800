@@ -98,6 +98,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          share_consent: boolean | null
           status: Database["public"]["Enums"]["location_status"]
           updated_at: string
           user_id: string | null
@@ -110,6 +111,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
           updated_at?: string
           user_id?: string | null
@@ -122,6 +124,7 @@ export type Database = {
           latitude?: number
           longitude?: number
           name?: string
+          share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
           updated_at?: string
           user_id?: string | null

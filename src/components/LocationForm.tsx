@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import LocationMap from "./LocationMap";
 
@@ -13,6 +14,7 @@ export const LocationForm = () => {
   const [email, setEmail] = useState("");
   const [locationName, setLocationName] = useState("");
   const [description, setDescription] = useState("");
+  const [shareConsent, setShareConsent] = useState(false);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -89,6 +91,7 @@ export const LocationForm = () => {
         longitude: coordinates.lng,
         user_id: session?.user?.id || null,
         heart_user_id: heartUser.id,
+        share_consent: shareConsent,
       });
 
       if (error) throw error;
@@ -114,6 +117,7 @@ export const LocationForm = () => {
       setLocationName("");
       setDescription("");
       setCoordinates(null);
+      setShareConsent(false);
       
       // Only reset name and email if not logged in
       if (!session) {
@@ -187,6 +191,20 @@ export const LocationForm = () => {
             rows={4}
             required
           />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="shareConsent"
+            checked={shareConsent}
+            onCheckedChange={(checked) => setShareConsent(checked as boolean)}
+          />
+          <label
+            htmlFor="shareConsent"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Ja, ik wil mijn verhaal delen.
+          </label>
         </div>
 
         <Button type="submit" disabled={isSubmitting || !coordinates}>
