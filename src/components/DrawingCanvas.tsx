@@ -13,7 +13,7 @@ interface DrawingCanvasProps {
   onSubmit: () => void;
   session: any;
   setShowAuth: (show: boolean) => void;
-  setIsDrawing?: (isDrawing: boolean) => void; // Add this prop
+  setIsDrawing: (isDrawing: boolean) => void;
 }
 
 export const DrawingCanvas = ({
@@ -37,9 +37,8 @@ export const DrawingCanvas = ({
   } = useDrawing();
 
   const handleClose = () => {
-    if (setIsDrawing) {
-      setIsDrawing(false);
-    }
+    console.log('Close button clicked');
+    setIsDrawing(false);
   };
 
   if (!isDrawing) return null;
