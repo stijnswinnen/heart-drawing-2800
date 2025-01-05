@@ -16,16 +16,21 @@ export const useLocationLikes = () => {
         .from('location_likes')
         .select('location_id, count')
         .eq('status', 'active')
-        .select('location_id, count(*)', { count: 'exact' })
-        .groupBy('location_id');
+        .select('location_id, count')
+        .then(result => {
+          if (result.error) throw result.error;
+          
+          // Group and count likes by location_id
+          const groupedLikes = result.data.reduce((acc: Record<string, number>, curr) => {
+            acc[curr.location_id] = (acc[curr.location_id] || 0) + 1;
+            return acc;
+          }, {});
+          
+          return { data: groupedLikes, error: null };
+        });
 
       if (error) throw error;
-
-      const likesMap: Record<string, number> = {};
-      (data as LocationLike[]).forEach(like => {
-        likesMap[like.location_id] = Number(like.count);
-      });
-      setLocationLikes(likesMap);
+      setLocationLikes(data);
     } catch (error) {
       console.error('Error fetching location likes:', error);
       toast.error("Er ging iets mis bij het ophalen van de likes");
