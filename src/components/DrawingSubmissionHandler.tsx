@@ -74,7 +74,7 @@ export const DrawingSubmissionHandler = ({
         }
       }
 
-      // If we get here, either the user is new or they don't have any drawings
+      // Always submit the drawing, regardless of email verification status
       console.log('Proceeding with drawing submission...');
       const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
       
@@ -84,8 +84,14 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      console.log('Drawing submitted successfully with filename:', fileName);
-      toast.success("Tekening werd met succes doorgestuurd!");
+      // Check if the email needs verification
+      const isEmailVerified = existingUsers?.[0]?.email_verified;
+      if (!isEmailVerified) {
+        toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
+      } else {
+        toast.success("Tekening werd met succes doorgestuurd!");
+      }
+
       setShowSubmitForm(false);
       setIsDrawing(false);
       setHasDrawn(false);

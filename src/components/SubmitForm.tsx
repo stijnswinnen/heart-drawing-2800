@@ -46,23 +46,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       setIsVerifying(true);
       console.log('Starting submission process with data:', data);
 
-      // Check if email is already verified
-      const { data: existingUser } = await supabase
-        .from("heart_users")
-        .select("email_verified")
-        .eq("email", data.email)
-        .maybeSingle();
-
-      console.log('Existing user check result:', existingUser);
-
-      if (existingUser?.email_verified) {
-        // Email is already verified, proceed with submission
-        console.log('Email already verified, proceeding with submission');
-        onSubmit(data);
-        return;
-      }
-
-      // Create or update heart_user
+      // Create or update heart_user regardless of verification status
       const { error: upsertError } = await supabase
         .from("heart_users")
         .upsert({
@@ -78,25 +62,28 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         throw new Error("Failed to create user record");
       }
 
-      console.log('Heart user created/updated, sending verification email');
+      // Check if email needs verification
+      const { data: existingUser } = await supabase
+        .from("heart_users")
+        .select("email_verified")
+        .eq("email", data.email)
+        .maybeSingle();
 
-      // Send verification email
-      const response = await supabase.functions.invoke("send-verification-email", {
-        body: { email: data.email },
-      });
+      // If email is not verified, send verification email
+      if (!existingUser?.email_verified) {
+        console.log('Email not verified, sending verification email');
+        const response = await supabase.functions.invoke("send-verification-email", {
+          body: { email: data.email },
+        });
 
-      if (response.error) {
-        console.error('Error sending verification email:', response.error);
-        throw new Error(response.error.message || "Failed to send verification email");
+        if (response.error) {
+          console.error('Error sending verification email:', response.error);
+          throw new Error(response.error.message || "Failed to send verification email");
+        }
       }
 
-      // Store the drawing data in localStorage to submit after verification
-      localStorage.setItem('pendingDrawingData', JSON.stringify(data));
-
-      toast.success(
-        "We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink."
-      );
-      onClose();
+      // Always proceed with the submission
+      onSubmit(data);
     } catch (error: any) {
       console.error("Error in form submission:", error);
       toast.error(error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail");
