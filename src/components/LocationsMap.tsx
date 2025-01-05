@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { useLocationLikes } from '@/hooks/useLocationLikes';
 import { useApprovedHearts } from '@/hooks/useApprovedHearts';
 import { useLocations } from '@/hooks/useLocations';
+import { cn } from '@/lib/utils';
 
 export const LocationsMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -15,6 +16,21 @@ export const LocationsMap = () => {
   const locations = useLocations();
   const approvedHearts = useApprovedHearts();
   const { locationLikes, handleLike } = useLocationLikes();
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Default coordinates for Mechelen
   const defaultLng = 4.480469;
@@ -76,12 +92,19 @@ export const LocationsMap = () => {
       }
 
       const likeCount = locationLikes[location.id] || 0;
+      const isAuthenticated = !!session;
+      
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
         `<div class="p-2">
           <h3 class="font-bold mb-1">${location.name}</h3>
           <p>${location.description || ''}</p>
           <div class="mt-2 flex items-center gap-2">
-            <button class="like-button flex items-center gap-1 text-rose-500 hover:text-rose-600" data-location-id="${location.id}">
+            <button 
+              class="like-button flex items-center gap-1 ${isAuthenticated ? 'text-rose-500 hover:text-rose-600' : 'text-gray-300 cursor-not-allowed'}" 
+              data-location-id="${location.id}"
+              ${!isAuthenticated ? 'disabled' : ''}
+              title="${!isAuthenticated ? 'Log in om te kunnen liken' : ''}"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
               <span class="like-count">${likeCount}</span>
             </button>
@@ -101,14 +124,14 @@ export const LocationsMap = () => {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const likeButton = target.closest('.like-button');
-      if (likeButton) {
+      if (likeButton && !likeButton.hasAttribute('disabled')) {
         const locationId = likeButton.getAttribute('data-location-id');
         if (locationId) {
           handleLike(locationId);
         }
       }
     });
-  }, [locations, locationLikes, approvedHearts]);
+  }, [locations, locationLikes, approvedHearts, session]);
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
