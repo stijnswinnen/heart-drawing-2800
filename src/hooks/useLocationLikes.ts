@@ -14,9 +14,8 @@ export const useLocationLikes = () => {
     try {
       const { data, error } = await supabase
         .from('location_likes')
-        .select('location_id, count')
+        .select('location_id')
         .eq('status', 'active')
-        .select('location_id, count')
         .then(result => {
           if (result.error) throw result.error;
           
@@ -39,11 +38,18 @@ export const useLocationLikes = () => {
 
   const handleLike = async (locationId: string) => {
     try {
+      const user = (await supabase.auth.getUser()).data.user;
+      
+      if (!user) {
+        toast.error("Je moet ingelogd zijn om te kunnen liken");
+        return;
+      }
+
       const { data: existingLike, error: fetchError } = await supabase
         .from('location_likes')
         .select('id, status')
         .eq('location_id', locationId)
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (fetchError) throw fetchError;
@@ -69,7 +75,7 @@ export const useLocationLikes = () => {
           .from('location_likes')
           .insert([{ 
             location_id: locationId, 
-            user_id: (await supabase.auth.getUser()).data.user?.id 
+            user_id: user.id 
           }]);
 
         if (error) throw error;
