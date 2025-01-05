@@ -53,12 +53,6 @@ export const submitDrawing = async (
   if (existingUsers && existingUsers.length > 0) {
     heartUserId = existingUsers[0].id;
     console.log('Using existing heart user ID:', heartUserId);
-    
-    // Check if email is verified
-    if (!existingUsers[0].email_verified) {
-      console.error('Email not verified');
-      throw new Error("Please verify your email before submitting a drawing.");
-    }
   } else {
     // Create new heart user
     console.log('Creating new heart user...');
