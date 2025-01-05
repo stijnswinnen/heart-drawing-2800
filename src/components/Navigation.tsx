@@ -21,6 +21,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   
   const links = [
     { path: "/", label: "Teken een hart" },
+    { path: "/mijn-favoriete-plek", label: "Deel jouw plek" },
     { path: "/hearts", label: "Hartjes" },
     { path: "/over", label: "Over 2800.love" },
   ];
