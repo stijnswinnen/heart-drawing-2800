@@ -12,6 +12,7 @@ import Verify from "./pages/Verify";
 import Hearts from "./pages/Hearts";
 import Over from "./pages/Over";
 import FavoritePlek from "./pages/FavoritePlek";
+import Locaties from "./pages/Locaties";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/hearts" element={<Hearts />} />
             <Route path="/over" element={<Over />} />
             <Route path="/mijn-favoriete-plek" element={<FavoritePlek />} />
+            <Route path="/locaties" element={<Locaties />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
