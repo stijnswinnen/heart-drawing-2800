@@ -13,7 +13,7 @@ export const submitDrawing = async (
 ) => {
   console.log('Starting drawing submission process...');
   console.log('User ID:', userId);
-  console.log('Submission data:', data);
+  console.log('Submission data:', { ...data, email: '***' });
   
   if (!canvas) {
     console.error('No canvas element found');
@@ -37,23 +37,31 @@ export const submitDrawing = async (
 
   // First, create or get the heart user
   let heartUserId;
-  const { data: existingUsers } = await supabase
+  console.log('Checking for existing heart user...');
+  const { data: existingUsers, error: userError } = await supabase
     .from('heart_users')
-    .select('id, marketing_consent')
+    .select('id, email_verified')
     .eq('email', data.email);
+
+  if (userError) {
+    console.error('Error checking for existing heart user:', userError);
+    throw new Error("Failed to check user information: " + userError.message);
+  }
+
+  console.log('Existing users check result:', existingUsers);
 
   if (existingUsers && existingUsers.length > 0) {
     heartUserId = existingUsers[0].id;
+    console.log('Using existing heart user ID:', heartUserId);
     
-    // Update marketing consent if changed
-    if (existingUsers[0].marketing_consent !== data.newsletter) {
-      await supabase
-        .from('heart_users')
-        .update({ marketing_consent: data.newsletter })
-        .eq('id', heartUserId);
+    // Check if email is verified
+    if (!existingUsers[0].email_verified) {
+      console.error('Email not verified');
+      throw new Error("Please verify your email before submitting a drawing.");
     }
   } else {
     // Create new heart user
+    console.log('Creating new heart user...');
     const { data: heartUser, error: userError } = await supabase
       .from('heart_users')
       .insert({
@@ -70,21 +78,7 @@ export const submitDrawing = async (
     }
 
     heartUserId = heartUser.id;
-  }
-
-  // Now check if there's an active drawing for this user
-  const { data: existingDrawings, error: checkError } = await supabase
-    .from('drawings')
-    .select('id')
-    .eq('heart_user_id', heartUserId);
-
-  if (checkError) {
-    console.error('Error checking existing drawings:', checkError);
-    throw new Error("Failed to check existing submissions");
-  }
-
-  if (existingDrawings && existingDrawings.length > 0) {
-    throw new Error("You already have an active heart submission. Please wait for admin review.");
+    console.log('Created new heart user with ID:', heartUserId);
   }
 
   console.log('Converting canvas to blob...');

@@ -25,7 +25,7 @@ export const DrawingSubmissionHandler = ({
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
-      console.log('Starting submission process with data:', data);
+      console.log('Starting submission process with data:', { ...data, email: '***' });
       
       const canvas = document.querySelector('canvas');
       if (!canvas) {
@@ -35,10 +35,10 @@ export const DrawingSubmissionHandler = ({
       }
 
       // First check if there's an existing heart user with this email
-      console.log('Checking for existing heart user with email:', data.email);
+      console.log('Checking for existing heart user...');
       const { data: existingUsers, error: userError } = await supabase
         .from('heart_users')
-        .select('id')
+        .select('id, email_verified')
         .eq('email', data.email);
 
       if (userError) {
@@ -47,7 +47,9 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // If we found an existing user, check if they have any drawings (regardless of status)
+      console.log('Existing users check result:', existingUsers?.length || 0, 'users found');
+
+      // If we found an existing user, check if they have any drawings
       if (existingUsers && existingUsers.length > 0) {
         console.log('Found existing heart user, checking for any drawings');
         const { data: existingDrawings, error: drawingError } = await supabase
@@ -60,6 +62,8 @@ export const DrawingSubmissionHandler = ({
           toast.error("Versturen van tekening is mislukt");
           return;
         }
+
+        console.log('Existing drawings check result:', existingDrawings?.length || 0, 'drawings found');
 
         if (existingDrawings && existingDrawings.length > 0) {
           console.log('Found existing drawing, showing replace dialog');
@@ -87,7 +91,7 @@ export const DrawingSubmissionHandler = ({
       setHasDrawn(false);
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
-      toast.error("Versturen van tekening is mislukt");
+      toast.error(error.message || "Versturen van tekening is mislukt");
     }
   };
 
