@@ -7,6 +7,7 @@ import { LockButton } from "@/components/LockButton";
 import { DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
 import { Navigation } from "@/components/Navigation";
+import { toast } from "@/hooks/use-toast";
 
 export default function Index() {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -22,6 +23,12 @@ export default function Index() {
       setSession(session);
     };
     fetchSession();
+
+    // Show the toast notification on page load
+    toast({
+      title: "Klik op het hart om te starten.",
+      duration: 5000,
+    });
   }, []);
 
   const handleHeartClick = () => {
