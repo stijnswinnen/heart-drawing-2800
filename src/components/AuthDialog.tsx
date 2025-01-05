@@ -58,6 +58,8 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
           providers={[]}
+          view="sign_in"
+          showLinks={false}
           redirectTo={window.location.origin}
         />
       </div>
