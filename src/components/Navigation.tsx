@@ -31,7 +31,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
         <li key={link.path}>
           <Link
             to={link.path}
-            className={`text-lg hover:opacity-70 transition-opacity ${
+            className={`text hover:opacity-70 transition-opacity ${
               location.pathname === link.path ? "opacity-70" : "opacity-100"
             }`}
           >
