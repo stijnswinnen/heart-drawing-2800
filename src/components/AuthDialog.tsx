@@ -17,16 +17,30 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
       if (event === 'SIGNED_IN' && session?.user?.id) {
         try {
           // Check if user is admin
-          const { data: profile, error } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('role')
             .eq('id', session.user.id)
             .single();
 
-          if (error) {
-            console.error('Error fetching profile:', error);
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
             toast.error('Error checking user role');
             return;
+          }
+
+          // Try to link existing heart_user if exists
+          const { data: heartUser, error: linkError } = await supabase
+            .from('heart_users')
+            .update({ user_id: session.user.id })
+            .eq('email', session.user.email)
+            .select()
+            .single();
+
+          if (linkError) {
+            console.log('No existing heart_user to link:', linkError);
+          } else if (heartUser) {
+            console.log('Linked existing heart_user to auth account:', heartUser);
           }
 
           toast.success('Successfully signed in!');
@@ -58,8 +72,8 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
           providers={[]}
+          showLinks={true}
           view="sign_in"
-          showLinks={false}
           redirectTo={window.location.origin}
         />
       </div>

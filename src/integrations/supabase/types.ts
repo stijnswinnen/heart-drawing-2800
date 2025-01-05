@@ -60,6 +60,7 @@ export type Database = {
           marketing_consent: boolean | null
           name: string
           updated_at: string
+          user_id: string | null
           verification_token: string | null
           verification_token_expires_at: string | null
         }
@@ -72,6 +73,7 @@ export type Database = {
           marketing_consent?: boolean | null
           name: string
           updated_at?: string
+          user_id?: string | null
           verification_token?: string | null
           verification_token_expires_at?: string | null
         }
@@ -84,6 +86,7 @@ export type Database = {
           marketing_consent?: boolean | null
           name?: string
           updated_at?: string
+          user_id?: string | null
           verification_token?: string | null
           verification_token_expires_at?: string | null
         }
