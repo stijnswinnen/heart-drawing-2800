@@ -19,6 +19,7 @@ interface Drawing {
 export const LocationsMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [approvedHearts, setApprovedHearts] = useState<Drawing[]>([]);
 
@@ -73,10 +74,10 @@ export const LocationsMap = () => {
       .getPublicUrl(`optimized/${randomHeart.image_path}`).data.publicUrl;
   };
 
+  // Initialize map
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Initialize map
     mapboxgl.accessToken = 'pk.eyJ1IjoiMjgwMGxvdmUiLCJhIjoiY201aWcyNDJpMHJpMTJrczZ6bjB5Z2toZiJ9.N8jmpZW9QoVFiWa2VFIJFg';
     
     const newMap = new mapboxgl.Map({
@@ -90,44 +91,50 @@ export const LocationsMap = () => {
 
     map.current = newMap;
 
-    newMap.on('load', () => {
-      // Add markers for each location
-      locations.forEach((location) => {
-        // Create marker element
-        const markerEl = document.createElement('div');
-        markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden';
-        markerEl.style.border = '2px solid white';
-        
-        // Create and set heart image background
-        const heartUrl = getRandomHeartUrl();
-        if (heartUrl) {
-          markerEl.style.backgroundImage = `url(${heartUrl})`;
-          markerEl.style.backgroundSize = 'contain';
-          markerEl.style.backgroundPosition = 'center';
-          markerEl.style.backgroundRepeat = 'no-repeat';
-        }
-
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-          `<div class="p-2">
-            <h3 class="font-bold mb-1">${location.name}</h3>
-            <p>${location.description || ''}</p>
-          </div>`
-        );
-
-        new mapboxgl.Marker({ element: markerEl })
-          .setLngLat([location.longitude, location.latitude])
-          .setPopup(popup)
-          .addTo(newMap);
-      });
-    });
-
     // Add navigation controls
     newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Cleanup function
     return () => {
       newMap.remove();
     };
+  }, []);
+
+  // Handle markers
+  useEffect(() => {
+    if (!map.current || !locations.length) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Add new markers
+    locations.forEach((location) => {
+      const markerEl = document.createElement('div');
+      markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden';
+      markerEl.style.border = '2px solid white';
+      
+      const heartUrl = getRandomHeartUrl();
+      if (heartUrl) {
+        markerEl.style.backgroundImage = `url(${heartUrl})`;
+        markerEl.style.backgroundSize = 'contain';
+        markerEl.style.backgroundPosition = 'center';
+        markerEl.style.backgroundRepeat = 'no-repeat';
+      }
+
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+        `<div class="p-2">
+          <h3 class="font-bold mb-1">${location.name}</h3>
+          <p>${location.description || ''}</p>
+        </div>`
+      );
+
+      const marker = new mapboxgl.Marker({ element: markerEl })
+        .setLngLat([location.longitude, location.latitude])
+        .setPopup(popup)
+        .addTo(map.current);
+
+      markersRef.current.push(marker);
+    });
   }, [locations, approvedHearts]);
 
   return (
