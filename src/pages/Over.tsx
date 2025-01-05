@@ -56,7 +56,7 @@ const Over = () => {
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            We zoeken ook naar jouw lievelingsplek in Mechelen om te genieten, te chillen, te rusten, lief te hebben, geliefd te worden. Deel jouw plek en inspireer anderen.
+            We zoeken ook naar jouw lievelingsplek in Mechelen om te genieten, te chillen, te rusten, lief te hebben, geliefd te worden. <Link to="/mijn-favoriete-plek" className="underline hover:opacity-70 transition-opacity">Deel jouw plek</Link> en inspireer anderen.
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
