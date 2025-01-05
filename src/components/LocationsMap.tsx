@@ -1,149 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Heart } from "lucide-react";
-
-interface Location {
-  id: string;
-  name: string;
-  description: string | null;
-  latitude: number;
-  longitude: number;
-}
-
-interface Drawing {
-  image_path: string;
-}
-
-interface LocationLike {
-  location_id: string;
-  count: number;
-}
+import { useLocationLikes } from '@/hooks/useLocationLikes';
+import { useApprovedHearts } from '@/hooks/useApprovedHearts';
+import { useLocations } from '@/hooks/useLocations';
 
 export const LocationsMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [approvedHearts, setApprovedHearts] = useState<Drawing[]>([]);
-  const [locationLikes, setLocationLikes] = useState<Record<string, number>>({});
+  
+  const locations = useLocations();
+  const approvedHearts = useApprovedHearts();
+  const { locationLikes, handleLike } = useLocationLikes();
 
   // Default coordinates for Mechelen
   const defaultLng = 4.480469;
   const defaultLat = 51.028022;
-
-  // Fetch likes count for all locations
-  const fetchLocationLikes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('location_likes')
-        .select('location_id, count(*)')
-        .eq('status', 'active')
-        .group_by('location_id');
-
-      if (error) throw error;
-
-      const likesMap: Record<string, number> = {};
-      (data as LocationLike[]).forEach(like => {
-        likesMap[like.location_id] = Number(like.count);
-      });
-      setLocationLikes(likesMap);
-    } catch (error) {
-      console.error('Error fetching location likes:', error);
-      toast.error("Er ging iets mis bij het ophalen van de likes");
-    }
-  };
-
-  // Handle like action
-  const handleLike = async (locationId: string) => {
-    try {
-      const { data: existingLike, error: fetchError } = await supabase
-        .from('location_likes')
-        .select('id, status')
-        .eq('location_id', locationId)
-        .eq('user_id', supabase.auth.getUser())
-        .single();
-
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        throw fetchError;
-      }
-
-      if (existingLike) {
-        if (existingLike.status === 'removed') {
-          // Reactivate the like
-          const { error } = await supabase
-            .from('location_likes')
-            .update({ status: 'active' })
-            .eq('id', existingLike.id);
-
-          if (error) throw error;
-        } else {
-          // Remove the like
-          const { error } = await supabase
-            .from('location_likes')
-            .update({ status: 'removed' })
-            .eq('id', existingLike.id);
-
-          if (error) throw error;
-        }
-      } else {
-        // Create new like
-        const { error } = await supabase
-          .from('location_likes')
-          .insert([{ location_id: locationId, user_id: (await supabase.auth.getUser()).data.user?.id }]);
-
-        if (error) throw error;
-      }
-
-      // Refresh likes count
-      await fetchLocationLikes();
-      toast.success("Like bijgewerkt!");
-    } catch (error) {
-      console.error('Error handling like:', error);
-      toast.error("Er ging iets mis bij het liken");
-    }
-  };
-
-  useEffect(() => {
-    const fetchApprovedHearts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('drawings')
-          .select('image_path')
-          .eq('status', 'approved');
-        
-        if (error) throw error;
-        setApprovedHearts(data || []);
-      } catch (error) {
-        console.error('Error fetching approved hearts:', error);
-        toast.error("Er ging iets mis bij het ophalen van de hartjes");
-      }
-    };
-
-    fetchApprovedHearts();
-  }, []);
-
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('locations')
-          .select('id, name, description, latitude, longitude')
-          .eq('status', 'approved')
-          .eq('share_consent', true);
-
-        if (error) throw error;
-        setLocations(data || []);
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-        toast.error("Er ging iets mis bij het ophalen van de locaties");
-      }
-    };
-
-    fetchLocations();
-  }, []);
 
   const getRandomHeartUrl = () => {
     if (approvedHearts.length === 0) return '';
@@ -152,28 +27,6 @@ export const LocationsMap = () => {
       .from('optimized')
       .getPublicUrl(`optimized/${randomHeart.image_path}`).data.publicUrl;
   };
-
-  // Subscribe to real-time updates for likes
-  useEffect(() => {
-    const channel = supabase
-      .channel('location-likes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'location_likes'
-        },
-        () => {
-          fetchLocationLikes();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   // Initialize map
   useEffect(() => {
@@ -256,13 +109,6 @@ export const LocationsMap = () => {
       }
     });
   }, [locations, locationLikes, approvedHearts]);
-
-  // Initial data fetching
-  useEffect(() => {
-    fetchApprovedHearts();
-    fetchLocations();
-    fetchLocationLikes();
-  }, []);
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
