@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Layout } from "@/components/Layout";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Privacy from "./pages/Privacy";
@@ -23,13 +24,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/verify" element={<Verify />} />
-            <Route path="/hearts" element={<Hearts />} />
-            <Route path="/over" element={<Over />} />
-            <Route path="/mijn-favoriete-plek" element={<FavoritePlek />} />
+            <Route path="/" element={<Layout hideNavigation><Index /></Layout>} />
+            <Route path="/admin" element={<Layout><Admin /></Layout>} />
+            <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+            <Route path="/verify" element={<Layout><Verify /></Layout>} />
+            <Route path="/hearts" element={<Layout><Hearts /></Layout>} />
+            <Route path="/over" element={<Layout><Over /></Layout>} />
+            <Route path="/mijn-favoriete-plek" element={<Layout><FavoritePlek /></Layout>} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
