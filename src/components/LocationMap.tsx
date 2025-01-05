@@ -39,15 +39,17 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
 
     map.current = newMap;
 
-    newMap.on('load', () => {
+    const setupMap = () => {
+      if (!map.current) return;
+
       // Add the boundary layer
-      newMap.addSource('mechelen-boundary', {
+      map.current.addSource('mechelen-boundary', {
         type: 'geojson',
         data: boundary
       });
 
       // Add fill layer
-      newMap.addLayer({
+      map.current.addLayer({
         id: 'mechelen-fill',
         type: 'fill',
         source: 'mechelen-boundary',
@@ -58,7 +60,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
       });
 
       // Add line layer
-      newMap.addLayer({
+      map.current.addLayer({
         id: 'mechelen-line',
         type: 'line',
         source: 'mechelen-boundary',
@@ -75,11 +77,13 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
           draggable: true
         })
           .setLngLat([defaultLng, defaultLat])
-          .addTo(newMap);
+          .addTo(map.current);
 
         // Handle marker drag end
-        marker.current.on('dragend', () => {
-          const lngLat = marker.current!.getLngLat();
+        const onDragEnd = () => {
+          if (!marker.current) return;
+          
+          const lngLat = marker.current.getLngLat();
           const draggedPoint = turf.point([lngLat.lng, lngLat.lat]);
           
           if (turf.booleanPointInPolygon(draggedPoint, polygon)) {
@@ -87,25 +91,33 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
             toast.success("Locatie bijgewerkt!");
           } else {
             // Reset marker to previous position if outside boundary
-            marker.current!.setLngLat([defaultLng, defaultLat]);
+            marker.current.setLngLat([defaultLng, defaultLat]);
             toast.error("Selecteer een locatie binnen Mechelen");
           }
-        });
+        };
+
+        marker.current.on('dragend', onDragEnd);
 
         // Trigger initial location select
         onLocationSelect(defaultLat, defaultLng);
       }
-    });
 
-    // Add navigation controls
-    newMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    };
+
+    newMap.on('load', setupMap);
 
     // Cleanup function
     return () => {
       if (marker.current) {
         marker.current.remove();
+        marker.current = null;
       }
-      newMap.remove();
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
     };
   }, []);
 
