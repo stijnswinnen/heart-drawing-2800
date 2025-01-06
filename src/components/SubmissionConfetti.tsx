@@ -21,8 +21,8 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
     const timer = setTimeout(() => {
       console.log("Testing confetti effect...");
       setTestActive(true);
-      // Reset after 2 seconds
-      setTimeout(() => setTestActive(false), 2000);
+      // Reset after 5 seconds
+      setTimeout(() => setTestActive(false), 5000);
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -59,22 +59,19 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
           },
           move: {
             enable: true,
-            speed: 6,
-            direction: "bottom",
-            random: false,
+            speed: 30,
+            direction: "none",
+            random: true,
             straight: false,
             outModes: {
               default: "out",
             },
             gravity: {
               enable: true,
-              acceleration: 9.81,
+              acceleration: 0,
             },
-            trail: {
-              enable: true,
-              length: 10,
-              fillColor: "#000000",
-            },
+            decay: 0.94,
+            spread: 360,
           },
           rotate: {
             value: { min: -45, max: 45 },
@@ -91,28 +88,25 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
         },
         emitters: [
           {
-            direction: "top",
+            direction: "none",
             rate: {
               delay: 0,
-              quantity: 30,
+              quantity: 100,
             },
             position: {
               x: 50,
-              y: 100,
+              y: 50,
             },
             size: {
-              width: 100,
+              width: 0,
               height: 0,
             },
             life: {
-              duration: 0.3,
+              duration: 5,
               count: 1,
             },
             particles: {
-              move: {
-                direction: "top",
-                speed: 15,
-              },
+              startVelocity: 30,
             },
           },
         ],
