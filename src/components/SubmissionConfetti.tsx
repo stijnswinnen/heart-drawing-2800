@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
@@ -9,6 +9,8 @@ interface SubmissionConfettiProps {
 }
 
 export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
+  const [testActive, setTestActive] = useState(false);
+  
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
     await loadHeartShape(engine);
@@ -18,12 +20,14 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       console.log("Testing confetti effect...");
-      // This will trigger the effect once after 1 second
+      setTestActive(true);
+      // Reset after 2 seconds
+      setTimeout(() => setTestActive(false), 2000);
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
 
-  if (!isActive) return null;
+  if (!isActive && !testActive) return null;
 
   return (
     <Particles
