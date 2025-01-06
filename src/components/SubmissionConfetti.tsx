@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
+import { loadHeartShape } from "tsparticles-shape-heart";
 
 interface SubmissionConfettiProps {
   isActive: boolean;
@@ -10,6 +11,7 @@ interface SubmissionConfettiProps {
 export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
+    await loadHeartShape(engine);
   }, []);
 
   if (!isActive) return null;
