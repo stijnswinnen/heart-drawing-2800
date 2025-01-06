@@ -59,25 +59,29 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
           },
           move: {
             enable: true,
-            speed: 50, // Increased initial velocity
-            direction: "none",
-            random: true,
+            speed: 6,
+            direction: "bottom",
+            random: false,
             straight: false,
             outModes: {
               default: "out",
             },
             gravity: {
               enable: true,
-              acceleration: 15, // Increased gravity
+              acceleration: 9.81,
             },
-            decay: 0.96, // Slightly reduced decay for longer movement
+            trail: {
+              enable: true,
+              length: 10,
+              fillColor: "#000000",
+            },
           },
           rotate: {
-            value: { min: 0, max: 360 },
+            value: { min: -45, max: 45 },
             direction: "random",
             animation: {
               enable: true,
-              speed: 30,
+              speed: 15,
             },
           },
         },
@@ -87,44 +91,17 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
         },
         emitters: [
           {
-            direction: "none",
+            direction: "top",
             rate: {
               delay: 0,
-              quantity: 50,
+              quantity: 30,
             },
             position: {
               x: 50,
-              y: 50,
+              y: 100,
             },
             size: {
-              width: 0,
-              height: 0,
-            },
-            life: {
-              duration: 0.3, // Increased duration
-              count: 1,
-            },
-            particles: {
-              size: {
-                value: 20,
-              },
-              move: {
-                speed: 50,
-              },
-            },
-          },
-          {
-            direction: "none",
-            rate: {
-              delay: 0.2,
-              quantity: 25,
-            },
-            position: {
-              x: 50,
-              y: 50,
-            },
-            size: {
-              width: 0,
+              width: 100,
               height: 0,
             },
             life: {
@@ -132,38 +109,9 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               count: 1,
             },
             particles: {
-              size: {
-                value: 30,
-              },
               move: {
-                speed: 65,
-              },
-            },
-          },
-          {
-            direction: "none",
-            rate: {
-              delay: 0.4,
-              quantity: 10,
-            },
-            position: {
-              x: 50,
-              y: 50,
-            },
-            size: {
-              width: 0,
-              height: 0,
-            },
-            life: {
-              duration: 0.3,
-              count: 1,
-            },
-            particles: {
-              size: {
-                value: 40,
-              },
-              move: {
-                speed: 80,
+                direction: "top",
+                speed: 15,
               },
             },
           },
