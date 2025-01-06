@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
-import { loadSlim } from "tsparticles-slim";
-import { loadHeartShape } from "tsparticles-shape-heart";
+import { loadFull } from "tsparticles";
 
 interface SubmissionConfettiProps {
   isActive: boolean;
@@ -25,8 +24,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   }, []);
 
   const particlesInit = useCallback(async (engine: Engine) => {
-    await loadSlim(engine);
-    await loadHeartShape(engine);
+    await loadFull(engine);
   }, []);
 
   if (!isActive && !testActive) return null;
@@ -38,78 +36,110 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
       options={{
         particles: {
           number: {
-            value: 100,
+            value: 0,
           },
           color: {
             value: ["#FFDEE2", "#F6F6F7", "#ff0000", "#ff69b4", "#ffc0cb"],
           },
           shape: {
-            type: "heart",
+            type: ["circle", "square", "heart"],
+            options: {
+              heart: {
+                particles: {
+                  color: {
+                    value: ["#ff0000", "#ff69b4", "#ffc0cb"],
+                  },
+                },
+              },
+            },
           },
           opacity: {
-            value: 0.6,
+            value: { min: 0.3, max: 0.8 },
             animation: {
               enable: true,
-              speed: 0.3,
+              speed: 0.5,
               minimumValue: 0,
               sync: false,
             },
           },
           size: {
-            value: 6,
+            value: { min: 3, max: 7 },
             random: {
               enable: true,
-              minimumValue: 3,
             },
           },
           rotate: {
-            value: 0,
+            value: { min: 0, max: 360 },
             direction: "random",
             animation: {
               enable: true,
-              speed: 5,
-              sync: false
-            }
+              speed: { min: 2, max: 8 },
+              sync: false,
+            },
           },
           move: {
             enable: true,
-            speed: 10,
-            direction: "bottom",
-            random: false,
+            speed: { min: 5, max: 15 },
+            direction: "none",
+            random: true,
             straight: false,
             outModes: {
               default: "out",
             },
             gravity: {
               enable: true,
-              acceleration: 1,
+              acceleration: 0.8,
+            },
+            trail: {
+              enable: true,
+              length: 3,
+              fillColor: "#000000",
             },
           },
-          scale: 0.9,
+          wobble: {
+            enable: true,
+            distance: 10,
+            speed: { min: 2, max: 5 },
+          },
         },
         fullScreen: {
           enable: true,
           zIndex: 999,
         },
-        emitters: {
-          direction: "top",
-          position: {
-            x: 50,
-            y: 100,
+        emitters: [
+          {
+            direction: "top",
+            position: { x: 25, y: 100 },
+            rate: {
+              delay: 0.1,
+              quantity: 5,
+            },
+            size: {
+              width: 0,
+              height: 0,
+            },
+            life: {
+              duration: 0.3,
+              count: 1,
+            },
           },
-          rate: {
-            delay: 0,
-            quantity: 100,
+          {
+            direction: "top",
+            position: { x: 75, y: 100 },
+            rate: {
+              delay: 0.1,
+              quantity: 5,
+            },
+            size: {
+              width: 0,
+              height: 0,
+            },
+            life: {
+              duration: 0.3,
+              count: 1,
+            },
           },
-          size: {
-            width: 100,
-            height: 0,
-          },
-          life: {
-            duration: 0.3,
-            count: 1,
-          },
-        },
+        ],
       }}
     />
   );
