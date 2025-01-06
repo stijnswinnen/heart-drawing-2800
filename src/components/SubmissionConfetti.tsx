@@ -68,10 +68,9 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             },
             gravity: {
               enable: true,
-              acceleration: 0,
+              acceleration: 1,
             },
             decay: 0.94,
-            spread: 360,
           },
           rotate: {
             value: { min: -45, max: 45 },
