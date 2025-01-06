@@ -11,17 +11,21 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   const [testActive, setTestActive] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Set a small delay to ensure the component is mounted
+    const initialTimer = setTimeout(() => {
       console.log("Testing confetti effect...");
       setTestActive(true);
       
-      setTimeout(() => {
+      // Keep the animation visible for 2 seconds
+      const cleanupTimer = setTimeout(() => {
         setTestActive(false);
       }, 2000);
-    }, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(cleanupTimer);
+    }, 500); // Reduced initial delay to make it more responsive
+
+    return () => clearTimeout(initialTimer);
+  }, []); // Empty dependency array to only run once on mount
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadFull(engine);
