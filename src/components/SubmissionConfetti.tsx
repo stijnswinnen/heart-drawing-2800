@@ -64,6 +64,15 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               minimumValue: 3,
             },
           },
+          rotate: {
+            value: 0,
+            direction: "random",
+            animation: {
+              enable: true,
+              speed: 5,
+              sync: false
+            }
+          },
           move: {
             enable: true,
             speed: 10,
@@ -75,7 +84,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             },
             gravity: {
               enable: true,
-              acceleration: 20,
+              acceleration: 1,
             },
           },
         },
@@ -101,6 +110,9 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             duration: 0.3,
             count: 1,
           },
+        },
+        particles: {
+          scale: 0.9,
         },
       }}
     />
