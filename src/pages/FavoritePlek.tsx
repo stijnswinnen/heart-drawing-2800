@@ -4,7 +4,7 @@ import { HeartTrail } from "@/components/HeartTrail";
 
 const FavoritePlek = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <HeartTrail />
       <Navigation />
       <main className="container max-w-4xl mx-auto px-4 py-8">
