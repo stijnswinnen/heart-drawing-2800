@@ -1,9 +1,11 @@
 import { Navigation } from "@/components/Navigation";
 import { LocationForm } from "@/components/LocationForm";
+import { HeartTrail } from "@/components/HeartTrail";
 
 const FavoritePlek = () => {
   return (
     <div className="min-h-screen bg-background">
+      <HeartTrail />
       <Navigation />
       <main className="container max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Deel jouw favoriete plekje in Mechelen! ❤️</h1>
