@@ -87,6 +87,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               acceleration: 1,
             },
           },
+          scale: 0.9,
         },
         fullScreen: {
           enable: true,
@@ -110,9 +111,6 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             duration: 0.3,
             count: 1,
           },
-        },
-        particles: {
-          scale: 0.9,
         },
       }}
     />
