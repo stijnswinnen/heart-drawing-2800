@@ -124,16 +124,17 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             direction: "top",
             position: { x: 50, y: 50 },
             rate: {
-              delay: 0,
-              quantity: 50,
+              delay: 0.4,
+              quantity: 10,
             },
             size: {
               width: 0,
               height: 0,
             },
             life: {
-              duration: 0.1,
-              count: 5,
+              duration: 10,
+              count: 0,
+              sync: true,
             },
           },
         ],
