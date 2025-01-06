@@ -1,18 +1,37 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
+import { loadHeartShape } from "tsparticles-shape-heart";
 
 interface SubmissionConfettiProps {
   isActive: boolean;
 }
 
 export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
-  const particlesInit = useCallback(async (engine: Engine) => {
-    await loadSlim(engine);
+  const [testActive, setTestActive] = useState(false);
+
+  // Temporary test trigger
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log("Testing confetti effect...");
+      setTestActive(true);
+      
+      // Reset after animation duration
+      setTimeout(() => {
+        setTestActive(false);
+      }, 2000);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!isActive) return null;
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadSlim(engine);
+    await loadHeartShape(engine);
+  }, []);
+
+  if (!isActive && !testActive) return null;
 
   return (
     <Particles
@@ -27,7 +46,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             value: ["#FFDEE2", "#F6F6F7", "#ff0000", "#ff69b4", "#ffc0cb"],
           },
           shape: {
-            type: "circle",
+            type: "heart",
           },
           opacity: {
             value: 0.6,
