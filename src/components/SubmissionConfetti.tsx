@@ -11,13 +11,11 @@ interface SubmissionConfettiProps {
 export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   const [testActive, setTestActive] = useState(false);
 
-  // Temporary test trigger
   useEffect(() => {
     const timer = setTimeout(() => {
       console.log("Testing confetti effect...");
       setTestActive(true);
       
-      // Reset after animation duration
       setTimeout(() => {
         setTestActive(false);
       }, 2000);
@@ -76,7 +74,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
           move: {
             enable: true,
             speed: 10,
-            direction: "top",
+            direction: "bottom",
             random: false,
             straight: false,
             outModes: {
