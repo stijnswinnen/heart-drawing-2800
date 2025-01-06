@@ -74,10 +74,16 @@ export const HeartTrail = () => {
               enable: true,
               acceleration: 2
             },
-            wobble: {
+            path: {
               enable: true,
-              distance: 10,
-              speed: { min: -2, max: 2 }
+              delay: {
+                value: 0
+              },
+              options: {
+                size: 10,
+                draw: false,
+                amplitude: 2
+              }
             }
           }
         },
