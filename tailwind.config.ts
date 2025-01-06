@@ -33,6 +33,9 @@ export default {
           foreground: "#333333",
         },
       },
+      transitionDuration: {
+        '2000': '2000ms',
+      },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
