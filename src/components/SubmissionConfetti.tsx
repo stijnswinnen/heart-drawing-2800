@@ -24,10 +24,10 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             value: 100,
           },
           color: {
-            value: ["#FFDEE2", "#F6F6F7", "#ff0000", "#ff69b4", "#ffc0cb"],
+            value: ["#FFC0CB", "#FF69B4", "#FF1493", "#C71585"],
           },
           shape: {
-            type: "circle",
+            type: "heart",
           },
           opacity: {
             value: 0.6,
