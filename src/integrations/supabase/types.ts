@@ -59,6 +59,7 @@ export type Database = {
           last_verification_email_sent_at: string | null
           marketing_consent: boolean | null
           name: string
+          reminder_sent_at: string | null
           updated_at: string
           user_id: string | null
           verification_token: string | null
@@ -72,6 +73,7 @@ export type Database = {
           last_verification_email_sent_at?: string | null
           marketing_consent?: boolean | null
           name: string
+          reminder_sent_at?: string | null
           updated_at?: string
           user_id?: string | null
           verification_token?: string | null
@@ -85,6 +87,7 @@ export type Database = {
           last_verification_email_sent_at?: string | null
           marketing_consent?: boolean | null
           name?: string
+          reminder_sent_at?: string | null
           updated_at?: string
           user_id?: string | null
           verification_token?: string | null
