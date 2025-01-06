@@ -39,22 +39,13 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             value: 0,
           },
           color: {
-            value: ["#FFDEE2", "#F6F6F7", "#ff0000", "#ff69b4", "#ffc0cb"],
+            value: ["#ff0000", "#ff69b4", "#ffc0cb"],
           },
           shape: {
-            type: ["circle", "square", "heart"],
-            options: {
-              heart: {
-                particles: {
-                  color: {
-                    value: ["#ff0000", "#ff69b4", "#ffc0cb"],
-                  },
-                },
-              },
-            },
+            type: "heart",
           },
           opacity: {
-            value: { min: 0.3, max: 0.8 },
+            value: { min: 0.4, max: 0.8 },
             animation: {
               enable: true,
               speed: 0.5,
@@ -63,9 +54,10 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             },
           },
           size: {
-            value: { min: 3, max: 7 },
+            value: { min: 4, max: 8 },
             random: {
               enable: true,
+              minimumValue: 4,
             },
           },
           rotate: {
@@ -73,13 +65,13 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             direction: "random",
             animation: {
               enable: true,
-              speed: { min: 2, max: 8 },
+              speed: { min: 3, max: 8 },
               sync: false,
             },
           },
           move: {
             enable: true,
-            speed: { min: 5, max: 15 },
+            speed: { min: 15, max: 25 },
             direction: "none",
             random: true,
             straight: false,
@@ -88,12 +80,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             },
             gravity: {
               enable: true,
-              acceleration: 0.8,
-            },
-            trail: {
-              enable: true,
-              length: 3,
-              fillColor: "#000000",
+              acceleration: 2,
             },
           },
           wobble: {
@@ -109,34 +96,18 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
         emitters: [
           {
             direction: "top",
-            position: { x: 25, y: 100 },
+            position: { x: 50, y: 50 },
             rate: {
               delay: 0.1,
-              quantity: 5,
+              quantity: 8,
             },
             size: {
               width: 0,
               height: 0,
             },
             life: {
-              duration: 0.3,
-              count: 1,
-            },
-          },
-          {
-            direction: "top",
-            position: { x: 75, y: 100 },
-            rate: {
-              delay: 0.1,
-              quantity: 5,
-            },
-            size: {
-              width: 0,
-              height: 0,
-            },
-            life: {
-              duration: 0.3,
-              count: 1,
+              duration: 0.1,
+              count: 3,
             },
           },
         ],
