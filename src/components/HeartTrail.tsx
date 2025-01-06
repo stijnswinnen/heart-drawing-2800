@@ -87,28 +87,26 @@ export const HeartTrail = () => {
             }
           }
         },
+        interactivity: {
+          detectsOn: "window",
+          events: {
+            onHover: {
+              enable: true,
+              mode: "trail"
+            },
+            resize: true
+          },
+          modes: {
+            trail: {
+              delay: 0.05,
+              quantity: 5,
+              pauseOnStop: false
+            }
+          }
+        },
         fullScreen: {
           enable: true,
           zIndex: -1
-        },
-        emitters: {
-          direction: "none",
-          rate: {
-            delay: 0.1,
-            quantity: 2
-          },
-          position: {
-            x: 50,
-            y: 50
-          },
-          size: {
-            width: 0,
-            height: 0
-          },
-          life: {
-            duration: 0.1,
-            count: 0
-          }
         },
         detectRetina: true
       }}
