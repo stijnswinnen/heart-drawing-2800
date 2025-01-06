@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
@@ -14,6 +14,15 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
     await loadHeartShape(engine);
   }, []);
 
+  // Temporary test trigger
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log("Testing confetti effect...");
+      // This will trigger the effect once after 1 second
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (!isActive) return null;
 
   return (
@@ -23,7 +32,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
       options={{
         particles: {
           number: {
-            value: 85, // Total particles (sum of the three groups from the example)
+            value: 85,
           },
           color: {
             value: ["#FFC0CB", "#FF69B4", "#FF1493", "#C71585"],
@@ -33,13 +42,20 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
           },
           opacity: {
             value: 1,
+            animation: {
+              enable: true,
+              speed: 0.5,
+              minimumValue: 0,
+              sync: false,
+              destroy: "min",
+            },
           },
           size: {
-            value: { min: 10, max: 30 }, // Different sizes for variety
+            value: { min: 10, max: 30 },
           },
           move: {
             enable: true,
-            speed: 30, // Matches startVelocity from the example
+            speed: 50, // Increased initial velocity
             direction: "none",
             random: true,
             straight: false,
@@ -48,12 +64,12 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             },
             gravity: {
               enable: true,
-              acceleration: 9.81,
+              acceleration: 15, // Increased gravity
             },
-            decay: 0.94, // Matches decay from the example
+            decay: 0.96, // Slightly reduced decay for longer movement
           },
           rotate: {
-            value: { min: 0, max: 360 }, // Random rotation for more natural look
+            value: { min: 0, max: 360 },
             direction: "random",
             animation: {
               enable: true,
@@ -81,7 +97,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               height: 0,
             },
             life: {
-              duration: 0.1,
+              duration: 0.3, // Increased duration
               count: 1,
             },
             particles: {
@@ -89,14 +105,14 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
                 value: 20,
               },
               move: {
-                speed: 30,
+                speed: 50,
               },
             },
           },
           {
             direction: "none",
             rate: {
-              delay: 0.1,
+              delay: 0.2,
               quantity: 25,
             },
             position: {
@@ -108,7 +124,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               height: 0,
             },
             life: {
-              duration: 0.1,
+              duration: 0.3,
               count: 1,
             },
             particles: {
@@ -116,14 +132,14 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
                 value: 30,
               },
               move: {
-                speed: 45,
+                speed: 65,
               },
             },
           },
           {
             direction: "none",
             rate: {
-              delay: 0.2,
+              delay: 0.4,
               quantity: 10,
             },
             position: {
@@ -135,7 +151,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               height: 0,
             },
             life: {
-              duration: 0.1,
+              duration: 0.3,
               count: 1,
             },
             particles: {
@@ -143,7 +159,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
                 value: 40,
               },
               move: {
-                speed: 60,
+                speed: 80,
               },
             },
           },
