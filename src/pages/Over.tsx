@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
+import { HeartTrail } from "@/components/HeartTrail";
 
 const Over = () => {
   useEffect(() => {
@@ -28,6 +29,7 @@ const Over = () => {
 
   return (
     <div className="min-h-screen w-full px-4 md:px-8">
+      <HeartTrail />
       <Navigation />
       <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left mt-24">
         <div className="space-y-8 font-['Montserrat_Alternates'] text-xl md:text-[70px] font-normal md:leading-[5rem] leading-8">
