@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { submitDrawing, deleteDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
 import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
+import { SubmissionConfetti } from "@/components/SubmissionConfetti";
 
 interface DrawingSubmissionHandlerProps {
   session: any;
@@ -22,6 +23,16 @@ export const DrawingSubmissionHandler = ({
 }: DrawingSubmissionHandlerProps) => {
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [existingDrawing, setExistingDrawing] = useState<any>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  useEffect(() => {
+    if (showConfetti) {
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
 
   const handleSubmit = async (data: { name: string; email: string; newsletter: boolean }) => {
     try {
@@ -92,6 +103,7 @@ export const DrawingSubmissionHandler = ({
         toast.success("Tekening werd met succes doorgestuurd!");
       }
 
+      setShowConfetti(true);
       setShowSubmitForm(false);
       setIsDrawing(false);
       setHasDrawn(false);
@@ -147,6 +159,7 @@ export const DrawingSubmissionHandler = ({
           }} 
         />
       )}
+      <SubmissionConfetti isActive={showConfetti} />
     </>
   );
 };
