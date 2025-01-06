@@ -53,7 +53,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             animation: {
               enable: true,
               minimumValue: 0,
-              speed: 2,
+              speed: 0.5,
               startValue: "min",
               destroy: "min",
             },
@@ -104,10 +104,10 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             outModes: {
               default: "out",
             },
-            decay: 0.05,
+            decay: 0.01,
             gravity: {
               enable: true,
-              acceleration: 20,
+              acceleration: 15,
             },
           },
           wobble: {
