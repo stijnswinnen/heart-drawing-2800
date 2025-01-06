@@ -49,12 +49,13 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             type: "heart",
           },
           opacity: {
-            value: { min: 0.4, max: 0.8 },
+            value: 1,
             animation: {
               enable: true,
-              speed: 0.5,
               minimumValue: 0,
-              sync: false,
+              speed: 2,
+              startValue: "min",
+              destroy: "min",
             },
           },
           size: {
@@ -132,7 +133,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
               height: 0,
             },
             life: {
-              duration: 10,
+              duration: 5,
               count: 0,
               sync: true,
             },
