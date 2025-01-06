@@ -12,21 +12,19 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   const [testActive, setTestActive] = useState(false);
 
   useEffect(() => {
-    // Set a small delay to ensure the component is mounted
     const initialTimer = setTimeout(() => {
       console.log("Testing confetti effect...");
       setTestActive(true);
       
-      // Keep the animation visible for 2 seconds
       const cleanupTimer = setTimeout(() => {
         setTestActive(false);
       }, 2000);
 
       return () => clearTimeout(cleanupTimer);
-    }, 500); // Reduced initial delay to make it more responsive
+    }, 500);
 
     return () => clearTimeout(initialTimer);
-  }, []); // Empty dependency array to only run once on mount
+  }, []);
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadHeartShape(engine);
@@ -71,28 +69,50 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             direction: "random",
             animation: {
               enable: true,
-              speed: { min: 3, max: 8 },
+              speed: 60,
               sync: false,
+            },
+          },
+          tilt: {
+            direction: "random",
+            enable: true,
+            move: true,
+            value: { min: 0, max: 360 },
+            animation: {
+              enable: true,
+              speed: 60,
+            },
+          },
+          roll: {
+            darken: {
+              enable: true,
+              value: 25,
+            },
+            enable: true,
+            speed: {
+              min: 15,
+              max: 25,
             },
           },
           move: {
             enable: true,
-            speed: { min: 15, max: 25 },
+            speed: { min: 10, max: 20 },
             direction: "none",
             random: true,
             straight: false,
             outModes: {
               default: "out",
             },
+            decay: 0.05,
             gravity: {
               enable: true,
-              acceleration: 2,
+              acceleration: 20,
             },
           },
           wobble: {
             enable: true,
-            distance: 10,
-            speed: { min: 2, max: 5 },
+            distance: 30,
+            speed: { min: -12, max: 5 },
           },
         },
         fullScreen: {
@@ -104,8 +124,8 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             direction: "top",
             position: { x: 50, y: 50 },
             rate: {
-              delay: 0.1,
-              quantity: 8,
+              delay: 0,
+              quantity: 50,
             },
             size: {
               width: 0,
@@ -113,7 +133,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
             },
             life: {
               duration: 0.1,
-              count: 3,
+              count: 5,
             },
           },
         ],
