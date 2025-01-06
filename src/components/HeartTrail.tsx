@@ -98,8 +98,8 @@ export const HeartTrail = () => {
           },
           modes: {
             trail: {
-              delay: 0.05,
-              quantity: 5,
+              delay: 0.1,
+              quantity: 2,
               pauseOnStop: false
             }
           }
