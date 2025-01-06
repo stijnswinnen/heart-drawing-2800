@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import Particles from "react-tsparticles";
 import type { Engine } from "tsparticles-engine";
 import { loadFull } from "tsparticles";
+import { loadHeartShape } from "tsparticles-shape-heart";
 
 interface SubmissionConfettiProps {
   isActive: boolean;
@@ -28,6 +29,7 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
   }, []); // Empty dependency array to only run once on mount
 
   const particlesInit = useCallback(async (engine: Engine) => {
+    await loadHeartShape(engine);
     await loadFull(engine);
   }, []);
 
