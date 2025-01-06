@@ -21,41 +21,42 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
       options={{
         particles: {
           number: {
-            value: 85, // Total particles (sum of the three groups from the example)
+            value: 100,
           },
           color: {
-            value: ["#FFC0CB", "#FF69B4", "#FF1493", "#C71585"],
+            value: ["#FFDEE2", "#F6F6F7", "#ff0000", "#ff69b4", "#ffc0cb"],
           },
           shape: {
-            type: "heart",
+            type: "circle",
           },
           opacity: {
-            value: 1,
+            value: 0.6,
+            animation: {
+              enable: true,
+              speed: 0.3,
+              minimumValue: 0,
+              sync: false,
+            },
           },
           size: {
-            value: { min: 10, max: 30 }, // Different sizes for variety
+            value: 6,
+            random: {
+              enable: true,
+              minimumValue: 3,
+            },
           },
           move: {
             enable: true,
-            speed: 30, // Matches startVelocity from the example
-            direction: "none",
-            random: true,
+            speed: 10,
+            direction: "top",
+            random: false,
             straight: false,
             outModes: {
               default: "out",
             },
             gravity: {
               enable: true,
-              acceleration: 9.81,
-            },
-            decay: 0.94, // Matches decay from the example
-          },
-          rotate: {
-            value: { min: 0, max: 360 }, // Random rotation for more natural look
-            direction: "random",
-            animation: {
-              enable: true,
-              speed: 30,
+              acceleration: 20,
             },
           },
         },
@@ -63,89 +64,25 @@ export const SubmissionConfetti = ({ isActive }: SubmissionConfettiProps) => {
           enable: true,
           zIndex: 999,
         },
-        emitters: [
-          {
-            direction: "none",
-            rate: {
-              delay: 0,
-              quantity: 50,
-            },
-            position: {
-              x: 50,
-              y: 50,
-            },
-            size: {
-              width: 0,
-              height: 0,
-            },
-            life: {
-              duration: 0.1,
-              count: 1,
-            },
-            particles: {
-              size: {
-                value: 20,
-              },
-              move: {
-                speed: 30,
-              },
-            },
+        emitters: {
+          direction: "top",
+          position: {
+            x: 50,
+            y: 100,
           },
-          {
-            direction: "none",
-            rate: {
-              delay: 0.1,
-              quantity: 25,
-            },
-            position: {
-              x: 50,
-              y: 50,
-            },
-            size: {
-              width: 0,
-              height: 0,
-            },
-            life: {
-              duration: 0.1,
-              count: 1,
-            },
-            particles: {
-              size: {
-                value: 30,
-              },
-              move: {
-                speed: 45,
-              },
-            },
+          rate: {
+            delay: 0,
+            quantity: 100,
           },
-          {
-            direction: "none",
-            rate: {
-              delay: 0.2,
-              quantity: 10,
-            },
-            position: {
-              x: 50,
-              y: 50,
-            },
-            size: {
-              width: 0,
-              height: 0,
-            },
-            life: {
-              duration: 0.1,
-              count: 1,
-            },
-            particles: {
-              size: {
-                value: 40,
-              },
-              move: {
-                speed: 60,
-              },
-            },
+          size: {
+            width: 100,
+            height: 0,
           },
-        ],
+          life: {
+            duration: 0.3,
+            count: 1,
+          },
+        },
       }}
     />
   );
