@@ -4,7 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { HeartTrail } from "@/components/HeartTrail";
 
 const AnimatedWord = ({ children }: { children: React.ReactNode }) => (
-  <span className="transition-colors duration-300 hover:text-[#D22B2B]">
+  <span className="transition-colors duration-[2000ms] hover:text-[#D22B2B]">
     {children}
   </span>
 );
