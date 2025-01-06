@@ -36,10 +36,10 @@ export const HeartTrail = () => {
             }
           },
           size: {
-            value: 4,
+            value: 12,
             random: {
               enable: true,
-              minimumValue: 2
+              minimumValue: 8
             }
           },
           rotate: {
