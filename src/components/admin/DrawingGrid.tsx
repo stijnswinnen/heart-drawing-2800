@@ -1,6 +1,6 @@
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -22,6 +22,7 @@ interface DrawingGridProps {
 
 interface HeartUser {
   email_verified: boolean;
+  email: string;
 }
 
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
@@ -38,7 +39,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
 
       const { data, error } = await supabase
         .from('heart_users')
-        .select('id, email_verified')
+        .select('id, email_verified, email')
         .in('id', heartUserIds);
 
       if (error) {
@@ -124,13 +125,23 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
             </div>
             {selectedStatus === "new" && (
               <>
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertCircle className={`w-4 h-4 ${drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified ? 'text-green-500' : 'text-amber-500'}`} />
-                  <span className="text-sm">
-                    {drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified 
-                      ? "Email verified" 
-                      : "Email not verified"}
-                  </span>
+                <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className={`w-4 h-4 ${drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified ? 'text-green-500' : 'text-amber-500'}`} />
+                    <span className="text-sm">
+                      {drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified 
+                        ? "Email verified" 
+                        : "Email not verified"}
+                    </span>
+                  </div>
+                  {drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {heartUsers[drawing.heart_user_id].email}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-between gap-4">
                   <Button
