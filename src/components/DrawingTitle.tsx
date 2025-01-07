@@ -29,6 +29,7 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
             size={200} 
             className="text-primary animate-pulse z-10" 
             fill="#FFDEE2"
+            strokeWidth={0}
           />
         </div>
       )}
