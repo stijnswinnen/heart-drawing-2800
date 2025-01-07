@@ -8,6 +8,10 @@ schemas = ["public", "storage", "graphql_public"]
 [db]
 port = 54322
 
+[db.pooler]
+enabled = true
+port = 54329
+
 [studio]
 enabled = true
 port = 54323
@@ -19,5 +23,17 @@ port = 54324
 [functions.optimize-heart]
 verify_jwt = false
 
+[functions.send-verification-email]
+verify_jwt = false
+
+[functions.send-verification-reminder]
+verify_jwt = false
+
+[functions.send-location-notification]
+verify_jwt = false
+
 [functions.generate-video]
+verify_jwt = false
+
+[functions.setup-video-cron]
 verify_jwt = false
