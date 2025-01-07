@@ -217,6 +217,38 @@ export type Database = {
         }
         Relationships: []
       }
+      video_generation: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_processed_drawing_id: string | null
+          processed_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_processed_drawing_id?: string | null
+          processed_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_processed_drawing_id?: string | null
+          processed_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_generation_last_processed_drawing_id_fkey"
+            columns: ["last_processed_drawing_id"]
+            isOneToOne: false
+            referencedRelation: "drawings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

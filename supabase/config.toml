@@ -30,3 +30,6 @@ port = 54327
 
 [functions.optimize-heart]
 verify_jwt = false
+
+[functions.generate-video]
+verify_jwt = false
