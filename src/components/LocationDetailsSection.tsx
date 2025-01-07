@@ -36,13 +36,27 @@ export const LocationDetailsSection = ({
 
       <div>
         <label htmlFor="description" className="block text-sm font-medium mb-1">
-          Beschrijving
+          Waarom is dit jouw lievelingsplek?
         </label>
         <Textarea
           id="description"
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder="Waarom is dit jouw favoriete plek?"
+          placeholder="bvb: ik hou van deze plaats omdat ik hier tot rust kom..."
+          rows={4}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="recommendation" className="block text-sm font-medium mb-1">
+          Waarom moeten andere Mechelaars hier ook eens komen?
+        </label>
+        <Textarea
+          id="recommendation"
+          value={description}
+          onChange={(e) => onDescriptionChange(e.target.value)}
+          placeholder="Vertel waarom anderen deze plek ook zouden moeten ontdekken..."
           rows={4}
           required
         />
