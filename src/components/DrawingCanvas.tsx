@@ -66,7 +66,8 @@ export const DrawingCanvas = ({
         <div className="fixed md:top-8 md:bottom-auto bottom-[11rem] md:right-8 flex gap-4 animate-fade-in mt-2 md:mt-0">
           <Button
             onClick={onSubmit}
-            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+            variant="default"
+            className="px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
           >
             Verzenden
           </Button>
