@@ -4,10 +4,10 @@ import { HeartTrail } from "@/components/HeartTrail";
 
 const FavoritePlek = () => {
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background">
       <HeartTrail />
       <Navigation />
-      <main className="container max-w-4xl mx-auto px-4 py-8">
+      <main className="container relative z-10 max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Deel jouw favoriete plekje in Mechelen! ❤️</h1>
         <div className="space-y-4 text-lg mb-8">
           <p>

@@ -6,8 +6,14 @@ import { loadHeartShape } from "tsparticles-shape-heart";
 
 export const HeartTrail = () => {
   const particlesInit = useCallback(async (engine: Engine) => {
-    await loadHeartShape(engine);
-    await loadFull(engine);
+    console.log("Initializing particles...");
+    try {
+      await loadHeartShape(engine);
+      await loadFull(engine);
+      console.log("Particles initialized successfully");
+    } catch (error) {
+      console.error("Error initializing particles:", error);
+    }
   }, []);
 
   return (
@@ -26,12 +32,12 @@ export const HeartTrail = () => {
             type: "heart"
           },
           opacity: {
-            value: 0.6,
+            value: { min: 0.3, max: 0.8 },
             animation: {
               enable: true,
               minimumValue: 0,
               speed: 0.4,
-              startValue: "min",
+              startValue: "max",
               destroy: "min"
             }
           },
@@ -42,48 +48,21 @@ export const HeartTrail = () => {
               minimumValue: 8
             }
           },
-          rotate: {
-            value: { min: 0, max: 360 },
-            direction: "random",
-            animation: {
-              enable: true,
-              speed: 30,
-              sync: false
-            }
-          },
-          tilt: {
-            direction: "random",
-            enable: true,
-            move: true,
-            value: { min: 0, max: 360 },
-            animation: {
-              enable: true,
-              speed: 30
-            }
+          life: {
+            duration: {
+              sync: true,
+              value: 1
+            },
+            count: 1
           },
           move: {
             enable: true,
             speed: { min: 3, max: 5 },
-            direction: "top",
-            random: true,
+            direction: "none",
+            random: false,
             straight: false,
             outModes: {
-              default: "out"
-            },
-            gravity: {
-              enable: true,
-              acceleration: 2
-            },
-            path: {
-              enable: true,
-              delay: {
-                value: 0
-              },
-              options: {
-                size: 10,
-                draw: false,
-                amplitude: 2
-              }
+              default: "destroy"
             }
           }
         },
@@ -100,13 +79,13 @@ export const HeartTrail = () => {
             trail: {
               delay: 0.1,
               quantity: 2,
-              pauseOnStop: false
+              pauseOnStop: true
             }
           }
         },
         fullScreen: {
           enable: true,
-          zIndex: -1
+          zIndex: 1
         },
         detectRetina: true
       }}
