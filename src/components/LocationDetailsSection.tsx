@@ -1,7 +1,6 @@
 import React from 'react';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Checkbox } from './ui/checkbox';
 
 interface LocationDetailsSectionProps {
   locationName: string;
@@ -47,20 +46,6 @@ export const LocationDetailsSection = ({
           rows={4}
           required
         />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="shareConsent"
-          checked={shareConsent}
-          onCheckedChange={(checked) => onShareConsentChange(checked as boolean)}
-        />
-        <label
-          htmlFor="shareConsent"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Ja, ik wil mijn verhaal delen.
-        </label>
       </div>
     </div>
   );
