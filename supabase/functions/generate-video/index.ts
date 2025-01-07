@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { decode as base64Decode } from "https://deno.land/std@0.208.0/encoding/base64.ts";
 import { FFmpeg } from 'https://esm.sh/@ffmpeg/ffmpeg@0.12.7';
 import { toBlobURL } from 'https://esm.sh/@ffmpeg/util@0.12.1';
