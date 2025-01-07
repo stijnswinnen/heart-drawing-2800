@@ -13,6 +13,7 @@ export const LocationForm = () => {
   const [email, setEmail] = useState("");
   const [locationName, setLocationName] = useState("");
   const [description, setDescription] = useState("");
+  const [recommendation, setRecommendation] = useState("");
   const [shareConsent, setShareConsent] = useState(false);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +55,11 @@ export const LocationForm = () => {
       return;
     }
 
+    if (!recommendation.trim()) {
+      toast.error("Vul een aanbeveling in voor andere Mechelaars");
+      return;
+    }
+
     if (!name.trim()) {
       toast.error("Vul je naam in");
       return;
@@ -83,7 +89,7 @@ export const LocationForm = () => {
 
       const { error } = await supabase.from("locations").insert({
         name: locationName,
-        description: description.trim(),
+        description: `${description.trim()}\n\nAanbeveling: ${recommendation.trim()}`,
         latitude: coordinates.lat,
         longitude: coordinates.lng,
         user_id: session?.user?.id || null,
@@ -98,7 +104,7 @@ export const LocationForm = () => {
           name,
           email,
           locationName,
-          description: description.trim(),
+          description: `${description.trim()}\n\nAanbeveling: ${recommendation.trim()}`,
           latitude: coordinates.lat,
           longitude: coordinates.lng,
         },
@@ -111,6 +117,7 @@ export const LocationForm = () => {
       toast.success("Locatie succesvol toegevoegd!");
       setLocationName("");
       setDescription("");
+      setRecommendation("");
       setCoordinates(null);
       setShareConsent(false);
       
@@ -140,9 +147,11 @@ export const LocationForm = () => {
       <LocationDetailsSection
         locationName={locationName}
         description={description}
+        recommendation={recommendation}
         shareConsent={shareConsent}
         onLocationNameChange={setLocationName}
         onDescriptionChange={setDescription}
+        onRecommendationChange={setRecommendation}
         onShareConsentChange={setShareConsent}
       />
 

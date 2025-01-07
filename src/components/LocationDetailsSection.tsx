@@ -5,18 +5,22 @@ import { Textarea } from './ui/textarea';
 interface LocationDetailsSectionProps {
   locationName: string;
   description: string;
+  recommendation: string;
   shareConsent: boolean;
   onLocationNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  onRecommendationChange: (value: string) => void;
   onShareConsentChange: (checked: boolean) => void;
 }
 
 export const LocationDetailsSection = ({
   locationName,
   description,
+  recommendation,
   shareConsent,
   onLocationNameChange,
   onDescriptionChange,
+  onRecommendationChange,
   onShareConsentChange,
 }: LocationDetailsSectionProps) => {
   return (
@@ -54,8 +58,8 @@ export const LocationDetailsSection = ({
         </label>
         <Textarea
           id="recommendation"
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
+          value={recommendation}
+          onChange={(e) => onRecommendationChange(e.target.value)}
           placeholder="Vertel waarom anderen deze plek ook zouden moeten ontdekken..."
           rows={4}
           required
