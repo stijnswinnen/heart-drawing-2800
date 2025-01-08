@@ -56,6 +56,9 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
     }
   };
 
+  // Filter drawings based on selected status
+  const filteredDrawings = drawings?.filter(drawing => drawing.status === selectedStatus) || null;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -66,7 +69,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
         />
         <main className="flex-1">
           <DrawingGrid
-            drawings={drawings}
+            drawings={filteredDrawings}
             selectedStatus={selectedStatus}
             onApprove={handleApprove}
             onDecline={handleDecline}
