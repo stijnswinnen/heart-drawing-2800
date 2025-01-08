@@ -112,7 +112,10 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
       )}
       
       {location.recommendation && (
-        <p className="text-muted-foreground font-montserrat">{location.recommendation}</p>
+        <>
+          <h3 className="text-lg font-barlow text-primary-dark">Waarom moet je deze plek zeker bezoeken?</h3>
+          <p className="text-muted-foreground font-montserrat">{location.recommendation}</p>
+        </>
       )}
 
       <Separator className="bg-primary-light" />
