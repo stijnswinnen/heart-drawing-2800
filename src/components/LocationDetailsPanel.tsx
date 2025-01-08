@@ -6,6 +6,7 @@ import { useSession } from "@supabase/auth-helpers-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import { Separator } from "./ui/separator";
 
 interface Location {
   id: string;
@@ -91,22 +92,15 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
   const likeCount = locationLikes[location.id] || 0;
 
   return (
-    <div className="bg-white p-6 space-y-6">
+    <div className="bg-white p-6 space-y-6 w-[40%]">
       <h2 className="text-2xl font-barlow text-primary-dark">{location.name}</h2>
-      
-      {location.heart_users?.name && (
-        <p className="text-sm text-muted-foreground font-montserrat">
-          Gedeeld door {location.heart_users.name}
-        </p>
-      )}
       
       <button
         onClick={() => handleLike(location.id)}
         disabled={!session}
         className={cn(
-          "flex items-center gap-2 transition-colors",
-          session ? "hover:text-primary-dark" : "opacity-50 cursor-not-allowed",
-          likeCount > 0 ? "text-primary-dark" : "text-muted-foreground"
+          "flex items-center gap-2 transition-colors text-primary-dark",
+          session ? "hover:text-primary-dark" : "opacity-50 cursor-not-allowed"
         )}
       >
         <Heart className="w-5 h-5" fill={likeCount > 0 ? "currentColor" : "none"} />
@@ -119,6 +113,14 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
       
       {location.recommendation && (
         <p className="text-muted-foreground font-montserrat">{location.recommendation}</p>
+      )}
+
+      <Separator className="bg-primary-light" />
+      
+      {location.heart_users?.name && (
+        <p className="text-sm text-muted-foreground font-montserrat">
+          Gedeeld door {location.heart_users.name}
+        </p>
       )}
 
       <Button asChild>
