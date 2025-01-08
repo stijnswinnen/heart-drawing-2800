@@ -12,7 +12,7 @@ interface Location {
   name: string;
   description: string | null;
   recommendation: string | null;
-  heart_user: {
+  heart_users: {
     name: string;
   } | null;
 }
@@ -44,7 +44,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
             name, 
             description, 
             recommendation,
-            heart_user (
+            heart_users (
               name
             )
           `)
@@ -94,9 +94,9 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
     <div className="bg-white p-6 space-y-6">
       <h2 className="text-2xl font-barlow text-primary-dark">{location.name}</h2>
       
-      {location.heart_user?.name && (
+      {location.heart_users?.name && (
         <p className="text-sm text-muted-foreground font-montserrat">
-          Gedeeld door {location.heart_user.name}
+          Gedeeld door {location.heart_users.name}
         </p>
       )}
       
