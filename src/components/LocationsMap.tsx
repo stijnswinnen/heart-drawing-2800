@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { useLocationLikes } from '@/hooks/useLocationLikes';
 import { useApprovedHearts } from '@/hooks/useApprovedHearts';
 import { useLocations } from '@/hooks/useLocations';
+import { cn } from "@/lib/utils"; // Added this import
 
 interface LocationsMapProps {
   selectedLocationId: string | null;
