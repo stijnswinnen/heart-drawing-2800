@@ -23,6 +23,25 @@ export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
           showLinks={true}
           view="sign_in"
           redirectTo={window.location.origin}
+          localization={{
+            variables: {
+              sign_in: {
+                email_label: 'E-mailadres',
+                password_label: 'Wachtwoord',
+                button_label: 'Inloggen',
+                loading_button_label: 'Inloggen...',
+                social_provider_text: 'Inloggen met {{provider}}',
+                link_text: 'Heb je al een account? Log in',
+              },
+              forgotten_password: {
+                email_label: 'E-mailadres',
+                password_label: 'Wachtwoord',
+                button_label: 'Stuur instructies',
+                loading_button_label: 'Versturen...',
+                link_text: 'Wachtwoord vergeten?',
+              },
+            },
+          }}
         />
       </div>
     </div>
