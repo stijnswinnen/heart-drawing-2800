@@ -2,34 +2,24 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface LocationLike {
+export interface LocationLike {
+  id: string;
   location_id: string;
-  count: number;
+  user_id: string | null;
+  status: 'active' | 'removed';
 }
 
 export const useLocationLikes = () => {
-  const [locationLikes, setLocationLikes] = useState<Record<string, number>>({});
+  const [locationLikes, setLocationLikes] = useState<LocationLike[]>([]);
 
   const fetchLocationLikes = async () => {
     try {
       const { data, error } = await supabase
         .from('location_likes')
-        .select('location_id')
-        .eq('status', 'active')
-        .then(result => {
-          if (result.error) throw result.error;
-          
-          // Group and count likes by location_id
-          const groupedLikes = result.data.reduce((acc: Record<string, number>, curr) => {
-            acc[curr.location_id] = (acc[curr.location_id] || 0) + 1;
-            return acc;
-          }, {});
-          
-          return { data: groupedLikes, error: null };
-        });
+        .select('id, location_id, user_id, status');
 
       if (error) throw error;
-      setLocationLikes(data);
+      setLocationLikes(data || []);
     } catch (error) {
       console.error('Error fetching location likes:', error);
       toast.error("Er ging iets mis bij het ophalen van de likes");
@@ -75,7 +65,8 @@ export const useLocationLikes = () => {
           .from('location_likes')
           .insert([{ 
             location_id: locationId, 
-            user_id: user.id 
+            user_id: user.id,
+            status: 'active'
           }]);
 
         if (error) throw error;
