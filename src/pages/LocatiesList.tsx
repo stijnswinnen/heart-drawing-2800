@@ -25,14 +25,14 @@ const LocatiesList = () => {
       <Navigation />
       <div className="container py-8">
         <div className="flex flex-col md:flex-row gap-8">
-          <div className="w-full md:w-1/3 order-2 md:order-1">
+          <div className="w-full md:w-[40%] order-2 md:order-1">
             <LocationDetailsPanel 
               locationId={selectedLocationId} 
               onClose={() => setSelectedLocationId(null)}
             />
           </div>
           
-          <div className="w-full md:w-2/3 order-1 md:order-2">
+          <div className="w-full md:w-[60%] order-1 md:order-2">
             <LocationsMap 
               selectedLocationId={selectedLocationId}
               onLocationSelect={setSelectedLocationId}

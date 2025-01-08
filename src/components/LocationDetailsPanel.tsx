@@ -92,7 +92,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
   const likeCount = locationLikes[location.id] || 0;
 
   return (
-    <div className="bg-white p-6 space-y-6 w-[40%]">
+    <div className="bg-white p-6 space-y-6">
       <h2 className="text-2xl font-barlow text-primary-dark">{location.name}</h2>
       
       <button
