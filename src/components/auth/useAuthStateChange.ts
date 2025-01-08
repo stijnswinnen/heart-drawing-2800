@@ -40,6 +40,8 @@ export const useAuthStateChange = (onClose: () => void) => {
         if (error) {
           handleAuthError(error);
         }
+      } else if (event === 'PASSWORD_RECOVERY') {
+        toast.success('Check je e-mail voor instructies om je wachtwoord te resetten.');
       }
     });
 
