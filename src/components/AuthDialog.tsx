@@ -4,6 +4,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { AuthError } from "@supabase/supabase-js";
 
 interface AuthDialogProps {
   onClose: () => void;
@@ -42,11 +43,32 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
         console.log('User signed out');
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
+      } else if (event === 'USER_UPDATED') {
+        // Handle user update events
+        const { error } = await supabase.auth.getSession();
+        if (error) {
+          handleAuthError(error);
+        }
       }
     });
 
     return () => subscription.unsubscribe();
   }, [onClose, navigate]);
+
+  const handleAuthError = (error: AuthError) => {
+    console.error('Auth error:', error);
+    let errorMessage = 'An error occurred during authentication.';
+    
+    if (error.message.includes('Invalid login credentials')) {
+      errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+    } else if (error.message.includes('Email not confirmed')) {
+      errorMessage = 'Please verify your email address before signing in.';
+    } else if (error.message.includes('User not found')) {
+      errorMessage = 'No account found with these credentials.';
+    }
+    
+    toast.error(errorMessage);
+  };
 
   const handleSignedInUser = async (user: any) => {
     try {
@@ -83,9 +105,9 @@ export const AuthDialog = ({ onClose }: AuthDialogProps) => {
       if (profile?.role === 'admin') {
         navigate('/admin');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in auth state change:', error);
-      toast.error('An error occurred during sign in');
+      handleAuthError(error);
     }
   };
 
