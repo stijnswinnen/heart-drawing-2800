@@ -7,14 +7,19 @@ import { useLocationLikes } from '@/hooks/useLocationLikes';
 import { useApprovedHearts } from '@/hooks/useApprovedHearts';
 import { useLocations } from '@/hooks/useLocations';
 
-export const LocationsMap = () => {
+interface LocationsMapProps {
+  selectedLocationId: string | null;
+  onLocationSelect: (locationId: string) => void;
+}
+
+export const LocationsMap = ({ selectedLocationId, onLocationSelect }: LocationsMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   
   const locations = useLocations();
   const approvedHearts = useApprovedHearts();
-  const { locationLikes, handleLike } = useLocationLikes();
+  const { locationLikes } = useLocationLikes();
 
   // Default coordinates for Mechelen
   const defaultLng = 4.480469;
@@ -53,7 +58,7 @@ export const LocationsMap = () => {
     };
   }, []);
 
-  // Handle markers
+  // Handle markers and selection
   useEffect(() => {
     if (!map.current || !locations.length) return;
 
@@ -64,7 +69,10 @@ export const LocationsMap = () => {
     // Add new markers
     locations.forEach((location) => {
       const markerEl = document.createElement('div');
-      markerEl.className = 'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden';
+      markerEl.className = cn(
+        'w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden cursor-pointer',
+        selectedLocationId === location.id ? 'ring-4 ring-primary-dark' : ''
+      );
       markerEl.style.border = '5px solid white';
       
       const heartUrl = getRandomHeartUrl();
@@ -75,40 +83,27 @@ export const LocationsMap = () => {
         markerEl.style.backgroundRepeat = 'no-repeat';
       }
 
-      const likeCount = locationLikes[location.id] || 0;
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-        `<div class="p-2">
-          <h3 class="font-bold mb-1">${location.name}</h3>
-          <p>${location.description || ''}</p>
-          <div class="mt-2 flex items-center gap-2">
-            <button class="like-button flex items-center gap-1 text-rose-500 hover:text-rose-600" data-location-id="${location.id}">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-              <span class="like-count">${likeCount}</span>
-            </button>
-          </div>
-        </div>`
-      );
+      // Add click handler
+      markerEl.addEventListener('click', () => {
+        onLocationSelect(location.id);
+      });
 
       const marker = new mapboxgl.Marker({ element: markerEl })
         .setLngLat([location.longitude, location.latitude])
-        .setPopup(popup)
-        .addTo(map.current);
+        .addTo(map.current!);
 
       markersRef.current.push(marker);
-    });
 
-    // Add click event listeners to like buttons
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      const likeButton = target.closest('.like-button');
-      if (likeButton) {
-        const locationId = likeButton.getAttribute('data-location-id');
-        if (locationId) {
-          handleLike(locationId);
-        }
+      // If this is the selected location, pan to it
+      if (location.id === selectedLocationId && map.current) {
+        map.current.flyTo({
+          center: [location.longitude, location.latitude],
+          zoom: 15,
+          duration: 1000
+        });
       }
     });
-  }, [locations, locationLikes, approvedHearts]);
+  }, [locations, selectedLocationId, onLocationSelect]);
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
