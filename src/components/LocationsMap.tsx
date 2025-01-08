@@ -107,7 +107,7 @@ export const LocationsMap = ({ selectedLocationId, onLocationSelect }: Locations
   }, [locations, selectedLocationId, onLocationSelect]);
 
   return (
-    <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
+    <div className="w-full h-[400px] md:h-[calc(100vh-4rem)] rounded-lg overflow-hidden">
       <div ref={mapContainer} className="w-full h-full" />
     </div>
   );

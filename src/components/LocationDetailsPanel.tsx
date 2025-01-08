@@ -4,12 +4,17 @@ import { Heart } from "lucide-react";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
 import { useSession } from "@supabase/auth-helpers-react";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 
 interface Location {
   id: string;
   name: string;
   description: string | null;
   recommendation: string | null;
+  heart_user: {
+    name: string;
+  } | null;
 }
 
 interface LocationDetailsPanelProps {
@@ -34,7 +39,15 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
       try {
         const { data, error } = await supabase
           .from('locations')
-          .select('id, name, description, recommendation')
+          .select(`
+            id, 
+            name, 
+            description, 
+            recommendation,
+            heart_user (
+              name
+            )
+          `)
           .eq('id', locationId)
           .single();
 
@@ -78,37 +91,42 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
   const likeCount = locationLikes[location.id] || 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-      <h2 className="text-2xl font-semibold">{location.name}</h2>
+    <div className="bg-white p-6 space-y-6">
+      <h2 className="text-2xl font-barlow text-primary-dark">{location.name}</h2>
+      
+      {location.heart_user?.name && (
+        <p className="text-sm text-muted-foreground font-montserrat">
+          Gedeeld door {location.heart_user.name}
+        </p>
+      )}
+      
+      <button
+        onClick={() => handleLike(location.id)}
+        disabled={!session}
+        className={cn(
+          "flex items-center gap-2 transition-colors",
+          session ? "hover:text-primary-dark" : "opacity-50 cursor-not-allowed",
+          likeCount > 0 ? "text-primary-dark" : "text-muted-foreground"
+        )}
+      >
+        <Heart className="w-5 h-5" fill={likeCount > 0 ? "currentColor" : "none"} />
+        <span>{likeCount}</span>
+      </button>
       
       {location.description && (
-        <div>
-          <h3 className="font-medium mb-2">Waarom is dit een lievelingsplek?</h3>
-          <p className="text-muted-foreground">{location.description}</p>
-        </div>
+        <p className="text-muted-foreground font-montserrat">{location.description}</p>
       )}
       
       {location.recommendation && (
-        <div>
-          <h3 className="font-medium mb-2">Waarom moet je hier naartoe?</h3>
-          <p className="text-muted-foreground">{location.recommendation}</p>
-        </div>
+        <p className="text-muted-foreground font-montserrat">{location.recommendation}</p>
       )}
 
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => handleLike(location.id)}
-          disabled={!session}
-          className={cn(
-            "flex items-center gap-2 transition-colors",
-            session ? "hover:text-primary-dark" : "opacity-50 cursor-not-allowed",
-            likeCount > 0 ? "text-primary-dark" : "text-muted-foreground"
-          )}
-        >
-          <Heart className="w-5 h-5" fill={likeCount > 0 ? "currentColor" : "none"} />
-          <span>{likeCount}</span>
-        </button>
-      </div>
+      <Button asChild>
+        <Link to="/mijn-favoriete-plek" className="flex items-center gap-2">
+          <Heart className="w-4 h-4" />
+          Voeg jouw lievelingsplek toe
+        </Link>
+      </Button>
     </div>
   );
 };
