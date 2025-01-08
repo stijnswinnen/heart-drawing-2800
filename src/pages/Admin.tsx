@@ -129,7 +129,7 @@ const Admin = () => {
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="font-medium">{profile?.email}</div>
+              <div className="font-medium">{session.user.email}</div>
               <div className="text-sm text-muted-foreground">
                 Admin{" "}
                 <span className="text-muted-foreground">|</span>{" "}
