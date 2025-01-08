@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 interface Drawing {
   image_path: string;
+  user_id: string | null;
 }
 
 export const useApprovedHearts = () => {
@@ -13,7 +14,7 @@ export const useApprovedHearts = () => {
     try {
       const { data, error } = await supabase
         .from('drawings')
-        .select('image_path')
+        .select('image_path, user_id')
         .eq('status', 'approved');
       
       if (error) throw error;

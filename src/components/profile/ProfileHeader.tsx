@@ -1,7 +1,7 @@
 import { useSession } from "@supabase/auth-helpers-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { User, Heart, MapPin, Star } from "lucide-react";
+import { User } from "lucide-react";
 import { useLocations } from "@/hooks/useLocations";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
 import { useApprovedHearts } from "@/hooks/useApprovedHearts";
@@ -13,15 +13,15 @@ export const ProfileHeader = () => {
   const approvedHearts = useApprovedHearts();
 
   const userLocations = locations.filter(
-    (location) => location.user_id === session?.user.id
+    (location) => location.user_id === session?.user?.id
   );
 
   const userLikes = locationLikes.filter(
-    (like) => like.user_id === session?.user.id && like.status === "active"
+    (like) => like.user_id === session?.user?.id && like.status === "active"
   );
 
   const userHearts = approvedHearts.filter(
-    (heart) => heart.user_id === session?.user.id
+    (heart) => heart.user_id === session?.user?.id
   );
 
   return (

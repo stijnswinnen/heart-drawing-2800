@@ -19,11 +19,11 @@ export const LocationsSection = () => {
   const { locationLikes } = useLocationLikes();
 
   const userLocations = locations.filter(
-    (location) => location.user_id === session?.user.id
+    (location) => location.user_id === session?.user?.id
   );
 
   const userLikes = locationLikes.filter(
-    (like) => like.user_id === session?.user.id && like.status === "active"
+    (like) => like.user_id === session?.user?.id && like.status === "active"
   );
 
   const favoriteLocations = locations.filter((location) =>

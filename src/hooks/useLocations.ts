@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface Location {
+export interface Location {
   id: string;
   name: string;
   description: string | null;
   latitude: number;
   longitude: number;
+  user_id: string | null;
 }
 
 export const useLocations = () => {
@@ -17,7 +18,7 @@ export const useLocations = () => {
     try {
       const { data, error } = await supabase
         .from('locations')
-        .select('id, name, description, latitude, longitude')
+        .select('id, name, description, latitude, longitude, user_id')
         .eq('status', 'approved')
         .eq('share_consent', true);
 
