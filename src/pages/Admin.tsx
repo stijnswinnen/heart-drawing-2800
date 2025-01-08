@@ -129,7 +129,7 @@ const Admin = () => {
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="font-medium">{profile.name}</div>
+              <div className="font-medium">{profile?.email}</div>
               <div className="text-sm text-muted-foreground">
                 Admin{" "}
                 <span className="text-muted-foreground">|</span>{" "}
@@ -142,9 +142,7 @@ const Admin = () => {
               </div>
             </div>
             <Avatar>
-              <AvatarFallback>
-                {profile.name?.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback>A</AvatarFallback>
             </Avatar>
           </div>
         </div>

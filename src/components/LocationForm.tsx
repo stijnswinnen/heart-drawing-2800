@@ -21,14 +21,14 @@ export const LocationForm = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (session?.user?.id) {
-        const { data: profile } = await supabase
-          .from('profiles')
+        const { data: heartUser } = await supabase
+          .from('heart_users')
           .select('name')
-          .eq('id', session.user.id)
+          .eq('user_id', session.user.id)
           .single();
 
-        if (profile) {
-          setName(profile.name);
+        if (heartUser) {
+          setName(heartUser.name);
           setEmail(session.user.email || '');
         }
       }

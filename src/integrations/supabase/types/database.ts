@@ -1,3 +1,6 @@
+import { DrawingsTable, HeartUsersTable, LocationLikesTable, LocationsTable, ProfilesTable, VideoGenerationTable } from './tables';
+import { DatabaseEnums } from './enums';
+
 export type Json =
   | string
   | number
