@@ -149,6 +149,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          recommendation: string | null
           share_consent: boolean | null
           status: Database["public"]["Enums"]["location_status"]
           updated_at: string
@@ -162,6 +163,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          recommendation?: string | null
           share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
           updated_at?: string
@@ -175,6 +177,7 @@ export type Database = {
           latitude?: number
           longitude?: number
           name?: string
+          recommendation?: string | null
           share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
           updated_at?: string

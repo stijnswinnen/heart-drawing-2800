@@ -89,7 +89,8 @@ export const LocationForm = () => {
 
       const { error } = await supabase.from("locations").insert({
         name: locationName,
-        description: `${description.trim()}\n\nAanbeveling: ${recommendation.trim()}`,
+        description: description.trim(),
+        recommendation: recommendation.trim(),
         latitude: coordinates.lat,
         longitude: coordinates.lng,
         user_id: session?.user?.id || null,
@@ -104,7 +105,8 @@ export const LocationForm = () => {
           name,
           email,
           locationName,
-          description: `${description.trim()}\n\nAanbeveling: ${recommendation.trim()}`,
+          description: description.trim(),
+          recommendation: recommendation.trim(),
           latitude: coordinates.lat,
           longitude: coordinates.lng,
         },
