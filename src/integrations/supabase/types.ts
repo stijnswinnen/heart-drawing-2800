@@ -198,7 +198,6 @@ export type Database = {
           created_at: string
           id: string
           marketing_consent: boolean | null
-          name: string
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
         }
@@ -206,7 +205,6 @@ export type Database = {
           created_at?: string
           id: string
           marketing_consent?: boolean | null
-          name: string
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
         }
@@ -214,7 +212,6 @@ export type Database = {
           created_at?: string
           id?: string
           marketing_consent?: boolean | null
-          name?: string
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
         }
