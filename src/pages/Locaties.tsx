@@ -3,13 +3,19 @@ import { LocationsMap } from "@/components/LocationsMap";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const Locaties = () => {
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container py-8 flex flex-col gap-8">
-        <LocationsMap />
+        <LocationsMap 
+          selectedLocationId={selectedLocationId}
+          onLocationSelect={setSelectedLocationId}
+        />
         <div className="flex justify-center">
           <Button asChild>
             <Link to="/mijn-favoriete-plek" className="flex items-center gap-2">
