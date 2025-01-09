@@ -5,18 +5,37 @@ import { Heart, PlusCircle, Clock } from "lucide-react";
 import { useApprovedHearts } from "@/hooks/useApprovedHearts";
 import { Link } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export const HeartSection = () => {
   const session = useSession();
   const approvedHearts = useApprovedHearts();
+  const [pendingHeartUrl, setPendingHeartUrl] = useState<string | null>(null);
   
   const userHeart = approvedHearts.find(
-    (heart) => heart.user_id === session?.user.id
+    (heart) => heart.user_id === session?.user.id && heart.status === "approved"
   );
 
   const pendingHeart = approvedHearts.find(
     (heart) => heart.user_id === session?.user.id && heart.status === "new"
   );
+
+  useEffect(() => {
+    const fetchPendingHeartUrl = async () => {
+      if (pendingHeart?.image_path) {
+        const { data } = supabase.storage
+          .from('hearts')
+          .getPublicUrl(pendingHeart.image_path);
+        
+        if (data?.publicUrl) {
+          setPendingHeartUrl(data.publicUrl);
+        }
+      }
+    };
+
+    fetchPendingHeartUrl();
+  }, [pendingHeart?.image_path]);
 
   return (
     <Card className="mb-8">
@@ -35,18 +54,20 @@ export const HeartSection = () => {
                 Je tekening wordt momenteel beoordeeld. Je krijgt een e-mail zodra deze is goedgekeurd.
               </AlertDescription>
             </Alert>
-            <div className="aspect-square w-full max-w-md mx-auto">
-              <img
-                src={pendingHeart.image_path}
-                alt="Je wachtende hart"
-                className="w-full h-full object-contain"
-              />
-            </div>
+            {pendingHeartUrl && (
+              <div className="aspect-square w-full max-w-md mx-auto">
+                <img
+                  src={pendingHeartUrl}
+                  alt="Je wachtende hart"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
           </div>
         ) : userHeart ? (
           <div className="aspect-square w-full max-w-md mx-auto">
             <img
-              src={userHeart.image_path}
+              src={supabase.storage.from('hearts').getPublicUrl(userHeart.image_path).data.publicUrl}
               alt="Jouw hart"
               className="w-full h-full object-contain"
             />
