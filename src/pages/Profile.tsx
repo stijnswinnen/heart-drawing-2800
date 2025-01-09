@@ -4,6 +4,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { HeartSection } from "@/components/profile/HeartSection";
 import { LocationsSection } from "@/components/profile/LocationsSection";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
+import { Navigation } from "@/components/Navigation";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
@@ -53,12 +54,15 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <ProfileHeader />
-      <HeartSection />
-      <LocationsSection />
-      <PersonalInfoSection />
-    </div>
+    <>
+      <Navigation />
+      <div className="container mx-auto p-6">
+        <ProfileHeader />
+        <HeartSection />
+        <LocationsSection />
+        <PersonalInfoSection />
+      </div>
+    </>
   );
 };
 
