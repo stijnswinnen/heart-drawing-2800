@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -9,10 +9,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
 export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const location = useLocation();
@@ -21,12 +20,10 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const [session, setSession] = useState<any>(null);
   
   useEffect(() => {
-    // Fetch initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -36,7 +33,6 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
     return () => subscription.unsubscribe();
   }, []);
   
-  // Hide navigation when drawing on index page
   if (location.pathname === "/" && isDrawing) {
     return null;
   }
@@ -68,14 +64,25 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
           </li>
         ))}
       </ul>
-      <div className="mt-4 md:mt-0 md:absolute md:right-4">
+      <div className="mt-4 md:mt-0 md:absolute md:right-4 flex gap-2">
         {session ? (
-          <Button 
-            variant="outline" 
-            onClick={handleLogout}
-          >
-            Uitloggen
-          </Button>
+          <>
+            <Button 
+              variant="outline" 
+              asChild
+            >
+              <Link to="/profile">
+                <User className="h-4 w-4 mr-2" />
+                Profile
+              </Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+            >
+              Uitloggen
+            </Button>
+          </>
         ) : (
           <Button 
             variant="outline" 
