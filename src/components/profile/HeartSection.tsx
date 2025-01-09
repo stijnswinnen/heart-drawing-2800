@@ -14,7 +14,7 @@ export const HeartSection = () => {
     (heart) => heart.user_id === session?.user.id
   );
 
-  const hasPendingHeart = approvedHearts.some(
+  const pendingHeart = approvedHearts.find(
     (heart) => heart.user_id === session?.user.id && heart.status === "new"
   );
 
@@ -27,13 +27,22 @@ export const HeartSection = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {hasPendingHeart ? (
-          <Alert className="mb-4">
-            <Clock className="h-4 w-4" />
-            <AlertDescription>
-              Je tekening wordt momenteel beoordeeld. Je krijgt een e-mail zodra deze is goedgekeurd.
-            </AlertDescription>
-          </Alert>
+        {pendingHeart ? (
+          <div className="space-y-4">
+            <Alert>
+              <Clock className="h-4 w-4" />
+              <AlertDescription>
+                Je tekening wordt momenteel beoordeeld. Je krijgt een e-mail zodra deze is goedgekeurd.
+              </AlertDescription>
+            </Alert>
+            <div className="aspect-square w-full max-w-md mx-auto">
+              <img
+                src={pendingHeart.image_path}
+                alt="Your pending heart"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
         ) : userHeart ? (
           <div className="aspect-square w-full max-w-md mx-auto">
             <img
