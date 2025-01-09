@@ -25,14 +25,14 @@ export const PersonalInfoSection = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Your profile has been updated.",
+        title: "Succes",
+        description: "Je profiel is bijgewerkt.",
       });
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
+        title: "Fout",
+        description: "Profiel bijwerken mislukt. Probeer het opnieuw.",
         variant: "destructive",
       });
     } finally {
@@ -43,24 +43,24 @@ export const PersonalInfoSection = () => {
   return (
     <Card className="mt-8">
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
+        <CardTitle>Persoonlijke Informatie</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Name</Label>
+            <Label>Naam</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
+              placeholder="Jouw naam"
             />
           </div>
           <div>
-            <Label>Email</Label>
+            <Label>E-mailadres</Label>
             <Input value={session?.user.email || ""} type="email" disabled />
           </div>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? "Opslaan..." : "Wijzigingen Opslaan"}
           </Button>
         </form>
       </CardContent>

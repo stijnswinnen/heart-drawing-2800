@@ -33,18 +33,18 @@ export const LocationsSection = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>My Places</CardTitle>
+        <CardTitle>Mijn Plekken</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="my-locations">
           <TabsList>
             <TabsTrigger value="my-locations">
               <MapPin className="mr-2 h-4 w-4" />
-              My Locations
+              Mijn Locaties
             </TabsTrigger>
             <TabsTrigger value="favorites">
               <Star className="mr-2 h-4 w-4" />
-              Favorites
+              Favorieten
             </TabsTrigger>
           </TabsList>
 
@@ -62,7 +62,7 @@ export const LocationsSection = () => {
                     <Button variant="outline" asChild>
                       <Link to={`/locaties?id=${location.id}`}>
                         <Edit className="mr-2 h-4 w-4" />
-                        View Details
+                        Bekijk Details
                       </Link>
                     </Button>
                   </CardFooter>
@@ -72,7 +72,7 @@ export const LocationsSection = () => {
                 <Button variant="outline" asChild>
                   <Link to="/mijn-favoriete-plek">
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Add New Location
+                    Voeg Nieuwe Locatie Toe
                   </Link>
                 </Button>
               </Card>
@@ -93,7 +93,7 @@ export const LocationsSection = () => {
                     <Button variant="outline" asChild>
                       <Link to={`/locaties?id=${location.id}`}>
                         <Edit className="mr-2 h-4 w-4" />
-                        View Details
+                        Bekijk Details
                       </Link>
                     </Button>
                   </CardFooter>

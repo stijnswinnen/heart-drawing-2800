@@ -33,21 +33,21 @@ export const ProfileHeader = () => {
           </AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-2xl font-bold">Welcome!</h1>
+          <h1 className="text-2xl font-bold">Welkom!</h1>
           <p className="text-muted-foreground">{session?.user.email}</p>
         </div>
       </div>
       <div className="flex gap-4">
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Hearts Created</p>
+          <p className="text-sm text-muted-foreground">Harten Gemaakt</p>
           <p className="text-2xl font-bold">{userHearts.length}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Locations Added</p>
+          <p className="text-sm text-muted-foreground">Locaties Toegevoegd</p>
           <p className="text-2xl font-bold">{userLocations.length}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Favorite Places</p>
+          <p className="text-sm text-muted-foreground">Favoriete Plekken</p>
           <p className="text-2xl font-bold">{userLikes.length}</p>
         </Card>
       </div>

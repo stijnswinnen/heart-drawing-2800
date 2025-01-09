@@ -23,7 +23,7 @@ export const HeartSection = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Heart className="h-5 w-5" />
-          My Heart
+          Mijn Hart
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -38,7 +38,7 @@ export const HeartSection = () => {
             <div className="aspect-square w-full max-w-md mx-auto">
               <img
                 src={pendingHeart.image_path}
-                alt="Your pending heart"
+                alt="Je wachtende hart"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -47,19 +47,19 @@ export const HeartSection = () => {
           <div className="aspect-square w-full max-w-md mx-auto">
             <img
               src={userHeart.image_path}
-              alt="Your heart"
+              alt="Jouw hart"
               className="w-full h-full object-contain"
             />
           </div>
         ) : (
           <div className="text-center p-8">
             <p className="text-muted-foreground mb-4">
-              You haven't created a heart yet
+              Je hebt nog geen hart gemaakt
             </p>
             <Button asChild>
               <Link to="/hearts">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Create Your Heart
+                Maak Je Hart
               </Link>
             </Button>
           </div>
