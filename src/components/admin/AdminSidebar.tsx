@@ -11,8 +11,15 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Tables } from "@/integrations/supabase/types";
 
-export const AdminSidebar = () => {
+interface AdminSidebarProps {
+  selectedStatus: "new" | "approved";
+  setSelectedStatus: (status: "new" | "approved") => void;
+  drawings: Tables<"drawings">[] | null;
+}
+
+export const AdminSidebar = ({ selectedStatus, setSelectedStatus, drawings }: AdminSidebarProps) => {
   const location = useLocation();
 
   const menuItems = [
@@ -24,12 +31,16 @@ export const AdminSidebar = () => {
           url: "/admin",
           icon: Heart,
           activePattern: /^\/admin$/,
+          onClick: () => setSelectedStatus("new"),
+          isActive: selectedStatus === "new" && location.pathname === "/admin",
         },
         {
           title: "Approved Hearts",
           url: "/admin/approved-hearts",
           icon: Heart,
           activePattern: /^\/admin\/approved-hearts$/,
+          onClick: () => setSelectedStatus("approved"),
+          isActive: selectedStatus === "approved" || location.pathname === "/admin/approved-hearts",
         },
       ],
     },
@@ -76,9 +87,10 @@ export const AdminSidebar = () => {
                     <SidebarMenuButton
                       asChild
                       className={cn(
-                        item.activePattern.test(location.pathname) &&
+                        (item.isActive || item.activePattern.test(location.pathname)) &&
                           "bg-zinc-100 text-zinc-900"
                       )}
+                      onClick={item.onClick}
                     >
                       <Link to={item.url} className="flex items-center gap-2">
                         <item.icon className="w-4 h-4" />
