@@ -29,10 +29,17 @@ export const useApprovedHearts = () => {
       }
 
       // Then fetch drawings that match either user_id or heart_user_id
-      const { data, error } = await supabase
+      let query = supabase
         .from('drawings')
-        .select('image_path, user_id, heart_user_id, status')
-        .or(`user_id.eq.${session?.user?.id},heart_user_id.eq.${profileId}`);
+        .select('image_path, user_id, heart_user_id, status');
+
+      if (session?.user?.id || profileId) {
+        query = query.or(
+          `user_id.eq.${session?.user?.id}${profileId ? `,heart_user_id.eq.${profileId}` : ''}`
+        );
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       setApprovedHearts(data || []);

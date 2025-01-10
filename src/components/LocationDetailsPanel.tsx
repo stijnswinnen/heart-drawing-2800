@@ -35,9 +35,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
             name, 
             description, 
             recommendation,
-            profile:profiles!locations_heart_user_id_fkey (
-              name
-            )
+            profile:profiles(name)
           `)
           .eq('id', locationId)
           .maybeSingle();
@@ -59,7 +57,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           name: data.name,
           description: data.description || '',
           recommendation: data.recommendation || '',
-          profile: data.profile ? { name: data.profile.name } : null
+          profile: data.profile as Profile | null
         };
 
         setLocation(locationData);
