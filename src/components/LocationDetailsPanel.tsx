@@ -54,20 +54,16 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           return;
         }
 
-        // Safely handle profile data with proper type checking
-        let profileData: Profile | null = null;
-        if (data.profile && 
-            typeof data.profile === 'object' && 
-            'name' in data.profile && 
-            typeof data.profile.name === 'string') {
-          profileData = { name: data.profile.name };
-        }
+        // Safely handle profile data
+        const profileData: Profile | null = data.profile && typeof data.profile === 'object' && 'name' in data.profile
+          ? { name: data.profile.name as string }
+          : null;
 
         const locationData: Location = {
           id: data.id,
           name: data.name,
-          description: data.description,
-          recommendation: data.recommendation,
+          description: data.description || '',
+          recommendation: data.recommendation || '',
           profile: profileData
         };
 
