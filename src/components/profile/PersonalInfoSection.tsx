@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, CheckCircle2, XCircle } from "lucide-react";
+import { Mail, CheckCircle2, XCircle, Lock } from "lucide-react";
 
 export const PersonalInfoSection = () => {
   const session = useSession();
@@ -13,6 +13,7 @@ export const PersonalInfoSection = () => {
   const [name, setName] = useState(session?.user?.user_metadata?.name || "");
   const [isLoading, setIsLoading] = useState(false);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [isRequestingReset, setIsRequestingReset] = useState(false);
 
   const isVerified = session?.user?.email_confirmed_at !== null;
 
@@ -55,6 +56,27 @@ export const PersonalInfoSection = () => {
       toast.error("Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.");
     } finally {
       setIsResendingVerification(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    setIsRequestingReset(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        session?.user?.email || '',
+        {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }
+      );
+
+      if (error) throw error;
+
+      toast.success("Een wachtwoord reset link is verzonden naar je e-mail.");
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
+      toast.error("Er ging iets mis bij het verzenden van de wachtwoord reset e-mail. Probeer het later opnieuw.");
+    } finally {
+      setIsRequestingReset(false);
     }
   };
 
@@ -109,13 +131,25 @@ export const PersonalInfoSection = () => {
               </div>
             </div>
           </div>
-          <Button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-primary-dark hover:bg-primary-light text-white transition-colors duration-300"
-          >
-            {isLoading ? "Opslaan..." : "Wijzigingen Opslaan"}
-          </Button>
+          <div className="flex flex-col gap-4">
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full bg-primary-dark hover:bg-primary-light text-white transition-colors duration-300"
+            >
+              {isLoading ? "Opslaan..." : "Wijzigingen Opslaan"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePasswordReset}
+              disabled={isRequestingReset}
+              className="w-full border-primary/20"
+            >
+              <Lock className="mr-2 h-4 w-4" />
+              {isRequestingReset ? "Verzenden..." : "Wachtwoord wijzigen"}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
