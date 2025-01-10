@@ -66,10 +66,14 @@ const Admin = () => {
   return (
     <AdminLayout>
       <Routes>
-        <Route path="/" element={<AdminContent drawings={drawings} />} />
-        <Route path="/approved-hearts" element={<ApprovedHeartsContent />} />
-        <Route path="/locations" element={<LocationsList />} />
-        <Route path="/stats" element={<StatsOverview />} />
+        <Route path="/*" element={
+          <Routes>
+            <Route path="/" element={<AdminContent drawings={drawings} />} />
+            <Route path="/approved-hearts" element={<ApprovedHeartsContent />} />
+            <Route path="/locations" element={<LocationsList />} />
+            <Route path="/stats" element={<StatsOverview />} />
+          </Routes>
+        } />
       </Routes>
     </AdminLayout>
   );
