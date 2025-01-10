@@ -12,6 +12,12 @@ interface AdminContentProps {
   drawings: Tables<"drawings">[] | null;
 }
 
+interface AdminSidebarProps {
+  selectedStatus: DrawingStatus;
+  setSelectedStatus: (status: DrawingStatus) => void;
+  drawings: Tables<"drawings">[] | null;
+}
+
 export const AdminContent = ({ drawings }: AdminContentProps) => {
   const [selectedStatus, setSelectedStatus] = useState<DrawingStatus>("new");
   const queryClient = useQueryClient();
