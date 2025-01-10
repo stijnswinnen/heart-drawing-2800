@@ -48,38 +48,48 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       setIsVerifying(true);
       console.log('Starting submission process with data:', data);
 
-      const { error: upsertError } = await supabase
+      // First, create an auth user if they don't exist
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: crypto.randomUUID(), // Generate a random password
+        options: {
+          data: {
+            name: data.name,
+            marketing_consent: data.newsletter,
+          },
+        },
+      });
+
+      if (signUpError) {
+        console.error('Error signing up:', signUpError);
+        throw new Error("Failed to create user account");
+      }
+
+      if (!authData.user?.id) {
+        throw new Error("No user ID returned from signup");
+      }
+
+      // Now create/update the profile with the auth user's ID
+      const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
-          id: crypto.randomUUID(),
+          id: authData.user.id,
           email: data.email,
           name: data.name,
           marketing_consent: data.newsletter,
-        }, {
-          onConflict: 'email'
         });
 
-      if (upsertError) {
-        console.error('Error upserting profile:', upsertError);
+      if (profileError) {
+        console.error('Error upserting profile:', profileError);
         throw new Error("Failed to create user record");
       }
 
-      const { data: existingUser } = await supabase
-        .from("profiles")
-        .select("email_verified")
-        .eq("email", data.email)
-        .maybeSingle();
+      const { error: verificationError } = await supabase.functions.invoke("send-verification-email", {
+        body: { email: data.email },
+      });
 
-      if (!existingUser?.email_verified) {
-        console.log('Email not verified, sending verification email');
-        const response = await supabase.functions.invoke("send-verification-email", {
-          body: { email: data.email },
-        });
-
-        if (response.error) {
-          console.error('Error sending verification email:', response.error);
-          throw new Error(response.error.message || "Failed to send verification email");
-        }
+      if (verificationError) {
+        console.error('Error sending verification email:', verificationError);
       }
 
       onSubmit(data);

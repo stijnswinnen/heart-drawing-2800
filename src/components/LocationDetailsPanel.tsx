@@ -54,17 +54,21 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           return;
         }
 
-        // Type guard to ensure profile has the correct shape
-        const profile = data.profile && typeof data.profile === 'object' && 'name' in data.profile && data.profile.name
-          ? { name: data.profile.name }
-          : null;
+        // Safely handle profile data with proper type checking
+        let profileData: Profile | null = null;
+        if (data.profile && 
+            typeof data.profile === 'object' && 
+            'name' in data.profile && 
+            typeof data.profile.name === 'string') {
+          profileData = { name: data.profile.name };
+        }
 
         const locationData: Location = {
           id: data.id,
           name: data.name,
           description: data.description,
           recommendation: data.recommendation,
-          profile
+          profile: profileData
         };
 
         setLocation(locationData);
