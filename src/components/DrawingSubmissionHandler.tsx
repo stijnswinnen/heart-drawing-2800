@@ -45,28 +45,20 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // First check if there's an existing heart user with this email
-      console.log('Checking for existing heart user...');
-      const { data: existingUsers, error: userError } = await supabase
-        .from('heart_users')
+      // First check if there's an existing profile with this email
+      console.log('Checking for existing profile...');
+      const { data: existingProfile } = await supabase
+        .from('profiles')
         .select('id, email_verified')
-        .eq('email', data.email);
+        .eq('email', data.email)
+        .single();
 
-      if (userError) {
-        console.error('Error checking for existing heart user:', userError);
-        toast.error("Versturen van tekening is mislukt");
-        return;
-      }
-
-      console.log('Existing users check result:', existingUsers?.length || 0, 'users found');
-
-      // If we found an existing user, check if they have any drawings
-      if (existingUsers && existingUsers.length > 0) {
-        console.log('Found existing heart user, checking for any drawings');
+      if (existingProfile) {
+        console.log('Found existing profile, checking for any drawings');
         const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
-          .eq('heart_user_id', existingUsers[0].id);
+          .eq('heart_user_id', existingProfile.id);
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
@@ -96,7 +88,7 @@ export const DrawingSubmissionHandler = ({
       }
 
       // Check if the email needs verification
-      const isEmailVerified = existingUsers?.[0]?.email_verified;
+      const isEmailVerified = existingProfile?.email_verified;
       if (!isEmailVerified) {
         toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
       } else {
@@ -110,38 +102,6 @@ export const DrawingSubmissionHandler = ({
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
       toast.error(error.message || "Versturen van tekening is mislukt");
-    }
-  };
-
-  const handleReplaceDrawing = async () => {
-    try {
-      if (!existingDrawing?.image_path) {
-        console.error('No existing drawing found to replace');
-        toast.error("No existing drawing found");
-        return;
-      }
-
-      console.log('Attempting to delete file:', existingDrawing.image_path);
-      await deleteDrawing(existingDrawing.image_path);
-      
-      // Delete the database record
-      const { error: deleteError } = await supabase
-        .from('drawings')
-        .delete()
-        .eq('heart_user_id', existingDrawing.heart_user_id);
-
-      if (deleteError) {
-        console.error('Error deleting drawing record:', deleteError);
-        toast.error("Failed to delete existing drawing");
-        return;
-      }
-
-      console.log('Old drawing deleted successfully');
-      setShowReplaceDialog(false);
-      setShowSubmitForm(true);
-    } catch (error: any) {
-      console.error('Error replacing drawing:', error);
-      toast.error(error.message || "Failed to replace drawing");
     }
   };
 

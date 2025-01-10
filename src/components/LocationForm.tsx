@@ -21,15 +21,15 @@ export const LocationForm = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (session?.user?.id) {
-        const { data: heartUser } = await supabase
-          .from('heart_users')
-          .select('name')
-          .eq('user_id', session.user.id)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', session.user.id)
           .single();
 
-        if (heartUser) {
-          setName(heartUser.name);
-          setEmail(session.user.email || '');
+        if (profile) {
+          setName(profile.name || '');
+          setEmail(profile.email || '');
         }
       }
     };
@@ -73,8 +73,9 @@ export const LocationForm = () => {
     setIsSubmitting(true);
 
     try {
-      const { data: heartUser, error: heartUserError } = await supabase
-        .from("heart_users")
+      // First get or create profile
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
         .upsert({
           email,
           name,
@@ -85,7 +86,7 @@ export const LocationForm = () => {
         .select()
         .single();
 
-      if (heartUserError) throw heartUserError;
+      if (profileError) throw profileError;
 
       const { error } = await supabase.from("locations").insert({
         name: locationName,
@@ -94,7 +95,7 @@ export const LocationForm = () => {
         latitude: coordinates.lat,
         longitude: coordinates.lng,
         user_id: session?.user?.id || null,
-        heart_user_id: heartUser.id,
+        heart_user_id: profile.id,
         share_consent: shareConsent,
       });
 

@@ -13,7 +13,7 @@ interface Location {
   name: string;
   description: string | null;
   recommendation: string | null;
-  heart_users: {
+  profile: {
     name: string;
   } | null;
 }
@@ -45,7 +45,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
             name, 
             description, 
             recommendation,
-            heart_users (
+            profiles:heart_user_id (
               name
             )
           `)
@@ -120,9 +120,9 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
 
       <Separator className="bg-primary-light" />
       
-      {location.heart_users?.name && (
+      {location.profile?.name && (
         <p className="text-sm text-muted-foreground font-montserrat">
-          Gedeeld door {location.heart_users.name}
+          Gedeeld door {location.profile.name}
         </p>
       )}
 

@@ -35,29 +35,28 @@ export const submitDrawing = async (
     throw new Error("Please draw something before submitting!");
   }
 
-  // First, create or get the heart user
-  let heartUserId;
-  console.log('Checking for existing heart user...');
-  const { data: existingUsers, error: userError } = await supabase
-    .from('heart_users')
+  // First, create or get the profile
+  let profileId;
+  console.log('Checking for existing profile...');
+  const { data: existingProfile, error: profileError } = await supabase
+    .from('profiles')
     .select('id, email_verified')
-    .eq('email', data.email);
+    .eq('email', data.email)
+    .single();
 
-  if (userError) {
-    console.error('Error checking for existing heart user:', userError);
-    throw new Error("Failed to check user information: " + userError.message);
+  if (profileError && profileError.code !== 'PGRST116') {
+    console.error('Error checking for existing profile:', profileError);
+    throw new Error("Failed to check user information: " + profileError.message);
   }
 
-  console.log('Existing users check result:', existingUsers);
-
-  if (existingUsers && existingUsers.length > 0) {
-    heartUserId = existingUsers[0].id;
-    console.log('Using existing heart user ID:', heartUserId);
+  if (existingProfile) {
+    profileId = existingProfile.id;
+    console.log('Using existing profile ID:', profileId);
   } else {
-    // Create new heart user
-    console.log('Creating new heart user...');
-    const { data: heartUser, error: userError } = await supabase
-      .from('heart_users')
+    // Create new profile
+    console.log('Creating new profile...');
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
       .insert({
         email: data.email,
         name: data.name,
@@ -66,13 +65,13 @@ export const submitDrawing = async (
       .select()
       .single();
 
-    if (userError) {
-      console.error('Error creating heart user:', userError);
-      throw new Error("Failed to save user information: " + userError.message);
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      throw new Error("Failed to save user information: " + profileError.message);
     }
 
-    heartUserId = heartUser.id;
-    console.log('Created new heart user with ID:', heartUserId);
+    profileId = profile.id;
+    console.log('Created new profile with ID:', profileId);
   }
 
   console.log('Converting canvas to blob...');
@@ -110,7 +109,7 @@ export const submitDrawing = async (
       .from('drawings')
       .insert({
         user_id: userId,
-        heart_user_id: heartUserId,
+        heart_user_id: profileId,
         image_path: fileName,
         status: 'new'
       });

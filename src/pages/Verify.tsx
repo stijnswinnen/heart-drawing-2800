@@ -29,12 +29,12 @@ export default function Verify() {
         }
 
         const { data, error } = await supabase
-          .from("heart_users")
+          .from("profiles")
           .update({ email_verified: true })
           .eq("email", email)
           .eq("verification_token", token)
           .select()
-          .maybeSingle();
+          .single();
 
         if (error || !data) {
           throw new Error("Invalid or expired verification link");
