@@ -25,12 +25,6 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Check if RESEND_API_KEY is set
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is not set");
-      throw new Error("Email service configuration error: RESEND_API_KEY is not set");
-    }
-
     const { email }: EmailRequest = await req.json();
     console.log("Sending verification email to:", email);
 
@@ -52,32 +46,24 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Generate new verification token if needed
-    if (!profile.verification_token) {
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          verification_token: crypto.randomUUID(),
-          verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
-          last_verification_email_sent_at: new Date().toISOString()
-        })
-        .eq("email", email)
-        .select()
-        .single();
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        verification_token: crypto.randomUUID(),
+        verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
+        last_verification_email_sent_at: new Date().toISOString()
+      })
+      .eq("email", email)
+      .select()
+      .single();
 
-      if (updateError) {
-        console.error("Error updating profile with verification token:", updateError);
-        throw new Error("Failed to generate verification token");
-      }
-
-      profile.verification_token = updatedProfile.verification_token;
+    if (updateError) {
+      console.error("Error updating profile with verification token:", updateError);
+      throw new Error("Failed to generate verification token");
     }
 
-    console.log("Profile data retrieved:", { ...profile, verification_token: "REDACTED" });
+    const verificationUrl = `https://2800.love/verify?token=${updatedProfile.verification_token}&email=${encodeURIComponent(email)}`;
 
-    const verificationUrl = `https://2800.love/verify?token=${profile.verification_token}&email=${encodeURIComponent(email)}`;
-    console.log("Verification URL generated:", verificationUrl);
-
-    console.log("Attempting to send email via Resend");
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -118,12 +104,10 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    const resendResponse = await res.text();
-    console.log("Resend API response:", resendResponse);
-
     if (!res.ok) {
-      console.error("Resend API error:", resendResponse);
-      throw new Error(`Failed to send verification email: ${resendResponse}`);
+      const error = await res.text();
+      console.error("Resend API error:", error);
+      throw new Error(`Failed to send verification email: ${error}`);
     }
 
     return new Response(JSON.stringify({ message: "Verification email sent" }), {

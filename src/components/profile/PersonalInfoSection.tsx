@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { Mail, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export const PersonalInfoSection = () => {
   const session = useSession();
@@ -12,6 +14,9 @@ export const PersonalInfoSection = () => {
   const { toast } = useToast();
   const [name, setName] = useState(session?.user?.user_metadata?.name || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+
+  const isVerified = session?.user?.email_confirmed_at !== null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +45,24 @@ export const PersonalInfoSection = () => {
     }
   };
 
+  const handleResendVerification = async () => {
+    setIsResendingVerification(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-verification-email', {
+        body: { email: session?.user?.email },
+      });
+
+      if (error) throw error;
+
+      toast.success('Een nieuwe verificatie e-mail is verzonden. Check je inbox.');
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      toast.error('Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.');
+    } finally {
+      setIsResendingVerification(false);
+    }
+  };
+
   return (
     <Card className="transition-all duration-300 hover:shadow-lg">
       <CardHeader>
@@ -58,12 +81,38 @@ export const PersonalInfoSection = () => {
           </div>
           <div className="space-y-2">
             <Label className="text-sm font-medium text-muted-foreground">E-mailadres</Label>
-            <Input 
-              value={session?.user.email || ""} 
-              type="email" 
-              disabled 
-              className="bg-gray-50 border-primary/20"
-            />
+            <div className="space-y-2">
+              <Input 
+                value={session?.user.email || ""} 
+                type="email" 
+                disabled 
+                className="bg-gray-50 border-primary/20"
+              />
+              <div className="flex items-center gap-2 text-sm">
+                {isVerified ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-green-600">E-mailadres geverifieerd</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-4 w-4 text-red-500" />
+                    <span className="text-red-600">E-mailadres niet geverifieerd</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResendVerification}
+                      disabled={isResendingVerification}
+                      className="ml-2"
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      {isResendingVerification ? "Verzenden..." : "Verificatie e-mail opnieuw versturen"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
           <Button 
             type="submit" 
