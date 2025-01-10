@@ -20,16 +20,20 @@ const LocatiesList = () => {
     }
   }, [searchParams, locations]);
 
+  const selectedLocation = locations.find(loc => loc.id === selectedLocationId);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container py-8">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-[40%] order-2 md:order-1">
-            <LocationDetailsPanel 
-              locationId={selectedLocationId} 
-              onClose={() => setSelectedLocationId(null)}
-            />
+            {selectedLocation && (
+              <LocationDetailsPanel 
+                location={selectedLocation} 
+                onClose={() => setSelectedLocationId(null)}
+              />
+            )}
           </div>
           
           <div className="w-full md:w-[60%] order-1 md:order-2">
