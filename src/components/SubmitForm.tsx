@@ -69,7 +69,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         throw new Error("No user ID returned from signup");
       }
 
-      // Now create/update the profile with the auth user's ID
+      // Now upsert the profile
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -77,6 +77,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           email: data.email,
           name: data.name,
           marketing_consent: data.newsletter,
+        }, {
+          onConflict: 'email',
+          ignoreDuplicates: false
         });
 
       if (profileError) {
