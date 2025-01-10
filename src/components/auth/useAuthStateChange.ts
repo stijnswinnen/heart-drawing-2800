@@ -50,18 +50,27 @@ export const useAuthStateChange = (onClose: () => void) => {
 
   const handleSignedInUser = async (user: any) => {
     try {
-      const { data: profile, error: profileError } = await supabase
+      // First check if profile exists by user ID
+      const { data: profileById, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
         toast.error('Error checking user role');
         return;
       }
 
+      // If profile exists by ID, handle admin navigation
+      if (profileById?.role === 'admin') {
+        navigate('/admin');
+        onClose();
+        return;
+      }
+
+      // Try to link existing profile by email if it exists
       const { data: heartUser, error: linkError } = await supabase
         .from('profiles')
         .update({ 
@@ -70,10 +79,10 @@ export const useAuthStateChange = (onClose: () => void) => {
         })
         .eq('email', user.email)
         .select()
-        .single();
+        .maybeSingle();
 
-      if (linkError) {
-        console.log('No existing profile to link:', linkError);
+      if (linkError && linkError.code !== 'PGRST116') {
+        console.error('Error linking profile:', linkError);
       } else if (heartUser) {
         console.log('Linked existing profile to auth account:', heartUser);
       }
@@ -81,9 +90,6 @@ export const useAuthStateChange = (onClose: () => void) => {
       toast.success('Successfully signed in!');
       onClose();
 
-      if (profile?.role === 'admin') {
-        navigate('/admin');
-      }
     } catch (error: any) {
       console.error('Error in auth state change:', error);
       handleAuthError(error);
