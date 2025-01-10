@@ -27,17 +27,10 @@ export const PersonalInfoSection = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Je profiel is bijgewerkt.",
-      });
+      toast.success("Je profiel is bijgewerkt.");
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast({
-        title: "Error",
-        description: "Profiel bijwerken mislukt. Probeer het opnieuw.",
-        variant: "destructive",
-      });
+      toast.error("Profiel bijwerken mislukt. Probeer het opnieuw.");
     } finally {
       setIsLoading(false);
     }
@@ -56,17 +49,10 @@ export const PersonalInfoSection = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Een nieuwe verificatie e-mail is verzonden. Check je inbox.",
-      });
+      toast.success("Een nieuwe verificatie e-mail is verzonden. Check je inbox.");
     } catch (error) {
       console.error('Error sending verification email:', error);
-      toast({
-        title: "Error",
-        description: "Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.",
-        variant: "destructive",
-      });
+      toast.error("Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.");
     } finally {
       setIsResendingVerification(false);
     }

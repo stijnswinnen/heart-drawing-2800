@@ -41,11 +41,7 @@ export const DrawingSubmissionHandler = ({
       const canvas = document.querySelector('canvas');
       if (!canvas) {
         console.error('No canvas element found');
-        toast({
-          title: "Error",
-          description: "Versturen van tekening is mislukt",
-          variant: "destructive",
-        });
+        toast.error("Versturen van tekening is mislukt");
         return;
       }
 
@@ -66,11 +62,7 @@ export const DrawingSubmissionHandler = ({
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
-          toast({
-            title: "Error",
-            description: "Versturen van tekening is mislukt",
-            variant: "destructive",
-          });
+          toast.error("Versturen van tekening is mislukt");
           return;
         }
 
@@ -91,26 +83,16 @@ export const DrawingSubmissionHandler = ({
       
       if (!fileName) {
         console.error('No filename returned from submitDrawing');
-        toast({
-          title: "Error",
-          description: "Versturen van tekening is mislukt",
-          variant: "destructive",
-        });
+        toast.error("Versturen van tekening is mislukt");
         return;
       }
 
       // Check if the email needs verification
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email_confirmed_at) {
-        toast({
-          title: "Success",
-          description: "We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.",
-        });
+        toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
       } else {
-        toast({
-          title: "Success",
-          description: "Tekening werd met succes doorgestuurd!",
-        });
+        toast.success("Tekening werd met succes doorgestuurd!");
       }
 
       setShowConfetti(true);
@@ -119,11 +101,7 @@ export const DrawingSubmissionHandler = ({
       setHasDrawn(false);
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Versturen van tekening is mislukt",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Versturen van tekening is mislukt");
     }
   };
 
@@ -136,11 +114,7 @@ export const DrawingSubmissionHandler = ({
       }
     } catch (error: any) {
       console.error('Error replacing drawing:', error);
-      toast({
-        title: "Error",
-        description: "Error replacing drawing",
-        variant: "destructive",
-      });
+      toast.error("Error replacing drawing");
     }
   };
 

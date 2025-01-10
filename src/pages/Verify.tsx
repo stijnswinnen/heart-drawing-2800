@@ -18,21 +18,14 @@ export default function Verify() {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user?.email_confirmed_at) {
-          toast({
-            title: "Success",
-            description: "E-mailadres succesvol geverifieerd!",
-          });
+          toast.success("E-mailadres succesvol geverifieerd!");
           setVerificationComplete(true);
         } else {
           throw new Error("Email verification failed");
         }
       } catch (error: any) {
         console.error("Error verifying email:", error);
-        toast({
-          title: "Error",
-          description: "Er is iets misgegaan bij het verifiëren van je e-mailadres",
-          variant: "destructive",
-        });
+        toast.error("Er is iets misgegaan bij het verifiëren van je e-mailadres");
         navigate("/");
       } finally {
         setIsVerifying(false);

@@ -73,11 +73,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       onSubmit(data);
     } catch (error: any) {
       console.error("Error in form submission:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail");
     } finally {
       setIsVerifying(false);
     }
