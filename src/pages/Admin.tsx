@@ -31,6 +31,20 @@ const Admin = () => {
     enabled: !!session?.user?.id,
   });
 
+  const { data: drawings } = useQuery({
+    queryKey: ["admin-drawings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("drawings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile?.role === "admin",
+  });
+
   useEffect(() => {
     if (!session) {
       navigate("/");
@@ -51,7 +65,7 @@ const Admin = () => {
   return (
     <AdminLayout>
       <Routes>
-        <Route path="/" element={<AdminContent />} />
+        <Route path="/" element={<AdminContent drawings={drawings} />} />
         <Route path="/locations" element={<LocationsList />} />
         <Route path="/stats" element={<StatsOverview />} />
       </Routes>

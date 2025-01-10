@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { DatabaseEnums } from "@/integrations/supabase/types";
 
 export const LocationsList = () => {
   const { data: locations, refetch } = useQuery({
@@ -30,7 +31,7 @@ export const LocationsList = () => {
   const handleApprove = async (id: string) => {
     const { error } = await supabase
       .from("locations")
-      .update({ status: "approved" })
+      .update({ status: "approved" as DatabaseEnums["location_status"] })
       .eq("id", id);
 
     if (error) {
@@ -45,7 +46,7 @@ export const LocationsList = () => {
   const handleReject = async (id: string) => {
     const { error } = await supabase
       .from("locations")
-      .update({ status: "rejected" })
+      .update({ status: "pending_verification" as DatabaseEnums["location_status"] })
       .eq("id", id);
 
     if (error) {
@@ -79,7 +80,7 @@ export const LocationsList = () => {
                   variant={
                     location.status === "approved"
                       ? "success"
-                      : location.status === "rejected"
+                      : location.status === "pending_verification"
                       ? "destructive"
                       : "secondary"
                   }
