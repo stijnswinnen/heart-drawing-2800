@@ -48,7 +48,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       setIsVerifying(true);
       console.log('Starting submission process with data:', { ...data, email: '***' });
 
-      // Create auth user and let the trigger handle profile creation
+      // Create auth user with email verification enabled
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: crypto.randomUUID(),
@@ -57,6 +57,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
             name: data.name,
             marketing_consent: data.newsletter,
           },
+          emailRedirectTo: `${window.location.origin}/verify`,
         },
       });
 
@@ -69,20 +70,14 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         throw new Error("No user ID returned from signup");
       }
 
-      // Send verification email
-      const { error: verificationError } = await supabase.functions.invoke("send-verification-email", {
-        body: { email: data.email },
-      });
-
-      if (verificationError) {
-        console.error('Error sending verification email:', verificationError);
-        throw new Error("Failed to send verification email");
-      }
-
       onSubmit(data);
     } catch (error: any) {
       console.error("Error in form submission:", error);
-      toast.error(error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail");
+      toast({
+        title: "Error",
+        description: error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail",
+        variant: "destructive",
+      });
     } finally {
       setIsVerifying(false);
     }

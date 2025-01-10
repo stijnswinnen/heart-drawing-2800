@@ -1,58 +1,46 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export default function Verify() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationComplete, setVerificationComplete] = useState(false);
 
   useEffect(() => {
-    const verifyEmail = async () => {
+    const handleEmailVerification = async () => {
       try {
-        const token = searchParams.get("token");
-        const email = searchParams.get("email");
-        const preview = searchParams.get("preview");
+        const { error } = await supabase.auth.refreshSession();
+        if (error) throw error;
 
-        if (preview === "true") {
-          console.log("Preview mode activated");
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user?.email_confirmed_at) {
+          toast({
+            title: "Success",
+            description: "E-mailadres succesvol geverifieerd!",
+          });
           setVerificationComplete(true);
-          setIsVerifying(false);
-          return;
+        } else {
+          throw new Error("Email verification failed");
         }
-
-        if (!token || !email) {
-          throw new Error("Invalid verification link");
-        }
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .update({ email_verified: true })
-          .eq("email", email)
-          .eq("verification_token", token)
-          .select()
-          .single();
-
-        if (error || !data) {
-          throw new Error("Invalid or expired verification link");
-        }
-
-        toast.success("E-mailadres succesvol geverifieerd!");
-        setVerificationComplete(true);
       } catch (error: any) {
         console.error("Error verifying email:", error);
-        toast.error(error.message || "Er is iets misgegaan bij het verifiëren van je e-mailadres");
+        toast({
+          title: "Error",
+          description: "Er is iets misgegaan bij het verifiëren van je e-mailadres",
+          variant: "destructive",
+        });
         navigate("/");
       } finally {
         setIsVerifying(false);
       }
     };
 
-    verifyEmail();
-  }, [searchParams, navigate]);
+    handleEmailVerification();
+  }, [navigate]);
 
   if (isVerifying) {
     return (

@@ -4,13 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Mail, CheckCircle2, XCircle } from "lucide-react";
 
 export const PersonalInfoSection = () => {
   const session = useSession();
   const supabase = useSupabaseClient();
-  const { toast } = useToast();
   const [name, setName] = useState(session?.user?.user_metadata?.name || "");
   const [isLoading, setIsLoading] = useState(false);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
@@ -29,13 +28,13 @@ export const PersonalInfoSection = () => {
       if (error) throw error;
 
       toast({
-        title: "Succes",
+        title: "Success",
         description: "Je profiel is bijgewerkt.",
       });
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Fout",
+        title: "Error",
         description: "Profiel bijwerken mislukt. Probeer het opnieuw.",
         variant: "destructive",
       });
@@ -47,20 +46,24 @@ export const PersonalInfoSection = () => {
   const handleResendVerification = async () => {
     setIsResendingVerification(true);
     try {
-      const { error } = await supabase.functions.invoke('send-verification-email', {
-        body: { email: session?.user?.email },
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: session?.user?.email || '',
+        options: {
+          emailRedirectTo: `${window.location.origin}/verify`,
+        },
       });
 
       if (error) throw error;
 
       toast({
-        title: "Succes",
+        title: "Success",
         description: "Een nieuwe verificatie e-mail is verzonden. Check je inbox.",
       });
     } catch (error) {
       console.error('Error sending verification email:', error);
       toast({
-        title: "Fout",
+        title: "Error",
         description: "Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.",
         variant: "destructive",
       });
@@ -89,7 +92,7 @@ export const PersonalInfoSection = () => {
             <Label className="text-sm font-medium text-muted-foreground">E-mailadres</Label>
             <div className="space-y-2">
               <Input 
-                value={session?.user.email || ""} 
+                value={session?.user?.email || ""} 
                 type="email" 
                 disabled 
                 className="bg-gray-50 border-primary/20"
