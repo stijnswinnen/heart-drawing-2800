@@ -42,7 +42,7 @@ const Admin = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!profile?.role === "admin",
+    enabled: profile?.role === "admin",
   });
 
   useEffect(() => {
