@@ -48,10 +48,10 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       setIsVerifying(true);
       console.log('Starting submission process with data:', { ...data, email: '***' });
 
-      // First, create an auth user if they don't exist
+      // Create auth user and let the trigger handle profile creation
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
-        password: crypto.randomUUID(), // Generate a random password
+        password: crypto.randomUUID(),
         options: {
           data: {
             name: data.name,
@@ -67,24 +67,6 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
 
       if (!authData.user?.id) {
         throw new Error("No user ID returned from signup");
-      }
-
-      // Now upsert the profile
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: authData.user.id,
-          email: data.email,
-          name: data.name,
-          marketing_consent: data.newsletter,
-        }, {
-          onConflict: 'email',
-          ignoreDuplicates: false
-        });
-
-      if (profileError) {
-        console.error('Error upserting profile:', profileError);
-        throw new Error("Failed to create user record");
       }
 
       // Send verification email
