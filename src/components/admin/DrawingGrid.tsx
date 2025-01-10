@@ -60,8 +60,12 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
 
   const getImageUrl = (filename: string, status: string) => {
     try {
+      // Remove any leading 'optimized/' from the filename if it exists
+      const cleanFilename = filename.replace(/^optimized\//, '');
+      
+      // Determine bucket and path based on status
       const bucket = status === "approved" ? "optimized" : "hearts";
-      const path = status === "approved" ? `optimized/${filename}` : filename;
+      const path = status === "approved" ? cleanFilename : filename;
       
       console.log('Getting image URL for:', { bucket, path });
       const { data } = supabase.storage.from(bucket).getPublicUrl(path);
