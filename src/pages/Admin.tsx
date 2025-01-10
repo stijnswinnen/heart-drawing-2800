@@ -4,22 +4,19 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { AdminLayout } from "@/components/admin/AdminLayout";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminContent } from "@/components/admin/AdminContent";
-import { LocationsList } from "@/components/admin/LocationsList";
-import { StatsOverview } from "@/components/admin/StatsOverview";
-import { ApprovedHeartsContent } from "@/components/admin/ApprovedHeartsContent";
-import { Routes, Route } from "react-router-dom";
 
 const Admin = () => {
   const session = useSession();
   const navigate = useNavigate();
 
+  // Only fetch profile if we have a session
   const { data: profile } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) {
-        navigate("/");
+        navigate('/');
         return null;
       }
       const { data } = await supabase
@@ -33,17 +30,14 @@ const Admin = () => {
   });
 
   const { data: drawings } = useQuery({
-    queryKey: ["admin-drawings"],
+    queryKey: ["drawings"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("drawings")
         .select("*")
         .order("created_at", { ascending: false });
-
-      if (error) throw error;
       return data;
     },
-    enabled: profile?.role === "admin",
   });
 
   useEffect(() => {
@@ -52,6 +46,7 @@ const Admin = () => {
     }
   }, [session, navigate]);
 
+  // Add a separate effect for profile role check
   useEffect(() => {
     if (profile && profile.role !== "admin") {
       toast.error("You don't have permission to access this page");
@@ -59,23 +54,16 @@ const Admin = () => {
     }
   }, [profile, navigate]);
 
+  // Don't render anything until we have confirmed the user is an admin
   if (!session || !profile || profile.role !== "admin") {
     return null;
   }
 
   return (
-    <AdminLayout>
-      <Routes>
-        <Route path="/*" element={
-          <Routes>
-            <Route path="/" element={<AdminContent drawings={drawings} />} />
-            <Route path="/approved-hearts" element={<ApprovedHeartsContent />} />
-            <Route path="/locations" element={<LocationsList />} />
-            <Route path="/stats" element={<StatsOverview />} />
-          </Routes>
-        } />
-      </Routes>
-    </AdminLayout>
+    <div className="min-h-screen bg-background">
+      <AdminHeader />
+      <AdminContent drawings={drawings} />
+    </div>
   );
 };
 
