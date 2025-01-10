@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Mail, CheckCircle2, XCircle } from "lucide-react";
-import { toast } from "sonner";
 
 export const PersonalInfoSection = () => {
   const session = useSession();
@@ -54,10 +53,17 @@ export const PersonalInfoSection = () => {
 
       if (error) throw error;
 
-      toast.success('Een nieuwe verificatie e-mail is verzonden. Check je inbox.');
+      toast({
+        title: "Succes",
+        description: "Een nieuwe verificatie e-mail is verzonden. Check je inbox.",
+      });
     } catch (error) {
       console.error('Error sending verification email:', error);
-      toast.error('Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.');
+      toast({
+        title: "Fout",
+        description: "Er ging iets mis bij het verzenden van de verificatie e-mail. Probeer het later opnieuw.",
+        variant: "destructive",
+      });
     } finally {
       setIsResendingVerification(false);
     }
