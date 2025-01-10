@@ -34,31 +34,50 @@ const handler = async (req: Request): Promise<Response> => {
     const { email }: EmailRequest = await req.json();
     console.log("Sending verification email to:", email);
 
-    // Get user verification token
-    const { data: userData, error: userError } = await supabase
-      .from("heart_users")
+    // Get user profile data
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
       .select("verification_token, name")
       .eq("email", email)
       .maybeSingle();
 
-    if (userError) {
-      console.error("Error fetching user:", userError);
-      throw new Error("Failed to fetch user data");
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+      throw new Error("Failed to fetch profile data");
     }
 
-    if (!userData) {
-      console.error("No user found for email:", email);
-      throw new Error("User not found");
+    if (!profile) {
+      console.error("No profile found for email:", email);
+      throw new Error("Profile not found");
     }
 
-    console.log("User data retrieved:", { ...userData, verification_token: "REDACTED" });
+    // Generate new verification token if needed
+    if (!profile.verification_token) {
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          verification_token: crypto.randomUUID(),
+          verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
+          last_verification_email_sent_at: new Date().toISOString()
+        })
+        .eq("email", email)
+        .select()
+        .single();
 
-    // Use the custom domain instead of the preview URL
-    const verificationUrl = `https://2800.love/verify?token=${userData.verification_token}&email=${encodeURIComponent(email)}`;
+      if (updateError) {
+        console.error("Error updating profile with verification token:", updateError);
+        throw new Error("Failed to generate verification token");
+      }
+
+      profile.verification_token = updatedProfile.verification_token;
+    }
+
+    console.log("Profile data retrieved:", { ...profile, verification_token: "REDACTED" });
+
+    const verificationUrl = `https://2800.love/verify?token=${profile.verification_token}&email=${encodeURIComponent(email)}`;
     console.log("Verification URL generated:", verificationUrl);
 
     console.log("Attempting to send email via Resend");
-    // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -71,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
         subject: "Bevestig jouw e-mail adres",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <p>Beste ${userData.name},</p>
+            <p>Beste ${profile.name || 'gebruiker'},</p>
             
             <p>Bedankt om jouw hart te tekenen. Gelieve jouw e-mailadres te bevestigen door op onderstaande link te drukken.</p>
             
@@ -105,17 +124,6 @@ const handler = async (req: Request): Promise<Response> => {
     if (!res.ok) {
       console.error("Resend API error:", resendResponse);
       throw new Error(`Failed to send verification email: ${resendResponse}`);
-    }
-
-    // Update last verification email sent timestamp
-    const { error: updateError } = await supabase
-      .from("heart_users")
-      .update({ last_verification_email_sent_at: new Date().toISOString() })
-      .eq("email", email);
-
-    if (updateError) {
-      console.error("Error updating last_verification_email_sent_at:", updateError);
-      // Don't throw here as the email was sent successfully
     }
 
     return new Response(JSON.stringify({ message: "Verification email sent" }), {

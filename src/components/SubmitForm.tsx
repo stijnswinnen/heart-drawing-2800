@@ -46,7 +46,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       setIsVerifying(true);
-      console.log('Starting submission process with data:', data);
+      console.log('Starting submission process with data:', { ...data, email: '***' });
 
       // First, create an auth user if they don't exist
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -87,12 +87,14 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         throw new Error("Failed to create user record");
       }
 
+      // Send verification email
       const { error: verificationError } = await supabase.functions.invoke("send-verification-email", {
         body: { email: data.email },
       });
 
       if (verificationError) {
         console.error('Error sending verification email:', verificationError);
+        throw new Error("Failed to send verification email");
       }
 
       onSubmit(data);
