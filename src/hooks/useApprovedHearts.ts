@@ -16,23 +16,23 @@ export const useApprovedHearts = () => {
 
   const fetchApprovedHearts = async () => {
     try {
-      // First, get the heart_user_id for the current authenticated user's email
-      let heartUserId = null;
+      // First, get the profile id for the current authenticated user's email
+      let profileId = null;
       if (session?.user?.email) {
-        const { data: heartUser } = await supabase
-          .from('heart_users')
+        const { data: profile } = await supabase
+          .from('profiles')
           .select('id')
           .eq('email', session.user.email)
           .maybeSingle();
         
-        heartUserId = heartUser?.id;
+        profileId = profile?.id;
       }
 
       // Then fetch drawings that match either user_id or heart_user_id
       const { data, error } = await supabase
         .from('drawings')
         .select('image_path, user_id, heart_user_id, status')
-        .or(`user_id.eq.${session?.user?.id},heart_user_id.eq.${heartUserId}`);
+        .or(`user_id.eq.${session?.user?.id},heart_user_id.eq.${profileId}`);
       
       if (error) throw error;
       setApprovedHearts(data || []);

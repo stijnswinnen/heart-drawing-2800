@@ -1,21 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart } from "lucide-react";
-import { useLocationLikes } from "@/hooks/useLocationLikes";
-import { useSession } from "@supabase/auth-helpers-react";
-import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
-import { Separator } from "./ui/separator";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Location {
   id: string;
   name: string;
-  description: string | null;
-  recommendation: string | null;
+  description: string;
+  recommendation: string;
   profile: {
     name: string;
-  } | null;
+  };
 }
 
 interface LocationDetailsPanelProps {
@@ -25,18 +20,11 @@ interface LocationDetailsPanelProps {
 
 export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPanelProps) => {
   const [location, setLocation] = useState<Location | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { locationLikes, handleLike } = useLocationLikes();
-  const session = useSession();
 
   useEffect(() => {
-    const fetchLocationDetails = async () => {
-      if (!locationId) {
-        setLocation(null);
-        return;
-      }
+    const fetchLocation = async () => {
+      if (!locationId) return;
 
-      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('locations')
@@ -53,85 +41,25 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           .single();
 
         if (error) throw error;
-        setLocation(data);
+        setLocation(data as Location);
       } catch (error) {
         console.error('Error fetching location:', error);
-        setLocation(null);
-      } finally {
-        setIsLoading(false);
+        toast.error("Er ging iets mis bij het ophalen van de locatie");
       }
     };
 
-    fetchLocationDetails();
+    fetchLocation();
   }, [locationId]);
 
-  if (!locationId) {
-    return (
-      <div className="h-full flex items-center justify-center p-8 text-center text-muted-foreground">
-        Selecteer een locatie op de kaart om meer details te zien
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center p-8">
-        <Heart className="w-12 h-12 text-primary-dark animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!location) {
-    return (
-      <div className="h-full flex items-center justify-center p-8 text-center text-muted-foreground">
-        Deze locatie kon niet worden geladen
-      </div>
-    );
-  }
-
-  const likeCount = locationLikes[location.id] || 0;
+  if (!location) return null;
 
   return (
-    <div className="bg-white p-6 space-y-6">
-      <h2 className="text-2xl font-barlow text-primary-dark">{location.name}</h2>
-      
-      <button
-        onClick={() => handleLike(location.id)}
-        disabled={!session}
-        className={cn(
-          "flex items-center gap-2 transition-colors text-primary-dark",
-          session ? "hover:text-primary-dark" : "opacity-50 cursor-not-allowed"
-        )}
-      >
-        <Heart className="w-5 h-5" fill={likeCount > 0 ? "currentColor" : "none"} />
-        <span>{likeCount}</span>
-      </button>
-      
-      {location.description && (
-        <p className="text-muted-foreground font-montserrat">{location.description}</p>
-      )}
-      
-      {location.recommendation && (
-        <>
-          <h3 className="text-lg font-barlow text-primary-dark">Waarom moet je deze plek zeker bezoeken?</h3>
-          <p className="text-muted-foreground font-montserrat">{location.recommendation}</p>
-        </>
-      )}
-
-      <Separator className="bg-primary-light" />
-      
-      {location.profile?.name && (
-        <p className="text-sm text-muted-foreground font-montserrat">
-          Gedeeld door {location.profile.name}
-        </p>
-      )}
-
-      <Button asChild>
-        <Link to="/mijn-favoriete-plek" className="flex items-center gap-2">
-          <Heart className="w-4 h-4" />
-          Voeg jouw lievelingsplek toe
-        </Link>
-      </Button>
+    <div className="p-4">
+      <h2 className="text-xl font-bold">{location.name}</h2>
+      <p className="mt-2">{location.description}</p>
+      <p className="mt-2"><strong>Aanbeveling:</strong> {location.recommendation}</p>
+      <p className="mt-2"><strong>Profiel:</strong> {location.profile.name}</p>
+      <Button onClick={onClose} className="mt-4">Sluiten</Button>
     </div>
   );
 };

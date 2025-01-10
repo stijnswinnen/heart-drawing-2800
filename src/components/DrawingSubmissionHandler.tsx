@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { submitDrawing } from "@/utils/drawingSubmission";
+import { submitDrawing, deleteDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
 import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
 import { SubmissionConfetti } from "@/components/SubmissionConfetti";
