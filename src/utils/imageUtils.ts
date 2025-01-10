@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
+import { DatabaseEnums } from "@/integrations/supabase/types/enums";
 
-export const getStorageUrl = (filename: string, status: "new" | "approved") => {
+export const getStorageUrl = (filename: string, status: DatabaseEnums["drawing_status"]) => {
   try {
     // Remove any leading 'optimized/' from the filename if it exists
     const cleanFilename = filename.replace(/^optimized\//, '');

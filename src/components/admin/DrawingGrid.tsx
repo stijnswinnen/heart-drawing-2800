@@ -104,12 +104,12 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2">
                       {drawing.heart_user_id && profiles[drawing.heart_user_id]?.email_verified ? (
-                        <Badge variant="success" className="w-full justify-center">
+                        <Badge variant="secondary" className="w-full justify-center">
                           <CheckCircle className="w-4 h-4 mr-1" />
                           Email verified
                         </Badge>
                       ) : (
-                        <Badge variant="warning" className="w-full justify-center">
+                        <Badge variant="destructive" className="w-full justify-center">
                           <AlertCircle className="w-4 h-4 mr-1" />
                           Email not verified
                         </Badge>
