@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { submitDrawing, deleteDrawing } from "@/utils/drawingSubmission";
+import { submitDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
 import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
 import { SubmissionConfetti } from "@/components/SubmissionConfetti";
@@ -51,7 +51,7 @@ export const DrawingSubmissionHandler = ({
         .from('profiles')
         .select('id, email_verified')
         .eq('email', data.email)
-        .single();
+        .maybeSingle();
 
       if (existingProfile) {
         console.log('Found existing profile, checking for any drawings');
@@ -88,8 +88,7 @@ export const DrawingSubmissionHandler = ({
       }
 
       // Check if the email needs verification
-      const isEmailVerified = existingProfile?.email_verified;
-      if (!isEmailVerified) {
+      if (!existingProfile?.email_verified) {
         toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
       } else {
         toast.success("Tekening werd met succes doorgestuurd!");
@@ -102,6 +101,19 @@ export const DrawingSubmissionHandler = ({
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
       toast.error(error.message || "Versturen van tekening is mislukt");
+    }
+  };
+
+  const handleReplaceDrawing = async () => {
+    try {
+      if (existingDrawing) {
+        await deleteDrawing(existingDrawing.image_path);
+        setShowReplaceDialog(false);
+        setShowSubmitForm(true);
+      }
+    } catch (error: any) {
+      console.error('Error replacing drawing:', error);
+      toast.error("Error replacing drawing");
     }
   };
 

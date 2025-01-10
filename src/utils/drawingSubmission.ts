@@ -40,9 +40,9 @@ export const submitDrawing = async (
   console.log('Checking for existing profile...');
   const { data: existingProfile, error: profileError } = await supabase
     .from('profiles')
-    .select('id, email_verified')
+    .select('id')
     .eq('email', data.email)
-    .single();
+    .maybeSingle();
 
   if (profileError && profileError.code !== 'PGRST116') {
     console.error('Error checking for existing profile:', profileError);
@@ -55,19 +55,21 @@ export const submitDrawing = async (
   } else {
     // Create new profile
     console.log('Creating new profile...');
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: insertError } = await supabase
       .from('profiles')
       .insert({
+        id: crypto.randomUUID(),
         email: data.email,
         name: data.name,
-        marketing_consent: data.newsletter
+        marketing_consent: data.newsletter,
+        email_verified: false
       })
       .select()
       .single();
 
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      throw new Error("Failed to save user information: " + profileError.message);
+    if (insertError) {
+      console.error('Error creating profile:', insertError);
+      throw new Error("Failed to save user information: " + insertError.message);
     }
 
     profileId = profile.id;
