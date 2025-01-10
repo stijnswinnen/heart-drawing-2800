@@ -1,6 +1,5 @@
-import { Heart, MapPin } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
-import { Link } from "react-router-dom";
 
 interface AdminSidebarProps {
   selectedStatus: "new" | "approved";
@@ -55,19 +54,6 @@ export const AdminSidebar = ({ selectedStatus, setSelectedStatus, drawings }: Ad
             {approvedDrawingsCount} hearts
           </span>
         </button>
-      </nav>
-
-      <h2 className="font-medium mb-4 mt-8">Locations</h2>
-      <nav className="space-y-2">
-        <Link
-          to="/admin/locations"
-          className="w-full text-left px-4 py-3 rounded-lg flex items-center justify-between hover:bg-zinc-100"
-        >
-          <div className="flex items-center gap-2">
-            <MapPin size={20} />
-            <span>All Locations</span>
-          </div>
-        </Link>
       </nav>
     </aside>
   );
