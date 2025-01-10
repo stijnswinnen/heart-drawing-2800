@@ -40,7 +40,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
             )
           `)
           .eq('id', locationId)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching location:', error);
@@ -48,13 +48,23 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           return;
         }
 
-        // Ensure the data matches our Location type
+        if (!data) {
+          console.error('No location found with id:', locationId);
+          toast.error("Locatie niet gevonden");
+          return;
+        }
+
+        // Type guard to ensure profile has the correct shape
+        const profile = data.profile && typeof data.profile === 'object' && 'name' in data.profile
+          ? { name: data.profile.name }
+          : null;
+
         const locationData: Location = {
           id: data.id,
           name: data.name,
           description: data.description,
           recommendation: data.recommendation,
-          profile: data.profile || null // Handle null profile case
+          profile
         };
 
         setLocation(locationData);
