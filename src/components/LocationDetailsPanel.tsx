@@ -54,17 +54,12 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           return;
         }
 
-        // Safely handle profile data
-        const profileData: Profile | null = data.profile && typeof data.profile === 'object' && 'name' in data.profile
-          ? { name: data.profile.name as string }
-          : null;
-
         const locationData: Location = {
           id: data.id,
           name: data.name,
           description: data.description || '',
           recommendation: data.recommendation || '',
-          profile: profileData
+          profile: data.profile ? { name: data.profile.name } : null
         };
 
         setLocation(locationData);
