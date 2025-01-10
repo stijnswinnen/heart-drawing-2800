@@ -1,4 +1,4 @@
-import { DrawingsTable, HeartUsersTable, LocationLikesTable, LocationsTable, ProfilesTable, VideoGenerationTable } from './tables';
+import { DrawingsTable, LocationLikesTable, LocationsTable, ProfilesTable, VideoGenerationTable } from './tables';
 import { DatabaseEnums } from './enums';
 
 export type Json =
@@ -13,7 +13,6 @@ export type Database = {
   public: {
     Tables: {
       drawings: DrawingsTable
-      heart_users: HeartUsersTable
       location_likes: LocationLikesTable
       locations: LocationsTable
       profiles: ProfilesTable

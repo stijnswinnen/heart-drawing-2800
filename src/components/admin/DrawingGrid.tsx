@@ -20,42 +20,42 @@ interface DrawingGridProps {
   onDecline: (drawing: Tables<"drawings">) => Promise<void>;
 }
 
-interface HeartUser {
+interface Profile {
   email_verified: boolean;
   email: string;
 }
 
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [heartUsers, setHeartUsers] = useState<Record<string, HeartUser>>({});
+  const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const itemsPerPage = 20;
   
   useEffect(() => {
-    const fetchHeartUsers = async () => {
+    const fetchProfiles = async () => {
       if (!drawings?.length) return;
       
-      const heartUserIds = drawings.map(d => d.heart_user_id).filter(Boolean);
-      if (!heartUserIds.length) return;
+      const profileIds = drawings.map(d => d.heart_user_id).filter(Boolean);
+      if (!profileIds.length) return;
 
       const { data, error } = await supabase
-        .from('heart_users')
+        .from('profiles')
         .select('id, email_verified, email')
-        .in('id', heartUserIds);
+        .in('id', profileIds);
 
       if (error) {
-        console.error('Error fetching heart users:', error);
+        console.error('Error fetching profiles:', error);
         return;
       }
 
-      const userMap = (data || []).reduce((acc, user) => ({
+      const profileMap = (data || []).reduce((acc, profile) => ({
         ...acc,
-        [user.id]: user
+        [profile.id]: profile
       }), {});
 
-      setHeartUsers(userMap);
+      setProfiles(profileMap);
     };
 
-    fetchHeartUsers();
+    fetchProfiles();
   }, [drawings]);
 
   const getImageUrl = (filename: string, status: string) => {
@@ -73,7 +73,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
   };
 
   const handleApprove = async (drawing: Tables<"drawings">) => {
-    if (!drawing.heart_user_id || !heartUsers[drawing.heart_user_id]?.email_verified) {
+    if (!drawing.heart_user_id || !profiles[drawing.heart_user_id]?.email_verified) {
       toast.error("Cannot approve drawing: Email not verified");
       return;
     }
@@ -127,18 +127,18 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
               <>
                 <div className="flex flex-col gap-2 mb-4">
                   <div className="flex items-center gap-2">
-                    <AlertCircle className={`w-4 h-4 ${drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified ? 'text-green-500' : 'text-amber-500'}`} />
+                    <AlertCircle className={`w-4 h-4 ${drawing.heart_user_id && profiles[drawing.heart_user_id]?.email_verified ? 'text-green-500' : 'text-amber-500'}`} />
                     <span className="text-sm">
-                      {drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email_verified 
+                      {drawing.heart_user_id && profiles[drawing.heart_user_id]?.email_verified 
                         ? "Email verified" 
                         : "Email not verified"}
                     </span>
                   </div>
-                  {drawing.heart_user_id && heartUsers[drawing.heart_user_id]?.email && (
+                  {drawing.heart_user_id && profiles[drawing.heart_user_id]?.email && (
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-gray-500" />
                       <span className="text-sm text-gray-600">
-                        {heartUsers[drawing.heart_user_id].email}
+                        {profiles[drawing.heart_user_id].email}
                       </span>
                     </div>
                   )}
@@ -148,7 +148,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
                     variant="outline"
                     className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
                     onClick={() => handleApprove(drawing)}
-                    disabled={!drawing.heart_user_id || !heartUsers[drawing.heart_user_id]?.email_verified}
+                    disabled={!drawing.heart_user_id || !profiles[drawing.heart_user_id]?.email_verified}
                   >
                     <CheckCircle className="mr-2" />
                     Approve

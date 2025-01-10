@@ -64,7 +64,10 @@ export const useAuthStateChange = (onClose: () => void) => {
 
       const { data: heartUser, error: linkError } = await supabase
         .from('profiles')
-        .update({ user_id: user.id })
+        .update({ 
+          email: user.email,
+          name: user.user_metadata?.name || user.email?.split('@')[0]
+        })
         .eq('email', user.email)
         .select()
         .single();
