@@ -45,9 +45,12 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           toast.error("Er ging iets mis bij het ophalen van de locatie");
           return;
         }
-        
-        if (data && data.profile) {
+
+        if (data && data.profile && typeof data.profile === 'object' && 'name' in data.profile) {
           setLocation(data as Location);
+        } else {
+          console.error('Invalid location data structure:', data);
+          toast.error("Er ging iets mis bij het ophalen van de locatie");
         }
       } catch (error) {
         console.error('Error fetching location:', error);
