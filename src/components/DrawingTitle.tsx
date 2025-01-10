@@ -23,12 +23,11 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
       {!isDrawing && (
         <div 
           onClick={onHeartClick} 
-          className="relative cursor-pointer transform hover:scale-105 transition-all duration-300 mt-4 md:mt-0"
+          className="cursor-pointer transform hover:scale-105 transition-transform mt-4 md:mt-0"
         >
-          <div className="absolute inset-0 blur-xl bg-gradient-to-r from-[#fc2c03] to-[#E02653] opacity-50" />
           <Heart 
             size={200} 
-            className="text-primary animate-[pulse_1000ms_ease-in-out_infinite] relative z-10 drop-shadow-xl hover:drop-shadow-2xl transition-all duration-300" 
+            className="text-primary animate-pulse z-10" 
             fill="#FFDEE2"
             strokeWidth={0}
           />
