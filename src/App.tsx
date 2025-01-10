@@ -14,6 +14,7 @@ import FavoritePlek from "./pages/FavoritePlek";
 import Locaties from "./pages/Locaties";
 import LocatiesList from "./pages/LocatiesList";
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/locaties" element={<Locaties />} />
             <Route path="/locaties-list" element={<LocatiesList />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
