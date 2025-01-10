@@ -12,7 +12,7 @@ interface Location {
   name: string;
   description: string;
   recommendation: string;
-  profile: Profile;
+  profile: Profile | null;
 }
 
 interface LocationDetailsPanelProps {
@@ -48,12 +48,16 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           return;
         }
 
-        if (data && data.profile && typeof data.profile === 'object' && 'name' in data.profile) {
-          setLocation(data as Location);
-        } else {
-          console.error('Invalid location data structure:', data);
-          toast.error("Er ging iets mis bij het ophalen van de locatie");
-        }
+        // Ensure the data matches our Location type
+        const locationData: Location = {
+          id: data.id,
+          name: data.name,
+          description: data.description,
+          recommendation: data.recommendation,
+          profile: data.profile || null // Handle null profile case
+        };
+
+        setLocation(locationData);
       } catch (error) {
         console.error('Error fetching location:', error);
         toast.error("Er ging iets mis bij het ophalen van de locatie");
