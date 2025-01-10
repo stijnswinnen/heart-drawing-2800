@@ -30,7 +30,12 @@ const LocatiesList = () => {
           <div className="w-full md:w-[40%] order-2 md:order-1">
             {selectedLocation && (
               <LocationDetailsPanel 
-                location={selectedLocation} 
+                location={{
+                  id: selectedLocation.id,
+                  name: selectedLocation.name,
+                  description: selectedLocation.description,
+                  heart_user_id: selectedLocation.heart_user_id || null
+                }}
                 onClose={() => setSelectedLocationId(null)}
               />
             )}
