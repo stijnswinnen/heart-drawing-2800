@@ -40,7 +40,10 @@ export const AdminSidebar = ({ selectedStatus, setSelectedStatus, drawings }: Ad
         .single();
 
       if (error) throw error;
-      return data;
+      return {
+        ...data,
+        email: session.user.email
+      };
     },
   });
 
