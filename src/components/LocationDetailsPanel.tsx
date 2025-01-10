@@ -1,86 +1,100 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Tables } from "@/integrations/supabase/types";
 
-interface Profile {
-  name: string;
-}
-
-interface Location {
-  id: string;
-  name: string;
-  description: string;
-  recommendation: string;
-  profile: Profile | null;
-}
+type Profile = Tables<"profiles">;
 
 interface LocationDetailsPanelProps {
-  locationId: string | null;
+  location: {
+    id: string;
+    name: string;
+    description: string | null;
+    heart_user_id: string | null;
+  };
   onClose: () => void;
 }
 
-export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPanelProps) => {
-  const [location, setLocation] = useState<Location | null>(null);
+export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanelProps) => {
+  const session = useSession();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLocation = async () => {
-      if (!locationId) return;
+    const fetchProfile = async () => {
+      if (location.heart_user_id) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', location.heart_user_id)
+            .single();
 
-      try {
-        const { data, error } = await supabase
-          .from('locations')
-          .select(`
-            id, 
-            name, 
-            description, 
-            recommendation,
-            profiles!locations_heart_user_id_fkey (
-              name
-            )
-          `)
-          .eq('id', locationId)
-          .maybeSingle();
+          if (error) {
+            console.error('Error fetching profile:', error);
+            return;
+          }
 
-        if (error) {
-          console.error('Error fetching location:', error);
-          toast.error("Er ging iets mis bij het ophalen van de locatie");
-          return;
+          setProfile(data);
+        } catch (error) {
+          console.error('Error:', error);
+        } finally {
+          setIsLoading(false);
         }
-
-        if (!data) {
-          console.error('No location found with id:', locationId);
-          toast.error("Locatie niet gevonden");
-          return;
-        }
-
-        const locationData: Location = {
-          id: data.id,
-          name: data.name,
-          description: data.description || '',
-          recommendation: data.recommendation || '',
-          profile: data.profiles ? { name: data.profiles.name } : null
-        };
-
-        setLocation(locationData);
-      } catch (error) {
-        console.error('Error fetching location:', error);
-        toast.error("Er ging iets mis bij het ophalen van de locatie");
       }
     };
 
-    fetchLocation();
-  }, [locationId]);
+    fetchProfile();
+  }, [location.heart_user_id]);
 
-  if (!location) return null;
+  const handleLike = async () => {
+    if (!session) {
+      toast.error("Je moet ingelogd zijn om een locatie leuk te vinden");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('location_likes')
+        .insert({
+          location_id: location.id,
+          user_id: session.user.id,
+          heart_user_id: location.heart_user_id,
+        });
+
+      if (error) throw error;
+      toast.success("Locatie toegevoegd aan favorieten");
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Er ging iets mis bij het toevoegen aan favorieten");
+    }
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold">{location.name}</h2>
-      <p className="mt-2">{location.description}</p>
-      <p className="mt-2"><strong>Aanbeveling:</strong> {location.recommendation}</p>
-      <p className="mt-2"><strong>Profiel:</strong> {location.profile?.name || 'Anoniem'}</p>
-      <Button onClick={onClose} className="mt-4">Sluiten</Button>
+    <div className="p-4 space-y-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-xl font-semibold">{location.name}</h2>
+          {!isLoading && profile && (
+            <p className="text-sm text-gray-600">Gedeeld door {profile.name}</p>
+          )}
+        </div>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          Sluiten
+        </Button>
+      </div>
+
+      {location.description && (
+        <p className="text-gray-700">{location.description}</p>
+      )}
+
+      <div className="flex justify-end">
+        <Button onClick={handleLike} variant="default">
+          Voeg toe aan favorieten
+        </Button>
+      </div>
     </div>
   );
 };
