@@ -1,60 +1,97 @@
-import { Heart } from "lucide-react";
-import { Tables } from "@/integrations/supabase/types";
+import { Heart, MapPin, BarChart3, Users } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-interface AdminSidebarProps {
-  selectedStatus: "new" | "approved";
-  setSelectedStatus: (status: "new" | "approved") => void;
-  drawings: Tables<"drawings">[] | null;
-}
+export const AdminSidebar = () => {
+  const location = useLocation();
 
-export const AdminSidebar = ({ selectedStatus, setSelectedStatus, drawings }: AdminSidebarProps) => {
-  // Calculate counts regardless of selected status
-  const newDrawingsCount = drawings?.filter(drawing => drawing.status === "new").length || 0;
-  const approvedDrawingsCount = drawings?.filter(drawing => drawing.status === "approved").length || 0;
+  const menuItems = [
+    {
+      label: "Hearts",
+      items: [
+        {
+          title: "New Hearts",
+          url: "/admin",
+          icon: Heart,
+          activePattern: /^\/admin$/,
+        },
+        {
+          title: "Approved Hearts",
+          url: "/admin/approved-hearts",
+          icon: Heart,
+          activePattern: /^\/admin\/approved-hearts$/,
+        },
+      ],
+    },
+    {
+      label: "Locations",
+      items: [
+        {
+          title: "All Locations",
+          url: "/admin/locations",
+          icon: MapPin,
+          activePattern: /^\/admin\/locations$/,
+        },
+      ],
+    },
+    {
+      label: "Analytics",
+      items: [
+        {
+          title: "Statistics",
+          url: "/admin/stats",
+          icon: BarChart3,
+          activePattern: /^\/admin\/stats$/,
+        },
+        {
+          title: "Users",
+          url: "/admin/users",
+          icon: Users,
+          activePattern: /^\/admin\/users$/,
+        },
+      ],
+    },
+  ];
 
   return (
-    <aside className="w-64 flex-shrink-0">
-      <h2 className="font-medium mb-4">Hearts</h2>
-      <nav className="space-y-2">
-        <button
-          onClick={() => setSelectedStatus("new")}
-          className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-            selectedStatus === "new"
-              ? "bg-zinc-900 text-white"
-              : "hover:bg-zinc-100"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Heart
-              className={selectedStatus === "new" ? "text-red-500" : ""}
-              size={20}
-            />
-            <span>New</span>
-          </div>
-          <span className="text-sm text-muted-foreground">
-            {newDrawingsCount} hearts
-          </span>
-        </button>
-        <button
-          onClick={() => setSelectedStatus("approved")}
-          className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-            selectedStatus === "approved"
-              ? "bg-zinc-900 text-white"
-              : "hover:bg-zinc-100"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Heart
-              className={selectedStatus === "approved" ? "text-green-500" : ""}
-              size={20}
-            />
-            <span>Approved</span>
-          </div>
-          <span className="text-sm text-muted-foreground">
-            {approvedDrawingsCount} hearts
-          </span>
-        </button>
-      </nav>
-    </aside>
+    <Sidebar>
+      <SidebarContent>
+        {menuItems.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      className={cn(
+                        item.activePattern.test(location.pathname) &&
+                          "bg-zinc-100 text-zinc-900"
+                      )}
+                    >
+                      <Link to={item.url} className="flex items-center gap-2">
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+    </Sidebar>
   );
 };
