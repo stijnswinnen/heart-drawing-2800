@@ -45,7 +45,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
             name, 
             description, 
             recommendation,
-            profiles:heart_user_id (
+            profile:profiles!heart_user_id (
               name
             )
           `)

@@ -49,8 +49,9 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       console.log('Starting submission process with data:', data);
 
       const { error: upsertError } = await supabase
-        .from("heart_users")
+        .from("profiles")
         .upsert({
+          id: crypto.randomUUID(),
           email: data.email,
           name: data.name,
           marketing_consent: data.newsletter,
@@ -59,12 +60,12 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         });
 
       if (upsertError) {
-        console.error('Error upserting heart_user:', upsertError);
+        console.error('Error upserting profile:', upsertError);
         throw new Error("Failed to create user record");
       }
 
       const { data: existingUser } = await supabase
-        .from("heart_users")
+        .from("profiles")
         .select("email_verified")
         .eq("email", data.email)
         .maybeSingle();

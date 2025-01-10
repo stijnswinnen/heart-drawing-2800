@@ -74,9 +74,11 @@ export const LocationForm = () => {
 
     try {
       // First get or create profile
+      const profileId = crypto.randomUUID();
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .upsert({
+          id: profileId,
           email,
           name,
           marketing_consent: false,

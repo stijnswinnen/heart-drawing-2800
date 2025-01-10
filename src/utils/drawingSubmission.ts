@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from 'uuid';
 
 interface SubmissionData {
   name: string;
@@ -40,7 +41,7 @@ export const submitDrawing = async (
   console.log('Checking for existing profile...');
   const { data: existingProfile, error: profileError } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, email_verified')
     .eq('email', data.email)
     .maybeSingle();
 
@@ -55,10 +56,11 @@ export const submitDrawing = async (
   } else {
     // Create new profile
     console.log('Creating new profile...');
+    const newProfileId = uuidv4();
     const { data: profile, error: insertError } = await supabase
       .from('profiles')
       .insert({
-        id: crypto.randomUUID(),
+        id: newProfileId,
         email: data.email,
         name: data.name,
         marketing_consent: data.newsletter,
