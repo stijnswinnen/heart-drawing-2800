@@ -40,13 +40,14 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
           .eq('id', locationId)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching location:', error);
+          toast.error("Er ging iets mis bij het ophalen van de locatie");
+          return;
+        }
         
-        // Ensure the data matches the Location interface
         if (data && data.profile) {
           setLocation(data as Location);
-        } else {
-          throw new Error("Location data is incomplete");
         }
       } catch (error) {
         console.error('Error fetching location:', error);
