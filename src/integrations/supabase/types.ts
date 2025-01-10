@@ -40,59 +40,6 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "drawings_heart_user_id_fkey"
-            columns: ["heart_user_id"]
-            isOneToOne: false
-            referencedRelation: "heart_users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      heart_users: {
-        Row: {
-          created_at: string
-          email: string
-          email_verified: boolean | null
-          id: string
-          last_verification_email_sent_at: string | null
-          marketing_consent: boolean | null
-          name: string
-          reminder_sent_at: string | null
-          updated_at: string
-          user_id: string | null
-          verification_token: string | null
-          verification_token_expires_at: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          email_verified?: boolean | null
-          id?: string
-          last_verification_email_sent_at?: string | null
-          marketing_consent?: boolean | null
-          name: string
-          reminder_sent_at?: string | null
-          updated_at?: string
-          user_id?: string | null
-          verification_token?: string | null
-          verification_token_expires_at?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          email_verified?: boolean | null
-          id?: string
-          last_verification_email_sent_at?: string | null
-          marketing_consent?: boolean | null
-          name?: string
-          reminder_sent_at?: string | null
-          updated_at?: string
-          user_id?: string | null
-          verification_token?: string | null
-          verification_token_expires_at?: string | null
-        }
         Relationships: []
       }
       location_likes: {
@@ -124,13 +71,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "location_likes_heart_user_id_fkey"
-            columns: ["heart_user_id"]
-            isOneToOne: false
-            referencedRelation: "heart_users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "location_likes_location_id_fkey"
             columns: ["location_id"]
@@ -183,15 +123,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "locations_heart_user_id_fkey"
-            columns: ["heart_user_id"]
-            isOneToOne: false
-            referencedRelation: "heart_users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
