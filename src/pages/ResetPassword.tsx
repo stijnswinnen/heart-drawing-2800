@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,30 +7,34 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [validatingToken, setValidatingToken] = useState(true);
 
   useEffect(() => {
-    // Check if we have a valid access token
-    const checkToken = async () => {
-      const accessToken = searchParams.get("access_token");
-      if (!accessToken) {
-        toast.error("Geen geldige reset link");
-        navigate("/");
-        return;
-      }
-
-      const { error } = await supabase.auth.getUser(accessToken);
-      if (error) {
-        toast.error("De reset link is verlopen");
+    const validateSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) throw error;
+        
+        if (!session) {
+          toast.error("Ongeldige of verlopen reset link");
+          navigate("/");
+          return;
+        }
+        
+        setValidatingToken(false);
+      } catch (error) {
+        console.error('Error validating session:', error);
+        toast.error("Er is een fout opgetreden bij het valideren van je reset link");
         navigate("/");
       }
     };
 
-    checkToken();
-  }, [searchParams, navigate]);
+    validateSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +50,22 @@ const ResetPassword = () => {
       toast.success("Wachtwoord succesvol gewijzigd");
       navigate("/profile");
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Error resetting password:', error);
+      toast.error(error.message || "Er ging iets mis bij het wijzigen van je wachtwoord");
     } finally {
       setLoading(false);
     }
   };
+
+  if (validatingToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/10 to-white p-4">
+        <div className="text-center">
+          <p>Reset link valideren...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/10 to-white p-4">
