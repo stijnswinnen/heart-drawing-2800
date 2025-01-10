@@ -74,21 +74,24 @@ export const LocationForm = () => {
 
     try {
       // First get or create profile
-      const profileId = crypto.randomUUID();
-      const { data: profile, error: profileError } = await supabase
+      const { data: existingProfile } = await supabase
         .from("profiles")
-        .upsert({
-          id: profileId,
-          email,
-          name,
-          marketing_consent: false,
-        }, {
-          onConflict: 'email'
-        })
-        .select()
+        .select("id")
+        .eq("email", email)
         .single();
 
-      if (profileError) throw profileError;
+      let profileId;
+      
+      if (existingProfile) {
+        profileId = existingProfile.id;
+      } else if (session?.user?.id) {
+        profileId = session.user.id;
+      } else {
+        // Create a new profile only if we have a valid user ID
+        toast.error("Er ging iets mis bij het opslaan van je profiel");
+        setIsSubmitting(false);
+        return;
+      }
 
       const { error } = await supabase.from("locations").insert({
         name: locationName,
@@ -97,7 +100,7 @@ export const LocationForm = () => {
         latitude: coordinates.lat,
         longitude: coordinates.lng,
         user_id: session?.user?.id || null,
-        heart_user_id: profile.id,
+        heart_user_id: profileId,
         share_consent: shareConsent,
       });
 
