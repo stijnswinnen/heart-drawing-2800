@@ -77,7 +77,7 @@ export const DrawingSubmissionHandler = ({
         }
       }
 
-      // Always submit the drawing, regardless of email verification status
+      // Submit the drawing
       console.log('Proceeding with drawing submission...');
       const fileName = await submitDrawing(canvas, session?.user?.id || null, data);
       
