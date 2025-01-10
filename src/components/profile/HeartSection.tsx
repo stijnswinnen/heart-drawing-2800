@@ -12,13 +12,34 @@ export const HeartSection = () => {
   const session = useSession();
   const approvedHearts = useApprovedHearts();
   const [pendingHeartUrl, setPendingHeartUrl] = useState<string | null>(null);
+  const [heartUserId, setHeartUserId] = useState<string | null>(null);
   
+  useEffect(() => {
+    const fetchHeartUserId = async () => {
+      if (session?.user?.email) {
+        const { data: heartUser } = await supabase
+          .from('heart_users')
+          .select('id')
+          .eq('email', session.user.email)
+          .maybeSingle();
+        
+        setHeartUserId(heartUser?.id || null);
+      }
+    };
+
+    fetchHeartUserId();
+  }, [session?.user?.email]);
+
   const userHeart = approvedHearts.find(
-    (heart) => heart.user_id === session?.user.id && heart.status === "approved"
+    (heart) => 
+      (heart.user_id === session?.user.id || heart.heart_user_id === heartUserId) && 
+      heart.status === "approved"
   );
 
   const pendingHeart = approvedHearts.find(
-    (heart) => heart.user_id === session?.user.id && heart.status === "new"
+    (heart) => 
+      (heart.user_id === session?.user.id || heart.heart_user_id === heartUserId) && 
+      heart.status === "new"
   );
 
   useEffect(() => {
