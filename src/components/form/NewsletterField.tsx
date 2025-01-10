@@ -1,12 +1,13 @@
-import { FormField, FormItem, FormControl } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
+import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface NewsletterFieldProps {
   form: UseFormReturn<any>;
+  disabled?: boolean;
 }
 
-export const NewsletterField = ({ form }: NewsletterFieldProps) => {
+export const NewsletterField = ({ form, disabled }: NewsletterFieldProps) => {
   return (
     <FormField
       control={form.control}
@@ -17,13 +18,12 @@ export const NewsletterField = ({ form }: NewsletterFieldProps) => {
             <Checkbox
               checked={field.value}
               onCheckedChange={field.onChange}
+              disabled={disabled}
             />
           </FormControl>
-          <div className="space-y-1 leading-none">
-            <label className="text-sm">
-              Ik schrijf me in op de nieuwsbrief
-            </label>
-          </div>
+          <FormLabel className="font-normal">
+            Ik wil graag op de hoogte blijven van nieuws en updates.
+          </FormLabel>
         </FormItem>
       )}
     />

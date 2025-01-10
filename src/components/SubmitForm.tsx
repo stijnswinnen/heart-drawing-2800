@@ -5,11 +5,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormFields } from "./form/FormFields";
 import { FormActions } from "./form/FormActions";
 import { NewsletterField } from "./form/NewsletterField";
 import { PrivacyConsentField } from "./form/PrivacyConsentField";
+import { useSession } from "@supabase/auth-helpers-react";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -32,6 +33,7 @@ interface SubmitFormProps {
 export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const dialogDescriptionId = "submit-form-description";
+  const session = useSession();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,31 +45,56 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
     },
   });
 
+  useEffect(() => {
+    const setUserData = async () => {
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, email, marketing_consent')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          form.reset({
+            name: profile.name || '',
+            email: profile.email || '',
+            newsletter: profile.marketing_consent || false,
+            privacyConsent: false, // This still needs to be checked by the user
+          });
+        }
+      }
+    };
+
+    setUserData();
+  }, [session, form]);
+
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       setIsVerifying(true);
       console.log('Starting submission process with data:', { ...data, email: '***' });
 
-      // Create auth user with email verification enabled
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: crypto.randomUUID(),
-        options: {
-          data: {
-            name: data.name,
-            marketing_consent: data.newsletter,
+      if (!session?.user) {
+        // Create auth user with email verification enabled
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: data.email,
+          password: crypto.randomUUID(),
+          options: {
+            data: {
+              name: data.name,
+              marketing_consent: data.newsletter,
+            },
+            emailRedirectTo: `${window.location.origin}/verify`,
           },
-          emailRedirectTo: `${window.location.origin}/verify`,
-        },
-      });
+        });
 
-      if (signUpError) {
-        console.error('Error signing up:', signUpError);
-        throw new Error("Failed to create user account");
-      }
+        if (signUpError) {
+          console.error('Error signing up:', signUpError);
+          throw new Error("Failed to create user account");
+        }
 
-      if (!authData.user?.id) {
-        throw new Error("No user ID returned from signup");
+        if (!authData.user?.id) {
+          throw new Error("No user ID returned from signup");
+        }
       }
 
       onSubmit(data);
@@ -90,8 +117,8 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormFields form={form} />
-            <NewsletterField form={form} />
+            <FormFields form={form} disabled={!!session?.user} />
+            <NewsletterField form={form} disabled={!!session?.user} />
             <PrivacyConsentField form={form} />
             <FormActions onClose={onClose} isVerifying={isVerifying} />
           </form>

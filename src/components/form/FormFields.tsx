@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 
 interface FormFieldsProps {
   form: UseFormReturn<any>;
+  disabled?: boolean;
 }
 
-export const FormFields = ({ form }: FormFieldsProps) => {
+export const FormFields = ({ form, disabled }: FormFieldsProps) => {
   return (
     <>
       <FormField
@@ -14,22 +15,32 @@ export const FormFields = ({ form }: FormFieldsProps) => {
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Naam</FormLabel>
+            <FormLabel>Jouw naam</FormLabel>
             <FormControl>
-              <Input placeholder="Jouw naam" {...field} />
+              <Input 
+                placeholder="Vul je naam in" 
+                {...field} 
+                disabled={disabled}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+
       <FormField
         control={form.control}
         name="email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>E-mailadres</FormLabel>
+            <FormLabel>Jouw e-mailadres</FormLabel>
             <FormControl>
-              <Input placeholder="jouw.mail@voorbeeld.be" type="email" {...field} />
+              <Input 
+                type="email" 
+                placeholder="Vul je e-mailadres in" 
+                {...field} 
+                disabled={disabled}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
