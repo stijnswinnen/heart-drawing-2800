@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { submitDrawing } from "@/utils/drawingSubmission";
+import { submitDrawing, deleteDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
-import { ExistingDrawingHandler } from "./ExistingDrawingHandler";
+import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
 
 interface DrawingSubmissionHandlerProps {
   session: any;
@@ -34,26 +34,19 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      console.log('Checking for existing heart user...');
-      const { data: existingUsers, error: userError } = await supabase
-        .from('heart_users')
+      console.log('Checking for existing profile...');
+      const { data: existingProfile } = await supabase
+        .from('profiles')
         .select('id, email_verified')
-        .eq('email', data.email);
+        .eq('email', data.email)
+        .maybeSingle();
 
-      if (userError) {
-        console.error('Error checking for existing heart user:', userError);
-        toast.error("Versturen van tekening is mislukt");
-        return;
-      }
-
-      console.log('Existing users check result:', existingUsers?.length || 0, 'users found');
-
-      if (existingUsers && existingUsers.length > 0) {
-        console.log('Found existing heart user, checking for any drawings');
+      if (existingProfile) {
+        console.log('Found existing profile, checking for any drawings');
         const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
-          .eq('heart_user_id', existingUsers[0].id);
+          .eq('heart_user_id', existingProfile.id);
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
@@ -81,8 +74,7 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      const isEmailVerified = existingUsers?.[0]?.email_verified;
-      if (!isEmailVerified) {
+      if (!existingProfile?.email_verified) {
         toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
       } else {
         toast.success("Tekening werd met succes doorgestuurd!");
@@ -103,10 +95,18 @@ export const DrawingSubmissionHandler = ({
         <SubmitForm onClose={() => setShowSubmitForm(false)} onSubmit={handleSubmit} />
       )}
       {showReplaceDialog && (
-        <ExistingDrawingHandler
-          existingDrawing={existingDrawing}
-          setShowReplaceDialog={setShowReplaceDialog}
-          setShowSubmitForm={setShowSubmitForm}
+        <ReplaceDrawingDialog 
+          onConfirm={async () => {
+            if (existingDrawing) {
+              await deleteDrawing(existingDrawing.image_path);
+              setShowReplaceDialog(false);
+              setShowSubmitForm(true);
+            }
+          }} 
+          onCancel={() => {
+            setShowReplaceDialog(false);
+            setShowSubmitForm(false);
+          }} 
         />
       )}
     </>

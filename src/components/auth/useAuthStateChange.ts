@@ -63,16 +63,16 @@ export const useAuthStateChange = (onClose: () => void) => {
       }
 
       const { data: heartUser, error: linkError } = await supabase
-        .from('heart_users')
+        .from('profiles')
         .update({ user_id: user.id })
         .eq('email', user.email)
         .select()
         .single();
 
       if (linkError) {
-        console.log('No existing heart_user to link:', linkError);
+        console.log('No existing profile to link:', linkError);
       } else if (heartUser) {
-        console.log('Linked existing heart_user to auth account:', heartUser);
+        console.log('Linked existing profile to auth account:', heartUser);
       }
 
       toast.success('Successfully signed in!');

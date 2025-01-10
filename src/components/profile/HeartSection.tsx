@@ -12,33 +12,33 @@ export const HeartSection = () => {
   const session = useSession();
   const approvedHearts = useApprovedHearts();
   const [pendingHeartUrl, setPendingHeartUrl] = useState<string | null>(null);
-  const [heartUserId, setHeartUserId] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
   
   useEffect(() => {
-    const fetchHeartUserId = async () => {
+    const fetchProfileId = async () => {
       if (session?.user?.email) {
-        const { data: heartUser } = await supabase
-          .from('heart_users')
+        const { data: profile } = await supabase
+          .from('profiles')
           .select('id')
           .eq('email', session.user.email)
           .maybeSingle();
         
-        setHeartUserId(heartUser?.id || null);
+        setProfileId(profile?.id || null);
       }
     };
 
-    fetchHeartUserId();
+    fetchProfileId();
   }, [session?.user?.email]);
 
   const userHeart = approvedHearts.find(
     (heart) => 
-      (heart.user_id === session?.user.id || heart.heart_user_id === heartUserId) && 
+      (heart.user_id === session?.user.id || heart.heart_user_id === profileId) && 
       heart.status === "approved"
   );
 
   const pendingHeart = approvedHearts.find(
     (heart) => 
-      (heart.user_id === session?.user.id || heart.heart_user_id === heartUserId) && 
+      (heart.user_id === session?.user.id || heart.heart_user_id === profileId) && 
       heart.status === "new"
   );
 
