@@ -28,7 +28,7 @@ interface HeartUser {
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [heartUsers, setHeartUsers] = useState<Record<string, HeartUser>>({});
-  const itemsPerPage = 20;
+  const itemsPerPage = 21; // Changed to 21 for better 3-column layout
   
   useEffect(() => {
     const fetchHeartUsers = async () => {
@@ -98,19 +98,14 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
     }
   };
 
-  // Pagination logic
   const totalPages = drawings ? Math.ceil(drawings.length / itemsPerPage) : 0;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentDrawings = drawings?.slice(startIndex, endIndex) || [];
 
-  const gridColumns = selectedStatus === "approved" 
-    ? "grid-cols-1 md:grid-cols-5" 
-    : "grid-cols-1 md:grid-cols-2";
-
   return (
     <div className="flex flex-col gap-8 w-full">
-      <div className={`grid ${gridColumns} gap-6 w-full`}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         {currentDrawings.map((drawing) => (
           <div
             key={drawing.id}
