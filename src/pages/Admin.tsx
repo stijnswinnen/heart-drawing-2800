@@ -8,6 +8,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminContent } from "@/components/admin/AdminContent";
 import { LocationsList } from "@/components/admin/LocationsList";
 import { StatsOverview } from "@/components/admin/StatsOverview";
+import { ApprovedHeartsContent } from "@/components/admin/ApprovedHeartsContent";
 import { Routes, Route } from "react-router-dom";
 
 const Admin = () => {
@@ -66,6 +67,7 @@ const Admin = () => {
     <AdminLayout>
       <Routes>
         <Route path="/" element={<AdminContent drawings={drawings} />} />
+        <Route path="/approved-hearts" element={<ApprovedHeartsContent />} />
         <Route path="/locations" element={<LocationsList />} />
         <Route path="/stats" element={<StatsOverview />} />
       </Routes>
