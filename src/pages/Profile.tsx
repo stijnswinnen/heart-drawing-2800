@@ -56,11 +56,15 @@ const Profile = () => {
   return (
     <>
       <Navigation />
-      <div className="container mx-auto p-6">
-        <ProfileHeader />
-        <HeartSection />
-        <LocationsSection />
-        <PersonalInfoSection />
+      <div className="min-h-screen bg-gradient-to-b from-primary/10 to-white">
+        <div className="container mx-auto p-6 space-y-8 animate-fade-in">
+          <ProfileHeader />
+          <div className="grid gap-8 md:grid-cols-2">
+            <HeartSection />
+            <PersonalInfoSection />
+          </div>
+          <LocationsSection />
+        </div>
       </div>
     </>
   );

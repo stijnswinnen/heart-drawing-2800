@@ -41,25 +41,35 @@ export const PersonalInfoSection = () => {
   };
 
   return (
-    <Card className="mt-8">
+    <Card className="transition-all duration-300 hover:shadow-lg">
       <CardHeader>
-        <CardTitle>Persoonlijke Informatie</CardTitle>
+        <CardTitle className="font-montserrat text-primary-dark">Persoonlijke Informatie</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Naam</Label>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-muted-foreground">Naam</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Jouw naam"
+              className="border-primary/20 focus:border-primary-dark"
             />
           </div>
-          <div>
-            <Label>E-mailadres</Label>
-            <Input value={session?.user.email || ""} type="email" disabled />
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-muted-foreground">E-mailadres</Label>
+            <Input 
+              value={session?.user.email || ""} 
+              type="email" 
+              disabled 
+              className="bg-gray-50 border-primary/20"
+            />
           </div>
-          <Button type="submit" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full bg-primary-dark hover:bg-primary-light text-white transition-colors duration-300"
+          >
             {isLoading ? "Opslaan..." : "Wijzigingen Opslaan"}
           </Button>
         </form>
