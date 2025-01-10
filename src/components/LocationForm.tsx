@@ -74,11 +74,18 @@ export const LocationForm = () => {
 
     try {
       // First get or create profile
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile, error: profileError } = await supabase
         .from("profiles")
         .select("id")
         .eq("email", email)
-        .single();
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("Error checking profile:", profileError);
+        toast.error("Er ging iets mis bij het controleren van je profiel");
+        setIsSubmitting(false);
+        return;
+      }
 
       let profileId;
       
@@ -87,7 +94,6 @@ export const LocationForm = () => {
       } else if (session?.user?.id) {
         profileId = session.user.id;
       } else {
-        // Create a new profile only if we have a valid user ID
         toast.error("Er ging iets mis bij het opslaan van je profiel");
         setIsSubmitting(false);
         return;

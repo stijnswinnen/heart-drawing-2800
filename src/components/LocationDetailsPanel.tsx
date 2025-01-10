@@ -3,14 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+interface Profile {
+  name: string;
+}
+
 interface Location {
   id: string;
   name: string;
   description: string;
   recommendation: string;
-  profile: {
-    name: string;
-  };
+  profile: Profile;
 }
 
 interface LocationDetailsPanelProps {
@@ -68,7 +70,7 @@ export const LocationDetailsPanel = ({ locationId, onClose }: LocationDetailsPan
       <h2 className="text-xl font-bold">{location.name}</h2>
       <p className="mt-2">{location.description}</p>
       <p className="mt-2"><strong>Aanbeveling:</strong> {location.recommendation}</p>
-      <p className="mt-2"><strong>Profiel:</strong> {location.profile.name}</p>
+      <p className="mt-2"><strong>Profiel:</strong> {location.profile?.name || 'Anoniem'}</p>
       <Button onClick={onClose} className="mt-4">Sluiten</Button>
     </div>
   );
