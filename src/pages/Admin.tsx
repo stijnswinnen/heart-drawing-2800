@@ -6,12 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminContent } from "@/components/admin/AdminContent";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLocationsContent } from "@/components/admin/AdminLocationsContent";
+import { Routes, Route } from "react-router-dom";
 
 const Admin = () => {
   const session = useSession();
   const navigate = useNavigate();
 
-  // Only fetch profile if we have a session
   const { data: profile } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
@@ -29,24 +31,12 @@ const Admin = () => {
     enabled: !!session?.user?.id,
   });
 
-  const { data: drawings } = useQuery({
-    queryKey: ["drawings"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("drawings")
-        .select("*")
-        .order("created_at", { ascending: false });
-      return data;
-    },
-  });
-
   useEffect(() => {
     if (!session) {
       navigate("/");
     }
   }, [session, navigate]);
 
-  // Add a separate effect for profile role check
   useEffect(() => {
     if (profile && profile.role !== "admin") {
       toast.error("You don't have permission to access this page");
@@ -54,7 +44,6 @@ const Admin = () => {
     }
   }, [profile, navigate]);
 
-  // Don't render anything until we have confirmed the user is an admin
   if (!session || !profile || profile.role !== "admin") {
     return null;
   }
@@ -62,7 +51,17 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <AdminHeader />
-      <AdminContent drawings={drawings} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row gap-8">
+          <AdminSidebar selectedStatus="new" setSelectedStatus={() => {}} drawings={[]} />
+          <main className="flex-1">
+            <Routes>
+              <Route index element={<AdminContent drawings={[]} />} />
+              <Route path="locations" element={<AdminLocationsContent />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
     </div>
   );
 };
