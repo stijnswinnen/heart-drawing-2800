@@ -31,6 +31,7 @@ interface Profile {
 export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: DrawingGridProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+  const [selectedDrawing, setSelectedDrawing] = useState<string | null>(null);
   const itemsPerPage = 20;
   
   useEffect(() => {
@@ -76,6 +77,10 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
     }
   };
 
+  const handleImageClick = (drawingId: string) => {
+    setSelectedDrawing(selectedDrawing === drawingId ? null : drawingId);
+  };
+
   // Pagination logic
   const totalPages = drawings ? Math.ceil(drawings.length / itemsPerPage) : 0;
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -90,9 +95,19 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
     <div className="flex flex-col gap-8 w-full">
       <div className={`grid ${gridColumns} gap-6 w-full`}>
         {currentDrawings.map((drawing) => (
-          <Card key={drawing.id} className="overflow-hidden">
+          <Card 
+            key={drawing.id} 
+            className={`overflow-hidden transition-all duration-300 ${
+              selectedDrawing === drawing.id 
+                ? 'ring-4 ring-primary-dark scale-[1.02]' 
+                : 'hover:scale-[1.01]'
+            }`}
+          >
             <CardContent className="p-4">
-              <div className="aspect-square mb-4 bg-gray-50 rounded-lg overflow-hidden">
+              <div 
+                className="aspect-square mb-4 bg-gray-50 rounded-lg overflow-hidden cursor-pointer"
+                onClick={() => handleImageClick(drawing.id)}
+              >
                 <img
                   src={getStorageUrl(drawing.image_path, drawing.status)}
                   alt="Heart drawing"
