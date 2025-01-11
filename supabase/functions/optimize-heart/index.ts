@@ -135,12 +135,17 @@ serve(async (req) => {
       throw new Error('Failed to encode processed image')
     }
 
-    // Upload to optimized bucket
-    const optimizedPath = `optimized/${imagePath.split('/').pop()}`
+    // Get just the filename without any path
+    const filename = imagePath.split('/').pop()
+    if (!filename) {
+      throw new Error('Invalid image path')
+    }
+
+    // Upload to optimized bucket (directly in root)
     const { error: uploadError } = await supabase
       .storage
       .from('optimized')
-      .upload(optimizedPath, processedBuffer, {
+      .upload(filename, processedBuffer, {
         contentType: 'image/png',
         upsert: true
       })
@@ -155,7 +160,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Image optimized successfully',
-        optimizedPath 
+        optimizedPath: filename
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
