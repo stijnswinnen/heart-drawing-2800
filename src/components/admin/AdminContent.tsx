@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Tables } from "@/integrations/supabase/types";
 import { AdminSidebar } from "./AdminSidebar";
 import { DrawingGrid } from "./DrawingGrid";
+import { LocationsGrid } from "./LocationsGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type DrawingStatus = "new" | "approved";
+type AdminSection = "hearts" | "locations";
 
 interface AdminContentProps {
   drawings: Tables<"drawings">[] | null;
@@ -14,13 +16,25 @@ interface AdminContentProps {
 
 export const AdminContent = ({ drawings }: AdminContentProps) => {
   const [selectedStatus, setSelectedStatus] = useState<DrawingStatus>("new");
+  const [selectedSection, setSelectedSection] = useState<AdminSection>("hearts");
   const queryClient = useQueryClient();
 
-  const handleApprove = async (drawing: Tables<"drawings">) => {
+  // Fetch locations
+  const { data: locations } = useQuery({
+    queryKey: ["locations"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("locations")
+        .select("*")
+        .order("created_at", { ascending: false });
+      return data;
+    },
+  });
+
+  const handleApproveDrawing = async (drawing: Tables<"drawings">) => {
     try {
       console.log('Starting approval process for drawing:', drawing.id);
       
-      // First update the drawing status
       const { error: updateError } = await supabase
         .from("drawings")
         .update({ status: "approved" })
@@ -28,7 +42,6 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
       if (updateError) throw updateError;
 
-      // Then trigger the optimization process
       console.log('Triggering optimization for drawing:', drawing.image_path);
       const { data: optimizationData, error: optimizationError } = await supabase.functions
         .invoke('optimize-heart', {
@@ -50,7 +63,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
     }
   };
 
-  const handleDecline = async (drawing: Tables<"drawings">) => {
+  const handleDeclineDrawing = async (drawing: Tables<"drawings">) => {
     try {
       const { error: storageError } = await supabase.storage
         .from("hearts")
@@ -73,24 +86,71 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
     }
   };
 
-  // Filter drawings based on selected status
+  const handleApproveLocation = async (location: Tables<"locations">) => {
+    try {
+      const { error } = await supabase
+        .from("locations")
+        .update({ status: "approved" })
+        .eq("id", location.id);
+
+      if (error) throw error;
+
+      toast.success("Location approved successfully");
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+    } catch (error) {
+      console.error("Error approving location:", error);
+      toast.error("Failed to approve location");
+    }
+  };
+
+  const handleDeclineLocation = async (location: Tables<"locations">) => {
+    try {
+      const { error } = await supabase
+        .from("locations")
+        .delete()
+        .eq("id", location.id);
+
+      if (error) throw error;
+
+      toast.success("Location declined and removed");
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+    } catch (error) {
+      console.error("Error declining location:", error);
+      toast.error("Failed to decline location");
+    }
+  };
+
+  // Filter items based on selected status
   const filteredDrawings = drawings?.filter(drawing => drawing.status === selectedStatus) || null;
+  const filteredLocations = locations?.filter(location => location.status === selectedStatus) || null;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8">
         <AdminSidebar
           selectedStatus={selectedStatus}
+          selectedSection={selectedSection}
           setSelectedStatus={setSelectedStatus}
+          setSelectedSection={setSelectedSection}
           drawings={drawings}
+          locations={locations}
         />
         <main className="flex-1">
-          <DrawingGrid
-            drawings={filteredDrawings}
-            selectedStatus={selectedStatus}
-            onApprove={handleApprove}
-            onDecline={handleDecline}
-          />
+          {selectedSection === "hearts" ? (
+            <DrawingGrid
+              drawings={filteredDrawings}
+              selectedStatus={selectedStatus}
+              onApprove={handleApproveDrawing}
+              onDecline={handleDeclineDrawing}
+            />
+          ) : (
+            <LocationsGrid
+              locations={filteredLocations}
+              selectedStatus={selectedStatus}
+              onApprove={handleApproveLocation}
+              onDecline={handleDeclineLocation}
+            />
+          )}
         </main>
       </div>
     </div>
