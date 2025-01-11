@@ -47,9 +47,9 @@ export const LocationsSection = () => {
   const handleLocationEdit = (location: any) => {
     setSelectedLocation(location);
     setEditedLocation({
-      name: location.name,
-      description: location.description,
-      recommendation: location.recommendation || "",
+      name: location.name || '',
+      description: location.description || '',
+      recommendation: location.recommendation || '',
     });
   };
 
@@ -77,6 +77,8 @@ export const LocationsSection = () => {
       toast.error("Er ging iets mis bij het bijwerken van de locatie");
     }
   };
+
+  // ... keep existing code (JSX for tabs and cards)
 
   return (
     <Card>
