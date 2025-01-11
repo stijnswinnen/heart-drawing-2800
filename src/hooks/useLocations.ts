@@ -12,6 +12,7 @@ export interface Location {
   heart_user_id: string | null;
   status: 'new' | 'approved' | 'pending_verification' | 'rejected';
   rejection_reason: string | null;
+  recommendation: string | null;  // Added this field
 }
 
 export const useLocations = () => {
@@ -21,7 +22,7 @@ export const useLocations = () => {
     try {
       const { data, error } = await supabase
         .from('locations')
-        .select('id, name, description, latitude, longitude, user_id, heart_user_id, status, rejection_reason')
+        .select('id, name, description, latitude, longitude, user_id, heart_user_id, status, rejection_reason, recommendation')  // Added recommendation to the select
         .or('status.eq.approved,and(status.eq.rejected,share_consent.is.false)');
 
       if (error) throw error;
