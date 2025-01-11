@@ -50,10 +50,13 @@ export function RandomApprovedHeart() {
 
   const getImageUrl = (filename: string) => {
     try {
-      console.log('Getting image URL for filename:', filename);
+      // Clean the filename by removing any path segments
+      const cleanFilename = filename.split('/').pop() || '';
+      console.log('Getting image URL for filename:', cleanFilename);
+      
       const { data } = supabase.storage
         .from('optimized')
-        .getPublicUrl(`optimized/${filename}`);
+        .getPublicUrl(cleanFilename);
       
       console.log('Generated URL:', data.publicUrl);
       return data.publicUrl;
