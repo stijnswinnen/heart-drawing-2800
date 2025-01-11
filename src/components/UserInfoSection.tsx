@@ -1,5 +1,6 @@
 import React from 'react';
 import { Input } from './ui/input';
+import { useSession } from '@supabase/auth-helpers-react';
 
 interface UserInfoSectionProps {
   name: string;
@@ -14,6 +15,9 @@ export const UserInfoSection = ({
   onNameChange, 
   onEmailChange 
 }: UserInfoSectionProps) => {
+  const session = useSession();
+  const isLoggedIn = !!session;
+
   return (
     <div className="space-y-4">
       <div>
@@ -25,6 +29,7 @@ export const UserInfoSection = ({
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
           placeholder="Vul je naam in"
+          disabled={isLoggedIn && name.trim() !== ''}
           required
         />
       </div>
@@ -39,6 +44,7 @@ export const UserInfoSection = ({
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           placeholder="Vul je e-mailadres in"
+          disabled={isLoggedIn && email.trim() !== ''}
           required
         />
       </div>
