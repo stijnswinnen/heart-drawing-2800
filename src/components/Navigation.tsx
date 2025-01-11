@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,17 +12,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState<any>(null);
   
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    const checkSession = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      setSession(currentSession);
+    };
+
+    checkSession();
 
     const {
       data: { subscription },
@@ -45,7 +50,28 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   ];
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error);
+        toast.error('Er ging iets mis bij het uitloggen');
+        return;
+      }
+      
+      // Clear any stored session data
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.clear();
+      
+      // Reset session state
+      setSession(null);
+      
+      // Navigate to home and show success message
+      navigate('/');
+      toast.success('Je bent succesvol uitgelogd');
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      toast.error('Er ging iets mis bij het uitloggen');
+    }
   };
 
   const NavLinks = () => (
