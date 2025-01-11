@@ -3,14 +3,16 @@ import { toast } from "sonner";
 
 export const handleAuthError = (error: AuthError) => {
   console.error('Auth error:', error);
-  let errorMessage = 'An error occurred during authentication.';
+  let errorMessage = 'Er is een fout opgetreden tijdens de authenticatie.';
   
-  if (error.message.includes('Invalid login credentials')) {
-    errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+  if (error.message.includes('invalid_credentials')) {
+    errorMessage = 'Ongeldige inloggegevens. Controleer je e-mailadres en wachtwoord.';
   } else if (error.message.includes('Email not confirmed')) {
-    errorMessage = 'Please verify your email address before signing in.';
+    errorMessage = 'Verifieer eerst je e-mailadres voordat je inlogt.';
   } else if (error.message.includes('User not found')) {
-    errorMessage = 'No account found with these credentials.';
+    errorMessage = 'Geen account gevonden met deze gegevens.';
+  } else if (error.message.includes('Invalid login credentials')) {
+    errorMessage = 'Ongeldige inloggegevens. Controleer je gegevens en probeer opnieuw.';
   }
   
   toast.error(errorMessage);
