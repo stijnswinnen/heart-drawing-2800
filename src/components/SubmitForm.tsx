@@ -59,7 +59,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
             name: profile.name || '',
             email: profile.email || '',
             newsletter: profile.marketing_consent || false,
-            privacyConsent: false, // This still needs to be checked by the user
+            privacyConsent: false,
           });
         }
       }
@@ -95,6 +95,18 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         if (!authData.user?.id) {
           throw new Error("No user ID returned from signup");
         }
+
+        // Send verification email using the edge function
+        const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
+          body: { email: data.email }
+        });
+
+        if (verificationError) {
+          console.error('Error sending verification email:', verificationError);
+          throw new Error("Failed to send verification email");
+        }
+
+        toast.success("Check je e-mail om je account te verifiëren.");
       }
 
       onSubmit(data);
@@ -117,8 +129,8 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormFields form={form} disabled={!!session?.user} />
-            <NewsletterField form={form} disabled={!!session?.user} />
+            <FormFields form={form} />
+            <NewsletterField form={form} />
             <PrivacyConsentField form={form} />
             <FormActions onClose={onClose} isVerifying={isVerifying} />
           </form>

@@ -62,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to generate verification token");
     }
 
-    const verificationUrl = `https://2800.love/verify?token=${updatedProfile.verification_token}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = `${req.headers.get("origin")}/verify?token=${updatedProfile.verification_token}&email=${encodeURIComponent(email)}`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

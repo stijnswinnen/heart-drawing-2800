@@ -134,33 +134,42 @@ export type Database = {
           email: string | null
           email_verified: boolean | null
           id: string
+          last_verification_email_sent_at: string | null
           marketing_consent: boolean | null
           name: string | null
           reminder_sent_at: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
+          verification_token: string | null
+          verification_token_expires_at: string | null
         }
         Insert: {
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
           id: string
+          last_verification_email_sent_at?: string | null
           marketing_consent?: boolean | null
           name?: string | null
           reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          verification_token?: string | null
+          verification_token_expires_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
           id?: string
+          last_verification_email_sent_at?: string | null
           marketing_consent?: boolean | null
           name?: string | null
           reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          verification_token?: string | null
+          verification_token_expires_at?: string | null
         }
         Relationships: []
       }
