@@ -12,23 +12,28 @@ export const PersonalInfoSection = () => {
   const session = useSession();
   const supabase = useSupabaseClient();
   const navigate = useNavigate();
-  const [name, setName] = useState(session?.user?.user_metadata?.name || "");
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      if (error || !currentSession) {
+        console.error('Session error:', error);
+        navigate('/');
+        return;
+      }
+      
+      if (currentSession?.user?.user_metadata?.name) {
+        setName(currentSession.user.user_metadata.name);
+      }
+    };
+
+    checkSession();
+  }, [supabase.auth, navigate]);
+
   const isVerified = session?.user?.email_confirmed_at !== null;
-
-  useEffect(() => {
-    if (!session) {
-      navigate('/');
-    }
-  }, [session, navigate]);
-
-  useEffect(() => {
-    if (session?.user?.user_metadata?.name) {
-      setName(session.user.user_metadata.name);
-    }
-  }, [session?.user?.user_metadata?.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +77,7 @@ export const PersonalInfoSection = () => {
     }
   };
 
-  if (!session) {
+  if (!session?.user) {
     return null;
   }
 
