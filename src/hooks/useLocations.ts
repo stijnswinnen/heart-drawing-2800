@@ -10,6 +10,8 @@ export interface Location {
   longitude: number;
   user_id: string | null;
   heart_user_id: string | null;
+  status: 'new' | 'approved' | 'pending_verification' | 'rejected';
+  rejection_reason: string | null;
 }
 
 export const useLocations = () => {
@@ -19,7 +21,7 @@ export const useLocations = () => {
     try {
       const { data, error } = await supabase
         .from('locations')
-        .select('id, name, description, latitude, longitude, user_id, heart_user_id')
+        .select('id, name, description, latitude, longitude, user_id, heart_user_id, status, rejection_reason')
         .eq('status', 'approved')
         .eq('share_consent', true);
 
