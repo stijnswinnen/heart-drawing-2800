@@ -99,7 +99,7 @@ export const HeartSection = () => {
               Je hebt nog geen hart gemaakt
             </p>
             <Button asChild>
-              <Link to="/hearts">
+              <Link to="/">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Maak Je Hart
               </Link>
