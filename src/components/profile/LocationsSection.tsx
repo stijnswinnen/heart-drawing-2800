@@ -78,13 +78,15 @@ export const LocationsSection = () => {
                   </CardFooter>
                 </Card>
               ))}
-              <Card className="flex items-center justify-center p-8">
-                <Button asChild>
-                  <Link to="/mijn-favoriete-plek">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Voeg Nieuwe Locatie Toe
-                  </Link>
-                </Button>
+              <Card>
+                <CardContent className="flex items-center justify-center p-8">
+                  <Button asChild>
+                    <Link to="/mijn-favoriete-plek">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Voeg Nieuwe Locatie Toe
+                    </Link>
+                  </Button>
+                </CardContent>
               </Card>
             </div>
           </TabsContent>
