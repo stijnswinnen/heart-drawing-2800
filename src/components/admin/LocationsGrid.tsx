@@ -97,6 +97,10 @@ export const LocationsGrid = ({
     };
   };
 
+  const getGoogleMapsUrl = (latitude: number, longitude: number) => {
+    return `https://www.google.com/maps?q=${latitude},${longitude}`;
+  };
+
   return (
     <>
       <div className="rounded-md border">
@@ -121,7 +125,14 @@ export const LocationsGrid = ({
                   <TableCell>{location.name}</TableCell>
                   <TableCell>{location.description || "-"}</TableCell>
                   <TableCell>
-                    {location.latitude}, {location.longitude}
+                    <a 
+                      href={getGoogleMapsUrl(Number(location.latitude), Number(location.longitude))}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      {location.latitude}, {location.longitude}
+                    </a>
                   </TableCell>
                   <TableCell>{location.recommendation || "-"}</TableCell>
                   <TableCell>{profileInfo.name}</TableCell>
