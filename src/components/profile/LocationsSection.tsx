@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MapPin, Star, Edit, PlusCircle, XCircle } from "lucide-react";
+import { MapPin, Star, Edit, PlusCircle, XCircle, AlertCircle } from "lucide-react";
 import { useLocations } from "@/hooks/useLocations";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
 import { Link } from "react-router-dom";
@@ -19,7 +19,7 @@ export const LocationsSection = () => {
   const { locationLikes } = useLocationLikes();
 
   const userLocations = locations.filter(
-    (location) => location.user_id === session?.user?.id
+    (location) => location.user_id === session?.user?.id && location.status === 'approved'
   );
 
   const userLikes = locationLikes.filter(
@@ -116,28 +116,38 @@ export const LocationsSection = () => {
 
           <TabsContent value="rejected">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {rejectedLocations.map((location) => (
-                <Card key={location.id}>
-                  <CardHeader>
-                    <CardTitle>{location.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">{location.description}</p>
-                    <div className="bg-destructive/10 p-4 rounded-lg">
-                      <h4 className="font-semibold text-sm mb-2">Reden voor afkeuring:</h4>
-                      <p className="text-sm text-destructive">{location.rejection_reason || "Geen reden opgegeven"}</p>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" asChild>
-                      <Link to={`/locaties?id=${location.id}`}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Bekijk Details
-                      </Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+              {rejectedLocations.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-muted-foreground">
+                  <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+                  <p>Je hebt geen afgekeurde locaties</p>
+                </div>
+              ) : (
+                rejectedLocations.map((location) => (
+                  <Card key={location.id} className="border-destructive/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <XCircle className="h-5 w-5 text-destructive" />
+                        {location.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground mb-4">{location.description}</p>
+                      <div className="bg-destructive/10 p-4 rounded-lg">
+                        <h4 className="font-semibold text-sm mb-2">Reden voor afkeuring:</h4>
+                        <p className="text-sm text-destructive">{location.rejection_reason || "Geen reden opgegeven"}</p>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" asChild>
+                        <Link to={`/locaties?id=${location.id}`}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Bekijk Details
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
         </Tabs>
