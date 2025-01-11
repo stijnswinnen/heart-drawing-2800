@@ -27,10 +27,10 @@ serve(async (req) => {
 
     console.log('Processing request for location:', locationId, 'action:', action);
 
-    // First fetch the location
+    // First fetch the location with heart_user_id
     const { data: location, error: locationError } = await supabase
       .from("locations")
-      .select("*, heart_user_id")
+      .select("*, profiles!inner(*)")
       .eq("id", locationId)
       .single();
 
@@ -43,23 +43,12 @@ serve(async (req) => {
       throw new Error("Location not found");
     }
 
-    // Then fetch the profile using heart_user_id
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("email, name")
-      .eq("id", location.heart_user_id)
-      .single();
+    console.log('Found location:', location);
 
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-      throw profileError;
+    if (!location.profiles?.email) {
+      console.error('No email found in profile:', location.profiles);
+      throw new Error("User email not found in profile");
     }
-
-    if (!profile?.email) {
-      throw new Error("User email not found");
-    }
-
-    console.log('Found profile:', profile);
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     
@@ -67,7 +56,7 @@ serve(async (req) => {
     const subject = `Je locatie is ${actionText}`;
     
     let html = `
-      <p>Beste ${profile.name || "gebruiker"},</p>
+      <p>Beste ${location.profiles.name || "gebruiker"},</p>
       <p>Je ingediende locatie "${location.name}" is ${actionText}.</p>
     `;
 
@@ -83,7 +72,7 @@ serve(async (req) => {
       <p>Met vriendelijke groet,<br>Het team van Mechelen Hartverwarmend</p>
     `;
 
-    console.log('Sending email to:', profile.email);
+    console.log('Sending email to:', location.profiles.email);
 
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -93,7 +82,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "Mechelen Hartverwarmend <noreply@mechelen-hartverwarmend.be>",
-        to: [profile.email],
+        to: [location.profiles.email],
         subject,
         html,
       }),
