@@ -22,8 +22,7 @@ export const useLocations = () => {
       const { data, error } = await supabase
         .from('locations')
         .select('id, name, description, latitude, longitude, user_id, heart_user_id, status, rejection_reason')
-        .or('status.eq.approved,status.eq.rejected')
-        .eq('share_consent', true);
+        .or('status.eq.approved,and(status.eq.rejected,share_consent.is.false)');
 
       if (error) throw error;
       setLocations(data || []);
