@@ -79,7 +79,7 @@ export const LocationsSection = () => {
                 </Card>
               ))}
               <Card className="flex items-center justify-center p-8">
-                <Button variant="outline" asChild>
+                <Button asChild>
                   <Link to="/mijn-favoriete-plek">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Voeg Nieuwe Locatie Toe
