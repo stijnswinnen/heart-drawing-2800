@@ -60,7 +60,7 @@ export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
           providers={[]}
           showLinks={true}
           view="sign_in"
-          redirectTo={`${window.location.origin}/reset-password`}
+          redirectTo={window.location.origin}
           localization={{
             variables: {
               sign_in: {
