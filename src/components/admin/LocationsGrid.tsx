@@ -21,6 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LocationsGridProps {
   locations: Tables<"locations">[] | null;
@@ -40,6 +42,27 @@ export const LocationsGrid = ({
   const [selectedLocation, setSelectedLocation] = useState<Tables<"locations"> | null>(null);
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Fetch profiles for all locations
+  const { data: profiles } = useQuery({
+    queryKey: ["profiles", locations?.map(loc => loc.heart_user_id)],
+    queryFn: async () => {
+      if (!locations) return [];
+      const heartUserIds = locations
+        .map(loc => loc.heart_user_id)
+        .filter((id): id is string => id !== null);
+      
+      if (heartUserIds.length === 0) return [];
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, name, email")
+        .in("id", heartUserIds);
+
+      return data || [];
+    },
+    enabled: !!locations?.length,
+  });
 
   if (!locations || locations.length === 0) {
     return (
@@ -65,6 +88,15 @@ export const LocationsGrid = ({
     setIsDeleteDialogOpen(true);
   };
 
+  const getProfileInfo = (heartUserId: string | null) => {
+    if (!heartUserId || !profiles) return { name: "-", email: "-" };
+    const profile = profiles.find(p => p.id === heartUserId);
+    return {
+      name: profile?.name || "-",
+      email: profile?.email || "-"
+    };
+  };
+
   return (
     <>
       <div className="rounded-md border">
@@ -75,53 +107,60 @@ export const LocationsGrid = ({
               <TableHead>Beschrijving</TableHead>
               <TableHead>Coördinaten</TableHead>
               <TableHead>Aanbeveling</TableHead>
+              <TableHead>Gebruiker naam</TableHead>
+              <TableHead>Gebruiker email</TableHead>
               {selectedStatus === "rejected" && <TableHead>Reden afkeuring</TableHead>}
               <TableHead>Acties</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {locations.map((location) => (
-              <TableRow key={location.id}>
-                <TableCell>{location.name}</TableCell>
-                <TableCell>{location.description || "-"}</TableCell>
-                <TableCell>
-                  {location.latitude}, {location.longitude}
-                </TableCell>
-                <TableCell>{location.recommendation || "-"}</TableCell>
-                {selectedStatus === "rejected" && (
-                  <TableCell>{location.rejection_reason || "-"}</TableCell>
-                )}
-                <TableCell>
-                  <div className="flex gap-2">
-                    {selectedStatus === "new" && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onApprove(location)}
-                        >
-                          <Check className="h-4 w-4 text-green-500" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeclineClick(location)}
-                        >
-                          <X className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteClick(location)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {locations.map((location) => {
+              const profileInfo = getProfileInfo(location.heart_user_id);
+              return (
+                <TableRow key={location.id}>
+                  <TableCell>{location.name}</TableCell>
+                  <TableCell>{location.description || "-"}</TableCell>
+                  <TableCell>
+                    {location.latitude}, {location.longitude}
+                  </TableCell>
+                  <TableCell>{location.recommendation || "-"}</TableCell>
+                  <TableCell>{profileInfo.name}</TableCell>
+                  <TableCell>{profileInfo.email}</TableCell>
+                  {selectedStatus === "rejected" && (
+                    <TableCell>{location.rejection_reason || "-"}</TableCell>
+                  )}
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {selectedStatus === "new" && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onApprove(location)}
+                          >
+                            <Check className="h-4 w-4 text-green-500" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeclineClick(location)}
+                          >
+                            <X className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteClick(location)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
