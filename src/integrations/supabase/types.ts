@@ -90,6 +90,7 @@ export type Database = {
           longitude: number
           name: string
           recommendation: string | null
+          rejection_reason: string | null
           share_consent: boolean | null
           status: Database["public"]["Enums"]["location_status"]
           updated_at: string
@@ -104,6 +105,7 @@ export type Database = {
           longitude: number
           name: string
           recommendation?: string | null
+          rejection_reason?: string | null
           share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
           updated_at?: string
@@ -118,6 +120,7 @@ export type Database = {
           longitude?: number
           name?: string
           recommendation?: string | null
+          rejection_reason?: string | null
           share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
           updated_at?: string
@@ -208,7 +211,7 @@ export type Database = {
     Enums: {
       drawing_status: "new" | "approved" | "pending_verification"
       like_status: "active" | "removed"
-      location_status: "new" | "approved" | "pending_verification"
+      location_status: "new" | "approved" | "pending_verification" | "rejected"
       user_role: "user" | "admin"
     }
     CompositeTypes: {

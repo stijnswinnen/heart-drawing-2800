@@ -95,28 +95,79 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
       if (error) throw error;
 
-      toast.success("Location approved successfully");
+      toast.success("Locatie goedgekeurd");
       queryClient.invalidateQueries({ queryKey: ["locations"] });
     } catch (error) {
       console.error("Error approving location:", error);
-      toast.error("Failed to approve location");
+      toast.error("Fout bij het goedkeuren van de locatie");
     }
   };
 
-  const handleDeclineLocation = async (location: Tables<"locations">) => {
+  const handleDeclineLocation = async (location: Tables<"locations">, reason: string) => {
     try {
-      const { error } = await supabase
+      const { error: updateError } = await supabase
+        .from("locations")
+        .update({ 
+          status: "rejected",
+          rejection_reason: reason
+        })
+        .eq("id", location.id);
+
+      if (updateError) throw updateError;
+
+      // Send notification email
+      const { error: emailError } = await supabase.functions
+        .invoke('send-location-notification', {
+          body: { 
+            locationId: location.id,
+            action: "rejected",
+            reason
+          }
+        });
+
+      if (emailError) {
+        console.error("Error sending notification:", emailError);
+        toast.error("Locatie afgekeurd maar e-mail notificatie mislukt");
+        return;
+      }
+
+      toast.success("Locatie afgekeurd en gebruiker genotificeerd");
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+    } catch (error) {
+      console.error("Error declining location:", error);
+      toast.error("Fout bij het afkeuren van de locatie");
+    }
+  };
+
+  const handleDeleteLocation = async (location: Tables<"locations">) => {
+    try {
+      // Send notification before deleting
+      const { error: emailError } = await supabase.functions
+        .invoke('send-location-notification', {
+          body: { 
+            locationId: location.id,
+            action: "deleted"
+          }
+        });
+
+      if (emailError) {
+        console.error("Error sending notification:", emailError);
+        toast.error("Fout bij het versturen van de notificatie");
+        return;
+      }
+
+      const { error: deleteError } = await supabase
         .from("locations")
         .delete()
         .eq("id", location.id);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
-      toast.success("Location declined and removed");
+      toast.success("Locatie verwijderd en gebruiker genotificeerd");
       queryClient.invalidateQueries({ queryKey: ["locations"] });
     } catch (error) {
-      console.error("Error declining location:", error);
-      toast.error("Failed to decline location");
+      console.error("Error deleting location:", error);
+      toast.error("Fout bij het verwijderen van de locatie");
     }
   };
 
@@ -149,6 +200,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
               selectedStatus={selectedStatus}
               onApprove={handleApproveLocation}
               onDecline={handleDeclineLocation}
+              onDelete={handleDeleteLocation}
             />
           )}
         </main>
