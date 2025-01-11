@@ -18,14 +18,31 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
   const handleApprove = async (drawing: Tables<"drawings">) => {
     try {
-      const { error } = await supabase
+      console.log('Starting approval process for drawing:', drawing.id);
+      
+      // First update the drawing status
+      const { error: updateError } = await supabase
         .from("drawings")
         .update({ status: "approved" })
         .eq("id", drawing.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      toast.success("Drawing approved successfully");
+      // Then trigger the optimization process
+      console.log('Triggering optimization for drawing:', drawing.image_path);
+      const { data: optimizationData, error: optimizationError } = await supabase.functions
+        .invoke('optimize-heart', {
+          body: { imagePath: drawing.image_path }
+        });
+
+      if (optimizationError) {
+        console.error('Optimization error:', optimizationError);
+        toast.error("Drawing approved but optimization failed");
+        return;
+      }
+
+      console.log('Optimization response:', optimizationData);
+      toast.success("Drawing approved and optimized successfully");
       queryClient.invalidateQueries({ queryKey: ["drawings"] });
     } catch (error) {
       console.error("Error approving drawing:", error);
