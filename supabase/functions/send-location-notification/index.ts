@@ -27,10 +27,10 @@ serve(async (req) => {
 
     console.log('Processing request for location:', locationId, 'action:', action);
 
-    // First fetch the location with heart_user_id
+    // First fetch the location
     const { data: location, error: locationError } = await supabase
       .from("locations")
-      .select("*, profiles!inner(*)")
+      .select("*, heart_user_id")
       .eq("id", locationId)
       .single();
 
@@ -45,8 +45,20 @@ serve(async (req) => {
 
     console.log('Found location:', location);
 
-    if (!location.profiles?.email) {
-      console.error('No email found in profile:', location.profiles);
+    // Then fetch the profile separately
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("email, name")
+      .eq("id", location.heart_user_id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      throw profileError;
+    }
+
+    if (!profile?.email) {
+      console.error('No email found in profile:', profile);
       throw new Error("User email not found in profile");
     }
 
@@ -56,7 +68,7 @@ serve(async (req) => {
     const subject = `Je locatie is ${actionText}`;
     
     let html = `
-      <p>Beste ${location.profiles.name || "gebruiker"},</p>
+      <p>Beste ${profile.name || "gebruiker"},</p>
       <p>Je ingediende locatie "${location.name}" is ${actionText}.</p>
     `;
 
@@ -72,7 +84,7 @@ serve(async (req) => {
       <p>Met vriendelijke groet,<br>Het team van Mechelen Hartverwarmend</p>
     `;
 
-    console.log('Sending email to:', location.profiles.email);
+    console.log('Sending email to:', profile.email);
 
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -82,7 +94,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "Mechelen Hartverwarmend <noreply@mechelen-hartverwarmend.be>",
-        to: [location.profiles.email],
+        to: [profile.email],
         subject,
         html,
       }),
