@@ -59,9 +59,13 @@ const Profile = () => {
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-white">
         <div className="container mx-auto p-6 space-y-8 animate-fade-in">
           <ProfileHeader />
-          <div className="grid gap-8 md:grid-cols-2">
-            <HeartSection />
-            <LocationsSection />
+          <div className="grid grid-cols-8 gap-8">
+            <div className="col-span-3">
+              <HeartSection />
+            </div>
+            <div className="col-span-5">
+              <LocationsSection />
+            </div>
           </div>
           <PersonalInfoSection />
         </div>

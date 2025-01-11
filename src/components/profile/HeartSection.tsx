@@ -59,7 +59,7 @@ export const HeartSection = () => {
   }, [pendingHeart?.image_path]);
 
   return (
-    <Card className="mb-8">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-primary-dark">
           <Heart className="h-5 w-5" />
