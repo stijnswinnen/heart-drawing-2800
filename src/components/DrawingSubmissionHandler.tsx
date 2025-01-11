@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { submitDrawing, deleteDrawing } from "@/utils/drawingSubmission";
+import { submitDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
-import { ReplaceDrawingDialog } from "@/components/ReplaceDrawingDialog";
 import { SubmissionConfetti } from "@/components/SubmissionConfetti";
 
 interface DrawingSubmissionHandlerProps {
@@ -21,8 +20,6 @@ export const DrawingSubmissionHandler = ({
   setIsDrawing,
   setHasDrawn,
 }: DrawingSubmissionHandlerProps) => {
-  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
-  const [existingDrawing, setExistingDrawing] = useState<any>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -43,38 +40,6 @@ export const DrawingSubmissionHandler = ({
         console.error('No canvas element found');
         toast.error("Versturen van tekening is mislukt");
         return;
-      }
-
-      // First check if there's an existing profile with this email
-      console.log('Checking for existing profile...');
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id, email_verified')
-        .eq('email', data.email)
-        .maybeSingle();
-
-      if (existingProfile) {
-        console.log('Found existing profile, checking for any drawings');
-        const { data: existingDrawings, error: drawingError } = await supabase
-          .from('drawings')
-          .select('*')
-          .eq('heart_user_id', existingProfile.id);
-
-        if (drawingError) {
-          console.error('Error checking for existing drawings:', drawingError);
-          toast.error("Versturen van tekening is mislukt");
-          return;
-        }
-
-        console.log('Existing drawings check result:', existingDrawings?.length || 0, 'drawings found');
-
-        if (existingDrawings && existingDrawings.length > 0) {
-          console.log('Found existing drawing, showing replace dialog');
-          setExistingDrawing(existingDrawings[0]);
-          setShowReplaceDialog(true);
-          setShowSubmitForm(false);
-          return;
-        }
       }
 
       // Submit the drawing
@@ -105,32 +70,10 @@ export const DrawingSubmissionHandler = ({
     }
   };
 
-  const handleReplaceDrawing = async () => {
-    try {
-      if (existingDrawing) {
-        await deleteDrawing(existingDrawing.image_path);
-        setShowReplaceDialog(false);
-        setShowSubmitForm(true);
-      }
-    } catch (error: any) {
-      console.error('Error replacing drawing:', error);
-      toast.error("Error replacing drawing");
-    }
-  };
-
   return (
     <>
       {showSubmitForm && (
         <SubmitForm onClose={() => setShowSubmitForm(false)} onSubmit={handleSubmit} />
-      )}
-      {showReplaceDialog && (
-        <ReplaceDrawingDialog 
-          onConfirm={handleReplaceDrawing} 
-          onCancel={() => {
-            setShowReplaceDialog(false);
-            setShowSubmitForm(false);
-          }} 
-        />
       )}
       <SubmissionConfetti isActive={showConfetti} />
     </>
