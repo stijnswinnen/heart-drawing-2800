@@ -3,19 +3,32 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Mail, CheckCircle2, XCircle, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const PersonalInfoSection = () => {
   const session = useSession();
   const supabase = useSupabaseClient();
+  const navigate = useNavigate();
   const [name, setName] = useState(session?.user?.user_metadata?.name || "");
   const [isLoading, setIsLoading] = useState(false);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
 
   const isVerified = session?.user?.email_confirmed_at !== null;
+
+  useEffect(() => {
+    if (!session) {
+      navigate('/');
+    }
+  }, [session, navigate]);
+
+  useEffect(() => {
+    if (session?.user?.user_metadata?.name) {
+      setName(session.user.user_metadata.name);
+    }
+  }, [session?.user?.user_metadata?.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +71,10 @@ export const PersonalInfoSection = () => {
       setIsResendingVerification(false);
     }
   };
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <Card className="transition-all duration-300 hover:shadow-lg">
@@ -118,15 +135,19 @@ export const PersonalInfoSection = () => {
             >
               {isLoading ? "Opslaan..." : "Wijzigingen Opslaan"}
             </Button>
-            <Button
-              component={Link}
+            <Link 
               to="/reset-password"
-              variant="outline"
-              className="w-full border-primary/20"
+              className="w-full"
             >
-              <Lock className="mr-2 h-4 w-4" />
-              Wachtwoord wijzigen
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-primary/20"
+              >
+                <Lock className="mr-2 h-4 w-4" />
+                Wachtwoord wijzigen
+              </Button>
+            </Link>
           </div>
         </form>
       </CardContent>
