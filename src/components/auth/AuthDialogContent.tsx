@@ -27,6 +27,8 @@ export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
           console.error('Session check error:', error);
           handleAuthError(error);
         }
+      } else if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery initiated');
       }
     });
 
@@ -58,7 +60,7 @@ export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
           providers={[]}
           showLinks={true}
           view="sign_in"
-          redirectTo={`${window.location.origin}/verify`}
+          redirectTo={`${window.location.origin}/reset-password`}
           localization={{
             variables: {
               sign_in: {
@@ -80,9 +82,10 @@ export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
               forgotten_password: {
                 email_label: 'E-mailadres',
                 password_label: 'Wachtwoord',
-                button_label: 'Stuur instructies',
-                loading_button_label: 'Versturen...',
+                button_label: 'Stuur wachtwoord reset link',
+                loading_button_label: 'Link wordt verstuurd...',
                 link_text: 'Wachtwoord vergeten?',
+                confirmation_text: 'Check je e-mail voor de wachtwoord reset link',
               },
             },
           }}
