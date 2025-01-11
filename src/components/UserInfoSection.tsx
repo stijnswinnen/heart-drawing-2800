@@ -16,7 +16,6 @@ export const UserInfoSection = ({
   onEmailChange 
 }: UserInfoSectionProps) => {
   const session = useSession();
-  const isLoggedIn = !!session;
 
   return (
     <div className="space-y-4">
@@ -29,7 +28,6 @@ export const UserInfoSection = ({
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
           placeholder="Vul je naam in"
-          disabled={isLoggedIn && name.trim() !== ''}
           required
         />
       </div>
@@ -44,7 +42,6 @@ export const UserInfoSection = ({
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           placeholder="Vul je e-mailadres in"
-          disabled={isLoggedIn && email.trim() !== ''}
           required
         />
       </div>
