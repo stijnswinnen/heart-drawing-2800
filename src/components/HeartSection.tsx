@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export const HeartSection = () => {
   const session = useSession();
@@ -71,6 +72,12 @@ export const HeartSection = () => {
     fetchPendingHeartUrl();
   }, [pendingHeart?.image_path]);
 
+  const getHeartImageUrl = (imagePath: string, status: "approved" | "new") => {
+    const bucket = status === "approved" ? "optimized" : "hearts";
+    const { data } = supabase.storage.from(bucket).getPublicUrl(imagePath);
+    return data.publicUrl;
+  };
+
   return (
     <Card className="mb-8">
       <CardHeader>
@@ -89,9 +96,12 @@ export const HeartSection = () => {
               </AlertDescription>
             </Alert>
             {pendingHeartUrl && (
-              <div className="aspect-square w-full max-w-md mx-auto">
+              <div className="aspect-square w-full max-w-md mx-auto relative">
+                <Badge className="absolute top-4 right-4 bg-yellow-500">
+                  Wacht op goedkeuring
+                </Badge>
                 <img
-                  src={pendingHeartUrl}
+                  src={getHeartImageUrl(pendingHeart.image_path, "new")}
                   alt="Je wachtende hart"
                   className="w-full h-full object-contain"
                 />
@@ -101,7 +111,7 @@ export const HeartSection = () => {
         ) : userHeart ? (
           <div className="aspect-square w-full max-w-md mx-auto">
             <img
-              src={supabase.storage.from('hearts').getPublicUrl(userHeart.image_path).data.publicUrl}
+              src={getHeartImageUrl(userHeart.image_path, "approved")}
               alt="Jouw hart"
               className="w-full h-full object-contain"
             />
