@@ -9,18 +9,25 @@ export const useAuthStateChange = (onClose: () => void) => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        if (sessionError.message.includes('refresh_token_not_found')) {
-          await supabase.auth.signOut();
-          toast.error('Your session has expired. Please sign in again.');
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          if (sessionError.message.includes('refresh_token_not_found')) {
+            await supabase.auth.signOut();
+            toast.error('Je sessie is verlopen. Log opnieuw in.');
+          } else {
+            handleAuthError(sessionError);
+          }
         }
-      }
-      
-      if (session?.user) {
-        handleSignedInUser(session.user);
+        
+        if (session?.user) {
+          handleSignedInUser(session.user);
+        }
+      } catch (error: any) {
+        console.error('Session check error:', error);
+        handleAuthError(error);
       }
     };
 
@@ -36,8 +43,13 @@ export const useAuthStateChange = (onClose: () => void) => {
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       } else if (event === 'USER_UPDATED') {
-        const { error } = await supabase.auth.getSession();
-        if (error) {
+        try {
+          const { error } = await supabase.auth.getSession();
+          if (error) {
+            handleAuthError(error);
+          }
+        } catch (error: any) {
+          console.error('Session update error:', error);
           handleAuthError(error);
         }
       } else if (event === 'PASSWORD_RECOVERY') {
@@ -59,7 +71,7 @@ export const useAuthStateChange = (onClose: () => void) => {
 
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
-        toast.error('Error checking user role');
+        toast.error('Error bij het controleren van de gebruikersrol');
         return;
       }
 
@@ -87,7 +99,7 @@ export const useAuthStateChange = (onClose: () => void) => {
         console.log('Linked existing profile to auth account:', heartUser);
       }
 
-      toast.success('Successfully signed in!');
+      toast.success('Succesvol ingelogd!');
       onClose();
 
     } catch (error: any) {

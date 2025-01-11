@@ -3,6 +3,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { handleAuthError } from "./AuthErrorHandler";
 
 interface AuthDialogContentProps {
   onClose: () => void;
@@ -10,24 +11,22 @@ interface AuthDialogContentProps {
 
 export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
         toast.success('Succesvol ingelogd!');
         onClose();
       } else if (event === 'USER_UPDATED') {
-        const checkSession = async () => {
+        try {
           const { error } = await supabase.auth.getSession();
           if (error) {
-            if (error.message.includes('invalid_credentials')) {
-              toast.error('Ongeldige inloggegevens. Controleer je e-mailadres en wachtwoord.');
-            } else if (error.message.includes('Email not confirmed')) {
-              toast.error('Verifieer eerst je e-mailadres voordat je inlogt.');
-            } else {
-              toast.error('Er is een fout opgetreden tijdens het inloggen.');
-            }
+            handleAuthError(error);
           }
-        };
-        checkSession();
+        } catch (error: any) {
+          console.error('Session check error:', error);
+          handleAuthError(error);
+        }
       }
     });
 
