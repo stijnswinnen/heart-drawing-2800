@@ -47,7 +47,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
 
   useEffect(() => {
     const setUserData = async () => {
-      if (session?.user) {
+      if (session?.user?.id) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('name, email, marketing_consent')

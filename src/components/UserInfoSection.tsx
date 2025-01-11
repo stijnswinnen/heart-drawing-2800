@@ -1,6 +1,8 @@
 import React from 'react';
 import { Input } from './ui/input';
 import { useSession } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
 
 interface UserInfoSectionProps {
   name: string;
@@ -16,6 +18,27 @@ export const UserInfoSection = ({
   onEmailChange 
 }: UserInfoSectionProps) => {
   const session = useSession();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (session?.user?.id) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (data) {
+          onNameChange(data.name || '');
+          onEmailChange(data.email || '');
+          setProfile(data);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [session?.user?.id, onNameChange, onEmailChange]);
 
   return (
     <div className="space-y-4">
