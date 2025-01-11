@@ -1,120 +1,121 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
-interface EmailRequest {
+interface LocationNotificationRequest {
   locationId: string;
-  action: "rejected" | "deleted";
+  action: "reject" | "delete";
   reason?: string;
 }
 
-serve(async (req) => {
+const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const { locationId, action, reason } = await req.json() as LocationNotificationRequest;
 
-    const { locationId, action, reason } = await req.json() as EmailRequest;
-
-    console.log('Processing request for location:', locationId, 'action:', action);
-
-    // First fetch the location
-    const { data: location, error: locationError } = await supabase
+    // Fetch location and user details
+    const { data: location } = await supabase
       .from("locations")
-      .select("*, heart_user_id")
+      .select(`
+        name,
+        heart_user_id,
+        profiles (
+          email,
+          name
+        )
+      `)
       .eq("id", locationId)
       .single();
 
-    if (locationError) {
-      console.error('Error fetching location:', locationError);
-      throw locationError;
+    if (!location || !location.profiles?.email) {
+      console.error("Location or user email not found");
+      return new Response(
+        JSON.stringify({ error: "Location or user email not found" }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    if (!location) {
-      throw new Error("Location not found");
-    }
+    const userName = location.profiles.name || "Gebruiker";
+    const userEmail = location.profiles.email;
+    const locationName = location.name;
 
-    console.log('Found location:', location);
+    let subject = "";
+    let html = "";
 
-    // Then fetch the profile separately
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("email, name")
-      .eq("id", location.heart_user_id)
-      .single();
-
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-      throw profileError;
-    }
-
-    if (!profile?.email) {
-      console.error('No email found in profile:', profile);
-      throw new Error("User email not found in profile");
-    }
-
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    
-    const actionText = action === "rejected" ? "afgekeurd" : "verwijderd";
-    const subject = `Je locatie is ${actionText}`;
-    
-    let html = `
-      <p>Beste ${profile.name || "gebruiker"},</p>
-      <p>Je ingediende locatie "${location.name}" is ${actionText}.</p>
-    `;
-
-    if (action === "rejected" && reason) {
-      html += `
-        <p>Reden voor afkeuring:</p>
+    if (action === "reject") {
+      subject = `Je locatie "${locationName}" werd niet goedgekeurd`;
+      html = `
+        <p>Beste ${userName},</p>
+        <p>Je ingediende locatie "${locationName}" werd niet goedgekeurd om de volgende reden:</p>
         <p>${reason}</p>
-        <p>Je kunt de locatie aanpassen en opnieuw indienen via je profiel pagina.</p>
+        <p>Je kan een nieuwe locatie indienen via onze website.</p>
+        <p>Met vriendelijke groeten,<br>Het Mechelen Hartenstad team</p>
+      `;
+    } else if (action === "delete") {
+      subject = `Je locatie "${locationName}" werd verwijderd`;
+      html = `
+        <p>Beste ${userName},</p>
+        <p>Je ingediende locatie "${locationName}" werd verwijderd${
+        reason ? ` om de volgende reden:</p><p>${reason}</p>` : ".</p>"
+      }
+        <p>Je kan een nieuwe locatie indienen via onze website.</p>
+        <p>Met vriendelijke groeten,<br>Het Mechelen Hartenstad team</p>
       `;
     }
 
-    html += `
-      <p>Met vriendelijke groet,<br>Het team van Mechelen Hartverwarmend</p>
-    `;
-
-    console.log('Sending email to:', profile.email);
-
-    const emailRes = await fetch("https://api.resend.com/emails", {
+    // Send email using Resend
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Mechelen Hartverwarmend <noreply@mechelen-hartverwarmend.be>",
-        to: [profile.email],
+        from: "Mechelen Hartenstad <noreply@mechelen-hartenstad.be>",
+        to: [userEmail],
         subject,
         html,
       }),
     });
 
-    if (!emailRes.ok) {
-      const errorText = await emailRes.text();
-      console.error('Error from Resend:', errorText);
-      throw new Error("Failed to send email");
+    if (!res.ok) {
+      const error = await res.text();
+      console.error("Resend API error:", error);
+      throw new Error(`Failed to send email: ${error}`);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const data = await res.json();
+    console.log("Email sent successfully:", data);
+
+    return new Response(JSON.stringify(data), {
       status: 200,
-    });
-  } catch (error) {
-    console.error("Error in send-location-notification:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error: any) {
+    console.error("Error in send-location-notification function:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+};
+
+serve(handler);
