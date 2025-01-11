@@ -78,7 +78,7 @@ export const LocationsSection = () => {
                   </CardFooter>
                 </Card>
               ))}
-              <Card>
+              <Card className="shadow-none">
                 <CardContent className="flex items-center justify-center p-8">
                   <Button asChild>
                     <Link to="/mijn-favoriete-plek">
