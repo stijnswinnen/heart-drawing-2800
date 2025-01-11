@@ -178,7 +178,7 @@ export const LocationsSection = () => {
                     <CardFooter>
                       <Button variant="outline" onClick={() => handleLocationEdit(location)}>
                         <Edit className="mr-2 h-4 w-4" />
-                        Bewerk en dien opnieuw in
+                        Bewerken
                       </Button>
                     </CardFooter>
                   </Card>
