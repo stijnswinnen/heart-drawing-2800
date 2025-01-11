@@ -39,7 +39,7 @@ export const LocationsSection = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Mijn Plekken</CardTitle>
+        <CardTitle className="text-primary-dark">Mijn Plekken</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="my-locations">

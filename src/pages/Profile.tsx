@@ -61,9 +61,9 @@ const Profile = () => {
           <ProfileHeader />
           <div className="grid gap-8 md:grid-cols-2">
             <HeartSection />
-            <PersonalInfoSection />
+            <LocationsSection />
           </div>
-          <LocationsSection />
+          <PersonalInfoSection />
         </div>
       </div>
     </>
