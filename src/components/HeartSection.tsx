@@ -17,13 +17,22 @@ export const HeartSection = () => {
   useEffect(() => {
     const fetchProfileId = async () => {
       if (session?.user?.email) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', session.user.email)
-          .maybeSingle();
-        
-        setProfileId(profile?.id || null);
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', session.user.email)
+            .maybeSingle();
+          
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching profile:', error);
+            return;
+          }
+
+          setProfileId(profile?.id || null);
+        } catch (error) {
+          console.error('Error in fetchProfileId:', error);
+        }
       }
     };
 
@@ -45,12 +54,16 @@ export const HeartSection = () => {
   useEffect(() => {
     const fetchPendingHeartUrl = async () => {
       if (pendingHeart?.image_path) {
-        const { data } = supabase.storage
-          .from('hearts')
-          .getPublicUrl(pendingHeart.image_path);
-        
-        if (data?.publicUrl) {
-          setPendingHeartUrl(data.publicUrl);
+        try {
+          const { data } = supabase.storage
+            .from('hearts')
+            .getPublicUrl(pendingHeart.image_path);
+          
+          if (data?.publicUrl) {
+            setPendingHeartUrl(data.publicUrl);
+          }
+        } catch (error) {
+          console.error('Error fetching pending heart URL:', error);
         }
       }
     };
