@@ -13,7 +13,7 @@ const corsHeaders = {
 
 interface LocationNotificationRequest {
   locationId: string;
-  action: "reject" | "delete";
+  action: "rejected" | "deleted";
   reason?: string;
 }
 
@@ -60,16 +60,16 @@ const handler = async (req: Request): Promise<Response> => {
     let subject = "";
     let html = "";
 
-    if (action === "reject") {
+    if (action === "rejected") {
       subject = `Je locatie "${locationName}" werd niet goedgekeurd`;
       html = `
         <p>Beste ${userName},</p>
         <p>Je ingediende locatie "${locationName}" werd niet goedgekeurd om de volgende reden:</p>
         <p>${reason}</p>
         <p>Je kan een nieuwe locatie indienen via onze website.</p>
-        <p>Met vriendelijke groeten,<br>Het Mechelen Hartenstad team</p>
+        <p>Met vriendelijke groeten,<br>Het 2800.Love team</p>
       `;
-    } else if (action === "delete") {
+    } else if (action === "deleted") {
       subject = `Je locatie "${locationName}" werd verwijderd`;
       html = `
         <p>Beste ${userName},</p>
@@ -77,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
         reason ? ` om de volgende reden:</p><p>${reason}</p>` : ".</p>"
       }
         <p>Je kan een nieuwe locatie indienen via onze website.</p>
-        <p>Met vriendelijke groeten,<br>Het Mechelen Hartenstad team</p>
+        <p>Met vriendelijke groeten,<br>Het 2800.Love team</p>
       `;
     }
 
@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Mechelen Hartenstad <noreply@mechelen-hartenstad.be>",
+        from: "2800.Love <heart@stijnswinnen.be>",
         to: [userEmail],
         subject,
         html,
