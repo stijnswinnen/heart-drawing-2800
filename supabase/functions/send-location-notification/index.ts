@@ -25,20 +25,41 @@ serve(async (req) => {
 
     const { locationId, action, reason } = await req.json() as EmailRequest;
 
-    // Fetch location and user details
+    console.log('Processing request for location:', locationId, 'action:', action);
+
+    // First fetch the location
     const { data: location, error: locationError } = await supabase
       .from("locations")
-      .select("*, profiles(email, name)")
+      .select("*, heart_user_id")
       .eq("id", locationId)
       .single();
 
     if (locationError) {
+      console.error('Error fetching location:', locationError);
       throw locationError;
     }
 
-    if (!location?.profiles?.email) {
+    if (!location) {
+      throw new Error("Location not found");
+    }
+
+    // Then fetch the profile using heart_user_id
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("email, name")
+      .eq("id", location.heart_user_id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      throw profileError;
+    }
+
+    if (!profile?.email) {
       throw new Error("User email not found");
     }
+
+    console.log('Found profile:', profile);
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     
@@ -46,7 +67,7 @@ serve(async (req) => {
     const subject = `Je locatie is ${actionText}`;
     
     let html = `
-      <p>Beste ${location.profiles.name || "gebruiker"},</p>
+      <p>Beste ${profile.name || "gebruiker"},</p>
       <p>Je ingediende locatie "${location.name}" is ${actionText}.</p>
     `;
 
@@ -62,6 +83,8 @@ serve(async (req) => {
       <p>Met vriendelijke groet,<br>Het team van Mechelen Hartverwarmend</p>
     `;
 
+    console.log('Sending email to:', profile.email);
+
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -70,13 +93,15 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "Mechelen Hartverwarmend <noreply@mechelen-hartverwarmend.be>",
-        to: [location.profiles.email],
+        to: [profile.email],
         subject,
         html,
       }),
     });
 
     if (!emailRes.ok) {
+      const errorText = await emailRes.text();
+      console.error('Error from Resend:', errorText);
       throw new Error("Failed to send email");
     }
 
