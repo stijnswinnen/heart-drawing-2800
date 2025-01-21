@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
+import { Share2 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 type Profile = Tables<"profiles">;
 
@@ -21,6 +23,7 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
   const session = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const currentLocation = useLocation();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -72,6 +75,18 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
     }
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/locaties-list?location=${location.id}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link gekopieerd naar klembord");
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast.error("Kon de link niet kopiëren");
+    }
+  };
+
   return (
     <div className="p-4 space-y-4">
       <div className="flex justify-between items-start">
@@ -90,7 +105,11 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
         <p className="text-gray-700">{location.description}</p>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button onClick={handleShare} variant="outline">
+          <Share2 className="w-4 h-4 mr-2" />
+          Deel deze locatie
+        </Button>
         <Button onClick={handleLike} variant="default">
           Voeg toe aan favorieten
         </Button>
