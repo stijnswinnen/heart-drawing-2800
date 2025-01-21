@@ -6,7 +6,7 @@ import { Heart } from "lucide-react";
 import { useLocationLikes } from '@/hooks/useLocationLikes';
 import { useApprovedHearts } from '@/hooks/useApprovedHearts';
 import { useLocations } from '@/hooks/useLocations';
-import { cn } from "@/lib/utils"; // Added this import
+import { cn } from "@/lib/utils";
 
 interface LocationsMapProps {
   selectedLocationId: string | null;
@@ -29,9 +29,18 @@ export const LocationsMap = ({ selectedLocationId, onLocationSelect }: Locations
   const getRandomHeartUrl = () => {
     if (approvedHearts.length === 0) return '';
     const randomHeart = approvedHearts[Math.floor(Math.random() * approvedHearts.length)];
-    return supabase.storage
-      .from('optimized')
-      .getPublicUrl(`optimized/${randomHeart.image_path}`).data.publicUrl;
+    try {
+      console.log('Getting random heart URL for:', randomHeart.image_path);
+      const { data } = supabase.storage
+        .from('optimized')
+        .getPublicUrl(randomHeart.image_path);
+      
+      console.log('Generated URL:', data.publicUrl);
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Error generating heart URL:', err);
+      return '';
+    }
   };
 
   // Initialize map
@@ -82,6 +91,11 @@ export const LocationsMap = ({ selectedLocationId, onLocationSelect }: Locations
         markerEl.style.backgroundSize = 'contain';
         markerEl.style.backgroundPosition = 'center';
         markerEl.style.backgroundRepeat = 'no-repeat';
+      } else {
+        // Fallback to a heart icon if no image is available
+        const heartIcon = document.createElement('div');
+        heartIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#F26D85" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>';
+        markerEl.appendChild(heartIcon);
       }
 
       // Add click handler
@@ -104,7 +118,7 @@ export const LocationsMap = ({ selectedLocationId, onLocationSelect }: Locations
         });
       }
     });
-  }, [locations, selectedLocationId, onLocationSelect]);
+  }, [locations, selectedLocationId, onLocationSelect, approvedHearts]);
 
   return (
     <div className="w-full h-[400px] md:h-[calc(100vh-4rem)] rounded-lg overflow-hidden">
