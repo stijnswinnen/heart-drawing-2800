@@ -89,16 +89,11 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-xl font-semibold">{location.name}</h2>
-          {!isLoading && profile && (
-            <p className="text-sm text-gray-600">Gedeeld door {profile.name}</p>
-          )}
-        </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          Sluiten
-        </Button>
+      <div>
+        <h2 className="text-xl font-semibold">{location.name}</h2>
+        {!isLoading && profile && (
+          <p className="text-sm text-gray-600">Gedeeld door {profile.name}</p>
+        )}
       </div>
 
       {location.description && (
