@@ -108,12 +108,12 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
         </div>
       )}
 
-      <div className="flex justify-end gap-2">
-        <Button onClick={handleShare} variant="outline">
+      <div className="flex flex-col md:flex-row justify-end gap-2">
+        <Button onClick={handleShare} variant="outline" className="w-full md:w-auto">
           <Share2 className="w-4 h-4 mr-2" />
           Deel deze locatie
         </Button>
-        <Button onClick={handleLike} variant="default">
+        <Button onClick={handleLike} variant="default" className="w-full md:w-auto">
           Voeg toe aan favorieten
         </Button>
       </div>
