@@ -15,6 +15,7 @@ interface LocationDetailsPanelProps {
     name: string;
     description: string | null;
     heart_user_id: string | null;
+    recommendation: string | null;
   };
   onClose: () => void;
 }
