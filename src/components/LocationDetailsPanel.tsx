@@ -100,6 +100,13 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
         <p className="text-gray-700">{location.description}</p>
       )}
 
+      {location.recommendation && (
+        <div className="mt-4">
+          <h3 className="text-lg font-medium mb-2">Waarom is dit jouw lievelingsplek?</h3>
+          <p className="text-gray-700">{location.recommendation}</p>
+        </div>
+      )}
+
       <div className="flex justify-end gap-2">
         <Button onClick={handleShare} variant="outline">
           <Share2 className="w-4 h-4 mr-2" />
