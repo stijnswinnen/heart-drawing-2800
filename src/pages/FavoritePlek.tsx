@@ -20,7 +20,7 @@ const FavoritePlek = () => {
               Wist je dat...
             </p>
             <p className="text-[1.5rem] leading-snug text-white">
-              Als we jouw verhaal publiek mogen delen, maak je kans op een mini-fotoreportage op jouw lievelingsplek!
+              Jouw verhaal verdient een podium! Deel je favoriete plek en maak kans op een exclusieve mini-fotoreportage op locatie – helemaal gratis.
             </p>
             <p className="text-[0.8rem] text-white">
               (Let op: het aantal plaatsen is beperkt!)
