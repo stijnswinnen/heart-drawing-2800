@@ -14,6 +14,13 @@ export const useLocationLikes = () => {
 
   const fetchLocationLikes = async () => {
     try {
+      // Only fetch likes if user is authenticated - RLS now restricts access
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLocationLikes([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('location_likes')
         .select('id, location_id, user_id, status');
