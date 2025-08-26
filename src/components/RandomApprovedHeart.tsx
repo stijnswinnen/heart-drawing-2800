@@ -59,10 +59,11 @@ export function RandomApprovedHeart() {
       // Clean the filename by removing any path segments
       const cleanFilename = filename.split('/').pop() || '';
       console.log('Getting image URL for filename:', cleanFilename);
+      console.log('Storage path will be:', cleanFilename);
       
       const { data } = supabase.storage
         .from('optimized')
-        .getPublicUrl(`optimized/${cleanFilename}`);
+        .getPublicUrl(cleanFilename);
       
       console.log('Generated URL:', data.publicUrl);
       return data.publicUrl;
