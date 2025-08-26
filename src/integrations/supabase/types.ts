@@ -178,6 +178,33 @@ export type Database = {
         }
         Relationships: []
       }
+      security_logs: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       video_generation: {
         Row: {
           created_at: string | null
@@ -212,9 +239,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      secure_profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          email_verified: boolean | null
+          id: string | null
+          marketing_consent: boolean | null
+          name: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          email_verified?: boolean | null
+          id?: string | null
+          marketing_consent?: boolean | null
+          name?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          email_verified?: boolean | null
+          id?: string | null
+          marketing_consent?: boolean | null
+          name?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cleanup_expired_verification_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_profile_minimal_by_email: {
         Args: { p_email: string }
         Returns: {
@@ -237,9 +300,13 @@ export type Database = {
         Args: { user_email: string }
         Returns: undefined
       }
-      verify_profile: {
+      verify_profile_secure: {
         Args: { p_email: string; p_token: string }
         Returns: boolean
+      }
+      verify_user_email: {
+        Args: { p_email: string; p_token: string }
+        Returns: Json
       }
     }
     Enums: {
