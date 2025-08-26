@@ -15,6 +15,7 @@ import Locaties from "./pages/Locaties";
 import LocatiesList from "./pages/LocatiesList";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/verify" element={<Verify />} />

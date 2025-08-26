@@ -42,7 +42,7 @@ const Admin = () => {
 
   useEffect(() => {
     if (!session) {
-      navigate("/");
+      navigate("/auth");
     }
   }, [session, navigate]);
 
@@ -50,7 +50,7 @@ const Admin = () => {
   useEffect(() => {
     if (profile && profile.role !== "admin") {
       toast.error("You don't have permission to access this page");
-      navigate("/");
+      navigate("/auth");
     }
   }, [profile, navigate]);
 

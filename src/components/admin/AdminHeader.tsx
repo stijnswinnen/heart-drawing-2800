@@ -13,7 +13,7 @@ export const AdminHeader = () => {
     try {
       await supabase.auth.signOut();
       toast.success("Logged out successfully");
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Failed to log out");
