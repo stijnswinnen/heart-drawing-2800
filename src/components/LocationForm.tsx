@@ -109,22 +109,6 @@ export const LocationForm = () => {
 
       if (error) throw error;
 
-      const { error: notificationError } = await supabase.functions.invoke('send-location-notification', {
-        body: {
-          name,
-          email,
-          locationName,
-          description: description.trim(),
-          recommendation: recommendation.trim(),
-          latitude: coordinates.lat,
-          longitude: coordinates.lng,
-        },
-      });
-
-      if (notificationError) {
-        console.error("Error sending notification:", notificationError);
-      }
-
       toast.success("Locatie succesvol toegevoegd!");
       setLocationName("");
       setDescription("");

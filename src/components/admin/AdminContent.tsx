@@ -115,23 +115,22 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
       if (updateError) throw updateError;
 
-      // Send notification email
-      const { error: emailError } = await supabase.functions
-        .invoke('send-location-notification', {
-          body: { 
-            locationId: location.id,
-            action: "rejected",
-            reason
-          }
-        });
-
-      if (emailError) {
+      // Try to send notification email, but don't block if it fails
+      try {
+        await supabase.functions
+          .invoke('send-location-notification', {
+            body: { 
+              locationId: location.id,
+              action: "rejected",
+              reason
+            }
+          });
+        toast.success("Locatie afgekeurd en gebruiker genotificeerd");
+      } catch (emailError) {
         console.error("Error sending notification:", emailError);
-        toast.error("Locatie afgekeurd maar e-mail notificatie mislukt");
-        return;
+        toast.warning("Locatie afgekeurd, maar notificatie mislukt");
       }
 
-      toast.success("Locatie afgekeurd en gebruiker genotificeerd");
       queryClient.invalidateQueries({ queryKey: ["locations"] });
     } catch (error) {
       console.error("Error declining location:", error);
@@ -141,19 +140,19 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
   const handleDeleteLocation = async (location: Tables<"locations">) => {
     try {
-      // Send notification before deleting
-      const { error: emailError } = await supabase.functions
-        .invoke('send-location-notification', {
-          body: { 
-            locationId: location.id,
-            action: "deleted"
-          }
-        });
-
-      if (emailError) {
+      // Try to send notification first, but proceed with deletion regardless
+      let notificationSent = false;
+      try {
+        await supabase.functions
+          .invoke('send-location-notification', {
+            body: { 
+              locationId: location.id,
+              action: "deleted"
+            }
+          });
+        notificationSent = true;
+      } catch (emailError) {
         console.error("Error sending notification:", emailError);
-        toast.error("Fout bij het versturen van de notificatie");
-        return;
       }
 
       const { error: deleteError } = await supabase
@@ -163,7 +162,12 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
       if (deleteError) throw deleteError;
 
-      toast.success("Locatie verwijderd en gebruiker genotificeerd");
+      if (notificationSent) {
+        toast.success("Locatie verwijderd en gebruiker genotificeerd");
+      } else {
+        toast.warning("Locatie verwijderd, maar notificatie mislukt");
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["locations"] });
     } catch (error) {
       console.error("Error deleting location:", error);

@@ -28,24 +28,17 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { locationId, action, reason } = await req.json() as LocationNotificationRequest;
 
-    // Fetch location and user details
-    const { data: location } = await supabase
+    // Fetch location details first
+    const { data: location, error: locationError } = await supabase
       .from("locations")
-      .select(`
-        name,
-        heart_user_id,
-        profiles (
-          email,
-          name
-        )
-      `)
+      .select("id, name, user_id, heart_user_id")
       .eq("id", locationId)
       .single();
 
-    if (!location || !location.profiles?.email) {
-      console.error("Location or user email not found");
+    if (locationError || !location) {
+      console.error(`Location not found for ID: ${locationId}`, locationError);
       return new Response(
-        JSON.stringify({ error: "Location or user email not found" }),
+        JSON.stringify({ error: `Location not found for ID: ${locationId}` }),
         {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -53,8 +46,42 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const userName = location.profiles.name || "Gebruiker";
-    const userEmail = location.profiles.email;
+    // Determine which user ID to use (prefer heart_user_id, fallback to user_id)
+    const userId = location.heart_user_id || location.user_id;
+    
+    if (!userId) {
+      console.error(`No user associated with location: ${locationId}`);
+      return new Response(
+        JSON.stringify({ error: `No user associated with location: ${locationId}` }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Fetch user profile with the determined user ID
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("email, name")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile?.email) {
+      console.error(`User email not found for user ID: ${userId}, location ID: ${locationId}`, profileError);
+      return new Response(
+        JSON.stringify({ 
+          error: `User email not found for user ID: ${userId}, location ID: ${locationId}` 
+        }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const userName = profile.name || "Gebruiker";
+    const userEmail = profile.email;
     const locationName = location.name;
 
     let subject = "";
