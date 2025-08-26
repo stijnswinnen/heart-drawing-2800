@@ -75,10 +75,7 @@ export const LocationForm = () => {
     try {
       // First get or create profile
       const { data: existingProfile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", email)
-        .maybeSingle();
+        .rpc('get_profile_minimal_by_email', { p_email: email });
 
       if (profileError) {
         console.error("Error checking profile:", profileError);
@@ -89,8 +86,8 @@ export const LocationForm = () => {
 
       let profileId;
       
-      if (existingProfile) {
-        profileId = existingProfile.id;
+      if (existingProfile?.[0]) {
+        profileId = existingProfile[0].id;
       } else if (session?.user?.id) {
         profileId = session.user.id;
       } else {

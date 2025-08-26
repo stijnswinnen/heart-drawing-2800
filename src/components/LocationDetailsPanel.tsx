@@ -7,7 +7,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Share2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-type Profile = Tables<"profiles">;
+type Profile = { id: string; name: string; };
 
 interface LocationDetailsPanelProps {
   location: {
@@ -31,17 +31,14 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
       if (location.heart_user_id) {
         try {
           const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', location.heart_user_id)
-            .single();
+            .rpc('get_public_profile', { p_id: location.heart_user_id });
 
           if (error) {
             console.error('Error fetching profile:', error);
             return;
           }
 
-          setProfile(data);
+          setProfile(data?.[0] || null);
         } catch (error) {
           console.error('Error:', error);
         } finally {

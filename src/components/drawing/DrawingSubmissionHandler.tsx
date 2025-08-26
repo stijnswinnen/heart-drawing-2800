@@ -36,17 +36,14 @@ export const DrawingSubmissionHandler = ({
 
       console.log('Checking for existing profile...');
       const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id, email_verified')
-        .eq('email', data.email)
-        .maybeSingle();
+        .rpc('get_profile_minimal_by_email', { p_email: data.email });
 
-      if (existingProfile) {
+      if (existingProfile?.[0]) {
         console.log('Found existing profile, checking for any drawings');
         const { data: existingDrawings, error: drawingError } = await supabase
           .from('drawings')
           .select('*')
-          .eq('heart_user_id', existingProfile.id);
+          .eq('heart_user_id', existingProfile[0].id);
 
         if (drawingError) {
           console.error('Error checking for existing drawings:', drawingError);
@@ -74,7 +71,7 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      if (!existingProfile?.email_verified) {
+      if (!existingProfile?.[0]?.email_verified) {
         toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
       } else {
         toast.success("Tekening werd met succes doorgestuurd!");

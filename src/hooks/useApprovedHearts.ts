@@ -20,12 +20,9 @@ export const useApprovedHearts = () => {
       let profileId = null;
       if (session?.user?.email) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', session.user.email)
-          .maybeSingle();
+          .rpc('get_profile_minimal_by_email', { p_email: session.user.email });
         
-        profileId = profile?.id;
+        profileId = profile?.[0]?.id;
       }
 
       // Then fetch drawings that match either user_id or heart_user_id

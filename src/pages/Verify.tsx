@@ -42,35 +42,13 @@ export default function Verify() {
           toast.success("E-mailadres succesvol geverifieerd!");
           setVerificationComplete(true);
         } else {
-          // Check manual verification
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('verification_token, email_verified')
-            .eq('email', email)
-            .single();
+          // Use secure RPC for verification
+          const { data: verified, error: verifyError } = await supabase
+            .rpc('verify_profile', { p_email: email, p_token: token });
 
-          if (profileError) {
-            console.error('Error checking profile:', profileError);
-            throw new Error("Profiel niet gevonden");
-          }
-
-          if (profile.verification_token !== token) {
-            throw new Error("Ongeldige verificatie token");
-          }
-
-          // Update profile verification status
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ 
-              email_verified: true,
-              verification_token: null,
-              verification_token_expires_at: null
-            })
-            .eq('email', email);
-
-          if (updateError) {
-            console.error('Error updating profile:', updateError);
-            throw new Error("Er is een fout opgetreden bij het verifiëren van je e-mailadres");
+          if (verifyError || !verified) {
+            console.error('Verification failed:', verifyError);
+            throw new Error("Verificatie mislukt - ongeldig token of e-mailadres");
           }
 
           toast.success("E-mailadres succesvol geverifieerd!");

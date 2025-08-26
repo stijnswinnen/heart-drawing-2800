@@ -18,12 +18,9 @@ export const HeartSection = () => {
     const fetchProfileId = async () => {
       if (session?.user?.email) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', session.user.email)
-          .maybeSingle();
+          .rpc('get_profile_minimal_by_email', { p_email: session.user.email });
         
-        setProfileId(profile?.id || null);
+        setProfileId(profile?.[0]?.id || null);
       }
     };
 

@@ -40,18 +40,15 @@ export const submitDrawing = async (
   let profileId;
   console.log('Checking for existing profile...');
   const { data: existingProfile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, email_verified')
-    .eq('email', data.email)
-    .maybeSingle();
+    .rpc('get_profile_minimal_by_email', { p_email: data.email });
 
-  if (profileError && profileError.code !== 'PGRST116') {
+  if (profileError) {
     console.error('Error checking for existing profile:', profileError);
     throw new Error("Failed to check user information: " + profileError.message);
   }
 
-  if (existingProfile) {
-    profileId = existingProfile.id;
+  if (existingProfile?.[0]) {
+    profileId = existingProfile[0].id;
     console.log('Using existing profile ID:', profileId);
   } else {
     // Create new profile
