@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
+interface ApprovedHeart {
+  id: string;
+  image_path: string;
+  status: 'new' | 'approved' | 'pending_verification';
+  created_at: string;
+}
+
 export function RandomApprovedHeart() {
-  const [hearts, setHearts] = useState<Tables<"drawings">[]>([]);
+  const [hearts, setHearts] = useState<ApprovedHeart[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,7 +20,7 @@ export function RandomApprovedHeart() {
         console.log('Fetching approved hearts...');
         const { data, error } = await supabase
           .from('drawings')
-          .select('*')
+          .select('id, image_path, status, created_at')
           .eq('status', 'approved');
         
         if (error) {
