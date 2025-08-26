@@ -100,7 +100,7 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
 
       {location.recommendation && (
         <div className="mt-4">
-          <h3 className="text-lg font-medium mb-2">Waarom is dit jouw lievelingsplek?</h3>
+          <h3 className="text-lg font-medium mb-2">Waarom moet je deze plek zeker bezoeken?</h3>
           <p className="text-gray-700">{location.recommendation}</p>
         </div>
       )}
