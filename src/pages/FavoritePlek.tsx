@@ -27,7 +27,11 @@ const FavoritePlek = () => {
             </p>
           </div>
           <p>
-            Als fotograaf kom ik op diverse plekken in Mechelen. Duid jouw favoriete plek aan op de kaart hieronder en vertel ons waarom deze plek zo speciaal voor je is. Wat maakt het zo inspirerend? Waar geniet je zorgeloos van elkaar, waar verzink je in elkaars ogen? Welke plek maakt je nóg meer verliefd op Mechelen?
+            Als fotograaf kom ik op diverse plekken in Mechelen en ontmoet ik vele mensen. Een vraag die ik telkens graag stel is wat hun favoriete plek is in of rond de stad. Een plaats waar men graag komt of waar een verhaal aan verbonden is. 
+            Indien haalbaar plannen we dan ook een fotosessie op die plaats. Graag verzamel ik hier al deze fijne plaatsen om ook anderen te inspireren en deze verhalen te kunnen delen.
+          </p>
+          <p className="mt-4 font-semibold">
+            Stijn
           </p>
         </div>
       </main>
