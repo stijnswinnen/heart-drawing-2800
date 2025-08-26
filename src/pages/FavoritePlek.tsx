@@ -28,7 +28,10 @@ const FavoritePlek = () => {
           </div>
           <p>
             Als fotograaf kom ik op diverse plekken in Mechelen en ontmoet ik vele mensen. Een vraag die ik telkens graag stel is wat hun favoriete plek is in of rond de stad. Een plaats waar men graag komt of waar een verhaal aan verbonden is. 
-            Indien haalbaar plannen we dan ook een fotosessie op die plaats. Graag verzamel ik hier al deze fijne plaatsen om ook anderen te inspireren en deze verhalen te kunnen delen.
+            Indien haalbaar plannen we dan ook een fotosessie op die plaats.
+          </p>
+          <p>
+            Graag verzamel ik hier al deze fijne plaatsen om ook anderen te inspireren en deze verhalen te kunnen delen.
           </p>
           <p className="mt-4 font-semibold">
             Stijn
