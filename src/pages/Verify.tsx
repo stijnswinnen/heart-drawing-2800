@@ -44,7 +44,7 @@ export default function Verify() {
         } else {
           // Use secure RPC for verification
           const { data: verified, error: verifyError } = await supabase
-            .rpc('verify_profile', { p_email: email, p_token: token });
+            .rpc('verify_profile_secure', { p_email: email, p_token: token });
 
           if (verifyError || !verified) {
             console.error('Verification failed:', verifyError);
