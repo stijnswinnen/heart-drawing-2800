@@ -27,7 +27,7 @@ const FavoritePlek = () => {
             </p>
           </div>
           <p>
-            Wij zijn benieuwd naar jouw favoriete plek! Duid het aan op de kaart hieronder en vertel ons waarom deze plek zo speciaal voor je is. Wat maakt het zo inspirerend? Waar geniet je zorgeloos van elkaar, waar verzink je in elkaars ogen? Welke plek maakt je nóg meer verliefd op Mechelen?
+            Als fotograaf kom ik op diverse plekken in Mechelen. Duid jouw favoriete plek aan op de kaart hieronder en vertel ons waarom deze plek zo speciaal voor je is. Wat maakt het zo inspirerend? Waar geniet je zorgeloos van elkaar, waar verzink je in elkaars ogen? Welke plek maakt je nóg meer verliefd op Mechelen?
           </p>
         </div>
       </main>
