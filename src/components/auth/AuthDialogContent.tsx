@@ -12,7 +12,7 @@ interface AuthDialogContentProps {
 export const AuthDialogContent = ({ onClose }: AuthDialogContentProps) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN' && session?.user) {
         toast.success('Succesvol ingelogd!');
