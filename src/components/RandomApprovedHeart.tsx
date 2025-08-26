@@ -62,7 +62,7 @@ export function RandomApprovedHeart() {
       
       const { data } = supabase.storage
         .from('optimized')
-        .getPublicUrl(cleanFilename);
+        .getPublicUrl(`optimized/${cleanFilename}`);
       
       console.log('Generated URL:', data.publicUrl);
       return data.publicUrl;
