@@ -155,8 +155,10 @@ export const LocationsSection = () => {
                           : location.description}
                       </p>
                     </div>
-                    <Button variant="outline" onClick={() => handleLocationEdit(location)} className="ml-4">
-                      Bekijk Details
+                    <Button variant="outline" asChild className="ml-4">
+                      <Link to={`/locaties?location=${location.id}`}>
+                        Bekijk Details
+                      </Link>
                     </Button>
                   </div>
                 </Card>
