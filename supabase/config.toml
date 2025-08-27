@@ -17,5 +17,9 @@ name = "send-location-notification"
 verify_jwt = false
 
 [[functions]]
+name = "send-heart-notification"
+verify_jwt = false
+
+[[functions]]
 name = "generate-daily-video"
 verify_jwt = true

@@ -55,7 +55,22 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
       }
 
       console.log('Optimization response:', optimizationData);
-      toast.success("Drawing approved and optimized successfully");
+
+      // Try to send notification email, but don't block if it fails
+      try {
+        await supabase.functions
+          .invoke('send-heart-notification', {
+            body: { 
+              drawingId: drawing.id,
+              action: "approved"
+            }
+          });
+        toast.success("Drawing approved, optimized and user notified");
+      } catch (emailError) {
+        console.error("Error sending notification:", emailError);
+        toast.success("Drawing approved and optimized successfully");
+      }
+
       queryClient.invalidateQueries({ queryKey: ["drawings"] });
     } catch (error) {
       console.error("Error approving drawing:", error);
