@@ -109,21 +109,19 @@ export const LocationsSection = () => {
           </TabsList>
 
           <TabsContent value="my-locations">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <div className="space-y-4 mt-4">
               {userLocations.map((location) => (
-                <Card key={location.id}>
-                  <CardHeader>
-                    <CardTitle>{location.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{location.description}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" onClick={() => handleLocationEdit(location)}>
+                <Card key={location.id} className="w-full">
+                  <div className="flex items-center justify-between p-6">
+                    <div className="flex-1">
+                      <CardTitle className="mb-2">{location.name}</CardTitle>
+                      <p className="text-muted-foreground">{location.description}</p>
+                    </div>
+                    <Button variant="outline" onClick={() => handleLocationEdit(location)} className="ml-4">
                       <Edit className="mr-2 h-4 w-4" />
                       Bekijk Details
                     </Button>
-                  </CardFooter>
+                  </div>
                 </Card>
               ))}
             </div>
