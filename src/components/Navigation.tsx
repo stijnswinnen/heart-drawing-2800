@@ -99,7 +99,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
             >
               <Link to="/profile">
                 <User className="h-4 w-4 mr-2" />
-                Profile
+                Mijn profiel
               </Link>
             </Button>
             <Button 
