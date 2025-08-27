@@ -199,27 +199,54 @@ export const LocationsSection = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Naam van de locatie</label>
-              <Input
-                value={editedLocation?.name || ''}
-                onChange={(e) => setEditedLocation({ ...editedLocation, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Beschrijving</label>
-              <Textarea
-                value={editedLocation?.description || ''}
-                onChange={(e) => setEditedLocation({ ...editedLocation, description: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Aanbeveling</label>
-              <Textarea
-                value={editedLocation?.recommendation || ''}
-                onChange={(e) => setEditedLocation({ ...editedLocation, recommendation: e.target.value })}
-              />
-            </div>
+            {selectedLocation?.status === 'rejected' ? (
+              // Editable form for rejected locations
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Naam van de locatie</label>
+                  <Input
+                    value={editedLocation?.name || ''}
+                    onChange={(e) => setEditedLocation({ ...editedLocation, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Beschrijving</label>
+                  <Textarea
+                    value={editedLocation?.description || ''}
+                    onChange={(e) => setEditedLocation({ ...editedLocation, description: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Aanbeveling</label>
+                  <Textarea
+                    value={editedLocation?.recommendation || ''}
+                    onChange={(e) => setEditedLocation({ ...editedLocation, recommendation: e.target.value })}
+                  />
+                </div>
+              </>
+            ) : (
+              // Read-only display for approved locations
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Naam van de locatie</label>
+                  <p className="text-sm bg-muted/50 p-3 rounded-md">
+                    {selectedLocation?.name || 'Geen naam opgegeven'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Beschrijving</label>
+                  <p className="text-sm bg-muted/50 p-3 rounded-md">
+                    {selectedLocation?.description || 'Geen beschrijving opgegeven'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Aanbeveling</label>
+                  <p className="text-sm bg-muted/50 p-3 rounded-md">
+                    {selectedLocation?.recommendation || 'Geen aanbeveling opgegeven'}
+                  </p>
+                </div>
+              </>
+            )}
             {selectedLocation?.status === 'rejected' && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Reden voor afkeuring</label>
