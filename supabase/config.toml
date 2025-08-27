@@ -15,3 +15,7 @@ port = 54323
 [[functions]]
 name = "send-location-notification"
 verify_jwt = false
+
+[[functions]]
+name = "generate-daily-video"
+verify_jwt = true
