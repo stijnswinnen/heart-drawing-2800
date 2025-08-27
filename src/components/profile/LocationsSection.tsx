@@ -115,7 +115,11 @@ export const LocationsSection = () => {
                   <div className="flex items-center justify-between p-6">
                     <div className="flex-1">
                       <CardTitle className="mb-2">{location.name}</CardTitle>
-                      <p className="text-muted-foreground">{location.description}</p>
+                      <p className="text-muted-foreground">
+                        {location.description?.length > 200 
+                          ? location.description.substring(0, 200) + '...' 
+                          : location.description}
+                      </p>
                     </div>
                     <Button variant="outline" onClick={() => handleLocationEdit(location)} className="ml-4">
                       <Edit className="mr-2 h-4 w-4" />
