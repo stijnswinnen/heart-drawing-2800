@@ -134,7 +134,6 @@ export const LocationsSection = () => {
                       </p>
                     </div>
                     <Button variant="outline" onClick={() => handleLocationEdit(location)} className="ml-4">
-                      <Edit className="mr-2 h-4 w-4" />
                       Bekijk Details
                     </Button>
                   </div>
