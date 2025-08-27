@@ -143,21 +143,22 @@ export const LocationsSection = () => {
           </TabsContent>
 
           <TabsContent value="favorites">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <div className="space-y-4 mt-4">
               {favoriteLocations.map((location) => (
-                <Card key={location.id}>
-                  <CardHeader>
-                    <CardTitle>{location.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{location.description}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" onClick={() => handleLocationEdit(location)}>
-                      <Edit className="mr-2 h-4 w-4" />
+                <Card key={location.id} className="w-full bg-red-50 border-red-50">
+                  <div className="flex items-center justify-between p-6">
+                    <div className="flex-1">
+                      <CardTitle className="mb-2">{location.name}</CardTitle>
+                      <p className="text-muted-foreground">
+                        {location.description?.length > 200 
+                          ? location.description.substring(0, 200) + '...' 
+                          : location.description}
+                      </p>
+                    </div>
+                    <Button variant="outline" onClick={() => handleLocationEdit(location)} className="ml-4">
                       Bekijk Details
                     </Button>
-                  </CardFooter>
+                  </div>
                 </Card>
               ))}
             </div>
