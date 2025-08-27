@@ -66,8 +66,8 @@ serve(async (req) => {
     console.log('[generate-daily-video] Loading FFmpeg WASM');
     const ffmpeg = new FFmpeg();
     await ffmpeg.load({
-      coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.js',
-      wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.wasm',
+      coreURL: 'https://unpkg.com/@ffmpeg/core-st@0.12.10/dist/umd/ffmpeg-core.js',
+      wasmURL: 'https://unpkg.com/@ffmpeg/core-st@0.12.10/dist/umd/ffmpeg-core.wasm',
     });
 
     // Create frames dir in ffmpeg FS
