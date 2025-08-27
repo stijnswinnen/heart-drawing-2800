@@ -4,13 +4,11 @@ import { Card } from "@/components/ui/card";
 import { User } from "lucide-react";
 import { useLocations } from "@/hooks/useLocations";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
-import { useApprovedHearts } from "@/hooks/useApprovedHearts";
 
 export const ProfileHeader = () => {
   const session = useSession();
   const locations = useLocations();
   const { locationLikes } = useLocationLikes();
-  const approvedHearts = useApprovedHearts();
 
   const userLocations = locations.filter(
     (location) => location.user_id === session?.user?.id
@@ -18,10 +16,6 @@ export const ProfileHeader = () => {
 
   const userLikes = locationLikes.filter(
     (like) => like.user_id === session?.user?.id && like.status === "active"
-  );
-
-  const userHearts = approvedHearts.filter(
-    (heart) => heart.user_id === session?.user?.id
   );
 
   return (
@@ -41,10 +35,6 @@ export const ProfileHeader = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-4">
-          <Card className="p-4 bg-white/50 backdrop-blur transition-all duration-300 hover:scale-105">
-            <p className="text-sm text-muted-foreground">Harten Gemaakt</p>
-            <p className="text-2xl font-bold text-primary-dark">{userHearts.length}</p>
-          </Card>
           <Card className="p-4 bg-white/50 backdrop-blur transition-all duration-300 hover:scale-105">
             <p className="text-sm text-muted-foreground">Locaties Toegevoegd</p>
             <p className="text-2xl font-bold text-primary-dark">{userLocations.length}</p>
