@@ -82,8 +82,14 @@ export const LocationsSection = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-primary-dark">Mijn Plekken</CardTitle>
+        <Button asChild size="sm">
+          <Link to="/mijn-favoriete-plek">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Voeg Nieuwe Locatie Toe
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="my-locations">
@@ -120,16 +126,6 @@ export const LocationsSection = () => {
                   </CardFooter>
                 </Card>
               ))}
-              <Card className="shadow-none">
-                <CardContent className="flex items-center justify-center p-8">
-                  <Button asChild>
-                    <Link to="/mijn-favoriete-plek">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Voeg Nieuwe Locatie Toe
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
