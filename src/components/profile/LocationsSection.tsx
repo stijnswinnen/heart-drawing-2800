@@ -123,7 +123,7 @@ export const LocationsSection = () => {
           <TabsContent value="my-locations">
             <div className="space-y-4 mt-4">
               {userLocations.map((location) => (
-                <Card key={location.id} className="w-full">
+                <Card key={location.id} className="w-full bg-red-50 border-red-50">
                   <div className="flex items-center justify-between p-6">
                     <div className="flex-1">
                       <CardTitle className="mb-2">{location.name}</CardTitle>
