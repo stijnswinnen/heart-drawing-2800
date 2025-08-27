@@ -84,7 +84,7 @@ export const PersonalInfoSection = () => {
   return (
     <Card className="transition-all duration-300 hover:shadow-lg">
       <CardHeader>
-        <CardTitle className="text-primary-dark">Persoonlijke Informatie</CardTitle>
+        <CardTitle className="text-primary-dark">Mijn persoonlijke informatie</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
