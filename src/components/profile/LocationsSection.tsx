@@ -94,15 +94,27 @@ export const LocationsSection = () => {
       <CardContent>
         <Tabs defaultValue="my-locations">
           <TabsList>
-            <TabsTrigger value="my-locations">
+            <TabsTrigger 
+              value="my-locations"
+              disabled={userLocations.length === 0}
+              className={userLocations.length === 0 ? "text-muted-foreground/50 cursor-not-allowed" : ""}
+            >
               <MapPin className="mr-2 h-4 w-4" />
               Mijn Locaties
             </TabsTrigger>
-            <TabsTrigger value="favorites">
+            <TabsTrigger 
+              value="favorites"
+              disabled={favoriteLocations.length === 0}
+              className={favoriteLocations.length === 0 ? "text-muted-foreground/50 cursor-not-allowed" : ""}
+            >
               <Star className="mr-2 h-4 w-4" />
               Favorieten
             </TabsTrigger>
-            <TabsTrigger value="rejected">
+            <TabsTrigger 
+              value="rejected"
+              disabled={rejectedLocations.length === 0}
+              className={rejectedLocations.length === 0 ? "text-muted-foreground/50 cursor-not-allowed" : ""}
+            >
               <XCircle className="mr-2 h-4 w-4" />
               Afgekeurd
             </TabsTrigger>
