@@ -23,3 +23,11 @@ verify_jwt = false
 [[functions]]
 name = "generate-daily-video"
 verify_jwt = true
+
+[[functions]]
+name = "generate-video"
+verify_jwt = false
+
+[[functions]]
+name = "setup-video-cron"
+verify_jwt = false
