@@ -201,23 +201,11 @@ async function processVideoJob(jobId: string) {
     let rendiJob: any = null;
     
     try {
-      // First try with Bearer token
-      let res = await fetch(endpoint, {
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${rendiApiKey}` },
+        headers: { 'X-API-KEY': rendiApiKey },
         body: formData
       });
-
-      if (!res.ok && (res.status === 401 || res.status === 403)) {
-        const bodyText = await res.text();
-        console.log(`Bearer auth rejected (${res.status}): ${bodyText}. Retrying with X-API-Key...`);
-        // Retry with X-API-Key header
-        res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'X-API-Key': rendiApiKey },
-          body: formData
-        });
-      }
 
       if (res.ok) {
         rendiJob = await res.json();
@@ -227,6 +215,7 @@ async function processVideoJob(jobId: string) {
         console.log(`Rendi submission failed -> ${res.status}: ${errorBody}`);
         throw new Error(`Rendi API error: ${res.status} - ${errorBody}`);
       }
+    }
     } catch (e) {
       console.log('Rendi submission threw error:', e);
       throw new Error(`Failed to submit to Rendi: ${e.message}`);
@@ -313,14 +302,7 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
 
       for (let i = 0; i < statusUrls.length; i++) {
         try {
-          // First try with Bearer
-          let res = await fetch(statusUrls[i], { headers: { 'Authorization': `Bearer ${rendiApiKey}` } });
-          if (!res.ok && (res.status === 401 || res.status === 403)) {
-            const bodyText = await res.text();
-            console.log(`Status Bearer rejected (${res.status}): ${bodyText}. Retrying with X-API-Key...`);
-            // Retry with X-API-Key
-            res = await fetch(statusUrls[i], { headers: { 'X-API-Key': rendiApiKey as string } });
-          }
+          const res = await fetch(statusUrls[i], { headers: { 'X-API-KEY': rendiApiKey as string } });
 
           if (res.ok) {
             jobStatus = await res.json();

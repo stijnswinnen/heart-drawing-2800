@@ -92,19 +92,9 @@ serve(async (req) => {
 
           for (let i = 0; i < statusUrls.length; i++) {
             try {
-              // First try with Bearer
-              let res = await fetch(statusUrls[i], {
-                headers: { 'Authorization': `Bearer ${rendiApiKey}` }
+              const res = await fetch(statusUrls[i], {
+                headers: { 'X-API-KEY': rendiApiKey }
               });
-
-              if (!res.ok && (res.status === 401 || res.status === 403)) {
-                const bodyText = await res.text();
-                console.log(`Status Bearer rejected (${res.status}): ${bodyText}. Retrying with X-API-Key...`);
-                // Retry with X-API-Key
-                res = await fetch(statusUrls[i], {
-                  headers: { 'X-API-Key': rendiApiKey }
-                });
-              }
 
               if (res.ok) {
                 rendiStatus = await res.json();
