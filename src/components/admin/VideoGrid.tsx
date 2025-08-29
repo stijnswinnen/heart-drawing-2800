@@ -68,6 +68,30 @@ export const VideoGrid = () => {
     setActiveJob(processingJob || null);
   }, [videoJobs]);
 
+  // Periodically check status for active jobs
+  useEffect(() => {
+    if (!activeJob) return;
+
+    const checkJobStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        await supabase.functions.invoke('video-jobs-status', {
+          body: { jobId: activeJob.id },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          }
+        });
+      } catch (error) {
+        console.error('Error checking job status:', error);
+      }
+    };
+
+    const interval = setInterval(checkJobStatus, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, [activeJob]);
+
   // Subscribe to real-time updates for video jobs
   useEffect(() => {
     const channel = supabase

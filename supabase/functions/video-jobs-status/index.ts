@@ -19,7 +19,18 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const jobId = url.pathname.split('/').pop();
+    const pathJobId = url.pathname.split('/').pop();
+    
+    // Try to get jobId from request body if available
+    let jobId = pathJobId;
+    try {
+      const body = await req.json();
+      if (body.jobId) {
+        jobId = body.jobId;
+      }
+    } catch {
+      // If no JSON body, use path jobId
+    }
     
     if (!jobId) {
       throw new Error('Job ID is required');
@@ -71,8 +82,8 @@ serve(async (req) => {
         if (rendiApiKey) {
           // Try multiple endpoints for status
           const statusUrls = [
-            `https://api.rendi.dev/jobs/${job.rendi_job_id}`,
             `https://api.rendi.dev/v1/jobs/${job.rendi_job_id}`,
+            `https://api.rendi.dev/jobs/${job.rendi_job_id}`,
           ];
 
           let rendiStatus: any = null;
@@ -90,33 +101,85 @@ serve(async (req) => {
               } else {
                 lastStatus = res.status;
                 lastBody = await res.text();
-                console.log(`Rendi status (status endpoint) attempt ${i + 1} failed at ${statusUrls[i]} -> ${lastStatus}: ${lastBody}`);
+                console.log(`Rendi status check attempt ${i + 1} failed at ${statusUrls[i]} -> ${lastStatus}: ${lastBody}`);
               }
             } catch (e) {
-              console.log(`Rendi status (status endpoint) attempt ${i + 1} threw error at ${statusUrls[i]}:`, e);
+              console.log(`Rendi status check attempt ${i + 1} threw error at ${statusUrls[i]}:`, e);
             }
           }
 
           if (rendiStatus) {
+            console.log('Rendi status response:', rendiStatus);
+            
             // Update job status based on Rendi response
             if (rendiStatus.status === 'completed' && job.status !== 'completed') {
-              // Download and upload video (this should normally be handled by the webhook or polling)
-              console.log('Rendi job completed, should download video');
+              console.log('Finalizing completed job - downloading video...');
+              
+              // Download the completed video
+              const videoResponse = await fetch(rendiStatus.output_url);
+              const videoBlob = await videoResponse.blob();
+              
+              // Upload to Supabase storage
+              const videoPath = `${new Date().toISOString().split('T')[0]}/video_${Date.now()}.mp4`;
+              const { error: uploadError } = await supabase.storage
+                .from('videos')
+                .upload(videoPath, videoBlob);
+
+              if (uploadError) {
+                throw new Error(`Upload failed: ${uploadError.message}`);
+              }
+
+              // Mark job as completed
+              await supabase
+                .from('video_jobs')
+                .update({ 
+                  status: 'completed',
+                  progress: 100,
+                  video_path: videoPath,
+                  completed_at: new Date().toISOString(),
+                  logs: [
+                    ...(job.logs || []),
+                    { 
+                      timestamp: new Date().toISOString(), 
+                      message: `Video finalized successfully: ${videoPath}` 
+                    }
+                  ]
+                })
+                .eq('id', jobId);
+                
+              console.log('Job finalized successfully:', videoPath);
+              
             } else if (rendiStatus.status === 'failed') {
               await supabase
                 .from('video_jobs')
                 .update({ 
                   status: 'failed',
                   error_message: rendiStatus.error || 'Rendi job failed',
-                  completed_at: new Date().toISOString()
+                  completed_at: new Date().toISOString(),
+                  logs: [
+                    ...(job.logs || []),
+                    { 
+                      timestamp: new Date().toISOString(), 
+                      message: `Rendi job failed: ${rendiStatus.error || 'Unknown error'}` 
+                    }
+                  ]
                 })
                 .eq('id', jobId);
-            } else if (rendiStatus.progress) {
+            } else if (rendiStatus.progress !== undefined) {
               // Update progress
               const progress = 60 + Math.min(30, rendiStatus.progress || 0);
               await supabase
                 .from('video_jobs')
-                .update({ progress })
+                .update({ 
+                  progress,
+                  logs: [
+                    ...(job.logs || []),
+                    { 
+                      timestamp: new Date().toISOString(), 
+                      message: `Processing progress: ${progress}%` 
+                    }
+                  ]
+                })
                 .eq('id', jobId);
             }
           }

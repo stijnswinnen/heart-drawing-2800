@@ -68,8 +68,8 @@ serve(async (req) => {
 
     console.log('Job created:', job);
 
-    // Start background processing
-    processVideoJob(job.id);
+    // Start background processing with EdgeRuntime.waitUntil for persistence
+    EdgeRuntime.waitUntil(processVideoJob(job.id));
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -193,41 +193,33 @@ async function processVideoJob(jobId: string) {
 
     await updateJobProgress(jobId, 50, 'Submitting job to Rendi...');
 
-    // Submit job to Rendi.dev with fallback endpoints and header styles
-    const endpoints = [
-      { url: 'https://api.rendi.dev/jobs', headers: { 'Authorization': `Bearer ${rendiApiKey}` } },
-      { url: 'https://api.rendi.dev/v1/jobs', headers: { 'Authorization': `Bearer ${rendiApiKey}` } },
-      { url: 'https://api.rendi.dev/jobs', headers: { 'X-API-Key': rendiApiKey } },
-      { url: 'https://api.rendi.dev/v1/jobs', headers: { 'X-API-Key': rendiApiKey } },
-    ] as const;
+    // Submit job to Rendi.dev using the correct FFmpeg endpoint
+    const endpoint = 'https://api.rendi.dev/v1/run-ffmpeg-command';
+    
+    console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
     let rendiJob: any = null;
-    let lastStatus = 0;
-    let lastBody = '';
-
-    for (let i = 0; i < endpoints.length; i++) {
-      const ep = endpoints[i];
-      try {
-        const res = await fetch(ep.url, {
-          method: 'POST',
-          headers: ep.headers,
-          body: formData
-        });
-        if (res.ok) {
-          rendiJob = await res.json();
-          break;
-        } else {
-          lastStatus = res.status;
-          lastBody = await res.text();
-          console.log(`Rendi submit attempt ${i + 1} failed at ${ep.url} -> ${lastStatus}: ${lastBody}`);
-        }
-      } catch (e) {
-        console.log(`Rendi submit attempt ${i + 1} threw error at ${ep.url}:`, e);
+    
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${rendiApiKey}`
+        },
+        body: formData
+      });
+      
+      if (res.ok) {
+        rendiJob = await res.json();
+        console.log('Rendi job submitted successfully:', rendiJob);
+      } else {
+        const errorBody = await res.text();
+        console.log(`Rendi submission failed -> ${res.status}: ${errorBody}`);
+        throw new Error(`Rendi API error: ${res.status} - ${errorBody}`);
       }
-    }
-
-    if (!rendiJob) {
-      throw new Error(`Rendi API error after retries. Last response ${lastStatus} - ${lastBody}`);
+    } catch (e) {
+      console.log('Rendi submission threw error:', e);
+      throw new Error(`Failed to submit to Rendi: ${e.message}`);
     }
 
     console.log('Rendi job created:', rendiJob);
@@ -289,7 +281,7 @@ async function updateJobProgress(jobId: string, progress: number, message: strin
 async function pollRendiJob(jobId: string, rendiJobId: string) {
   const rendiApiKey = Deno.env.get('RENDI_API_KEY');
   let attempts = 0;
-  const maxAttempts = 60; // 5 minutes with 5s intervals
+  const maxAttempts = 180; // 15 minutes with 5s intervals
   
   while (attempts < maxAttempts) {
     try {
