@@ -47,10 +47,13 @@ serve(async (req) => {
       throw listErr;
     }
 
-    const images = (files || [])
+    const allImages = (files || [])
       .filter((f: any) => f && f.name && hasAllowedExt(f.name))
       .map((f: any) => f.name)
       .sort((a: string, b: string) => a.localeCompare(b)); // strict alphabetical
+
+    // Cap at most recent 50 images to prevent memory/timeout issues
+    const images = allImages.slice(-50);
 
     if (!images.length) {
       console.warn('[generate-daily-video] No images found in optimized bucket root');
@@ -81,22 +84,38 @@ serve(async (req) => {
     // 3) Download images and write to ffmpeg FS with sequential names
     console.log('[generate-daily-video] Downloading images to temp FS');
     const indexedNames: string[] = [];
+    let successCount = 0;
 
-    await Promise.all(
-      images.map(async (name: string, idx: number) => {
+    for (let idx = 0; idx < images.length; idx++) {
+      const name = images[idx];
+      try {
         const { data: blob, error: dlErr } = await supabase.storage.from('optimized').download(name);
         if (dlErr || !blob) {
-          console.error('Download error for', name, dlErr);
-          throw dlErr || new Error(`Failed to download ${name}`);
+          console.warn(`Skipping ${name}: download failed:`, dlErr);
+          continue;
         }
         const ab = await blob.arrayBuffer();
         const uint8 = new Uint8Array(ab);
         const ext = name.toLowerCase().slice(name.lastIndexOf('.')) || '.jpg';
-        const frameName = `frames/frame_${String(idx + 1).padStart(5, '0')}${ext}`;
+        const frameName = `frames/frame_${String(successCount + 1).padStart(5, '0')}${ext}`;
         await ffmpeg.writeFile(frameName, uint8);
         indexedNames.push(frameName);
-      })
-    );
+        successCount++;
+      } catch (err) {
+        console.warn(`Skipping ${name}: processing error:`, err);
+        continue;
+      }
+    }
+
+    if (successCount === 0) {
+      console.error('[generate-daily-video] No images could be processed');
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'No images could be processed' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[generate-daily-video] Successfully processed ${successCount}/${images.length} images`);
 
     // 4) Build concat list with 0.5s per image
     console.log('[generate-daily-video] Building concat list');
