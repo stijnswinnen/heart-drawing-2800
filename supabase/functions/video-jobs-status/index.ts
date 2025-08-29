@@ -69,7 +69,7 @@ serve(async (req) => {
       try {
         const rendiApiKey = Deno.env.get('RENDI_API_KEY');
         if (rendiApiKey) {
-          const statusResponse = await fetch(`https://api.rendi.dev/v1/jobs/${job.rendi_job_id}`, {
+          const statusResponse = await fetch(`https://api.rendi.dev/jobs/${job.rendi_job_id}`, {
             headers: {
               'Authorization': `Bearer ${rendiApiKey}`,
             }

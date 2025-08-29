@@ -194,7 +194,7 @@ async function processVideoJob(jobId: string) {
     await updateJobProgress(jobId, 50, 'Submitting job to Rendi...');
 
     // Submit job to Rendi.dev
-    const rendiResponse = await fetch('https://api.rendi.dev/v1/jobs', {
+    const rendiResponse = await fetch('https://api.rendi.dev/jobs', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${rendiApiKey}`,
@@ -271,7 +271,7 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
   
   while (attempts < maxAttempts) {
     try {
-      const statusResponse = await fetch(`https://api.rendi.dev/v1/jobs/${rendiJobId}`, {
+      const statusResponse = await fetch(`https://api.rendi.dev/jobs/${rendiJobId}`, {
         headers: {
           'Authorization': `Bearer ${rendiApiKey}`,
         }
