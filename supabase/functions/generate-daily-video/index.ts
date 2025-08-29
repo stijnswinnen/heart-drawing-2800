@@ -35,13 +35,33 @@ serve(async (req) => {
 
   try {
     console.log('[generate-daily-video] Start');
+    const startTs = Date.now();
+
+    // Parse config from body or query params
+    let payload: any = {};
+    try {
+      if (req.headers.get('content-type')?.includes('application/json')) {
+        payload = await req.json().catch(() => ({}));
+      }
+    } catch (_) { payload = {}; }
+    const urlObj = new URL(req.url);
+    const mode = String(payload.mode ?? urlObj.searchParams.get('mode') ?? 'daily');
+    const isArchive = mode === 'archive';
+    const maxFramesParam = Number(payload.maxFrames ?? urlObj.searchParams.get('maxFrames'));
+    const defaultCap = isArchive ? 300 : 50;
+    const maxCap = isArchive ? 300 : 50;
+    const maxFrames = Number.isFinite(maxFramesParam) ? Math.max(1, Math.min(Math.floor(maxFramesParam), maxCap)) : defaultCap;
+    const fpsParam = Number(payload.fps ?? urlObj.searchParams.get('fps'));
+    const fps = Number.isFinite(fpsParam) && fpsParam > 0 && fpsParam <= 30 ? Math.floor(fpsParam) : 25;
+    const durationParam = Number(payload.duration ?? urlObj.searchParams.get('duration'));
+    const durationSec = Number.isFinite(durationParam) && durationParam > 0 ? Number(durationParam) : 0.5;
+    console.log(`[generate-daily-video] Config mode=${mode} maxFrames=${maxFrames} fps=${fps} duration=${durationSec}`);
 
     // 1) Retrieve all images from optimized bucket root
     console.log('[generate-daily-video] Listing optimized bucket root');
     const { data: files, error: listErr } = await supabase.storage
       .from('optimized')
       .list('', { limit: 10000, sortBy: { column: 'name', order: 'asc' } });
-
     if (listErr) {
       console.error('Error listing optimized bucket:', listErr);
       throw listErr;
@@ -52,8 +72,8 @@ serve(async (req) => {
       .map((f: any) => f.name)
       .sort((a: string, b: string) => a.localeCompare(b)); // strict alphabetical
 
-    // Cap at most recent 50 images to prevent memory/timeout issues
-    const images = allImages.slice(-50);
+    // Cap to the configured maxFrames (most recent)
+    const images = allImages.slice(-maxFrames);
 
     if (!images.length) {
       console.warn('[generate-daily-video] No images found in optimized bucket root');
@@ -117,12 +137,12 @@ serve(async (req) => {
 
     console.log(`[generate-daily-video] Successfully processed ${successCount}/${images.length} images`);
 
-    // 4) Build concat list with 0.5s per image
+    // 4) Build concat list with N seconds per image
     console.log('[generate-daily-video] Building concat list');
     let listTxt = '';
     for (const frame of indexedNames) {
       listTxt += `file '${frame}'\n`;
-      listTxt += `duration 0.5\n`;
+      listTxt += `duration ${durationSec}\n`;
     }
     // FFmpeg concat demuxer: repeat last frame one more time (no duration) to finalize segment
     if (indexedNames.length) {
@@ -136,7 +156,7 @@ serve(async (req) => {
     const vf = [
       'scale=650:-2:force_original_aspect_ratio=decrease',
       'pad=650:650:(650-iw)/2:(650-ih)/2:color=black',
-      'fps=25',
+      `fps=${fps}`,
       'format=yuv420p',
     ].join(',');
 
@@ -147,7 +167,7 @@ serve(async (req) => {
       '-vf', vf,
       '-c:v', 'libx264',
       '-pix_fmt', 'yuv420p',
-      '-r', '25',
+      '-r', String(fps),
       '-movflags', 'faststart',
       '-profile:v', 'main',
       '-level', '3.1',
@@ -169,14 +189,35 @@ serve(async (req) => {
       }
     }
 
-    console.log('[generate-daily-video] Uploading final video to videos/final_video_h264.mp4');
+    // Compute upload target path
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10);
+    let targetPath = '';
+    if (isArchive) {
+      const ts = now.toISOString().replace(/[:.]/g, '-');
+      targetPath = `archive/archive-${ts}.mp4`;
+    } else {
+      targetPath = `daily/daily-${dateStr}.mp4`;
+    }
+
+    console.log(`[generate-daily-video] Uploading final video to videos/${targetPath}`);
     const { error: upErr } = await supabase.storage
       .from('videos')
-      .upload('final_video_h264.mp4', outBlob, { upsert: true, contentType: 'video/mp4' });
+      .upload(targetPath, outBlob, { upsert: true, contentType: 'video/mp4' });
 
     if (upErr) {
       console.error('Upload error:', upErr);
       throw upErr;
+    }
+
+    // Keep legacy path for backward compatibility in daily mode
+    if (!isArchive) {
+      const { error: legacyErr } = await supabase.storage
+        .from('videos')
+        .upload('final_video_h264.mp4', outBlob, { upsert: true, contentType: 'video/mp4' });
+      if (legacyErr) {
+        console.warn('Legacy path upload failed:', legacyErr);
+      }
     }
 
     console.log('[generate-daily-video] Success');
@@ -194,7 +235,17 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ status: 'ok', frames: indexedNames.length, output: 'videos/final_video_h264.mp4' }),
+      JSON.stringify({
+        status: 'ok',
+        mode,
+        frames: indexedNames.length,
+        candidates: allImages.length,
+        fps,
+        durationSec,
+        elapsedMs: Date.now() - startTs,
+        output: `videos/${targetPath}`,
+        legacyOutput: !isArchive ? 'videos/final_video_h264.mp4' : null
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
