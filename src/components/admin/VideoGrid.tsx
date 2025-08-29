@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +6,13 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Play, RefreshCw, Clock, VideoIcon, Archive } from "lucide-react";
+import { Play, RefreshCw, Clock, VideoIcon, Archive, AlertTriangle } from "lucide-react";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
 interface VideoGenerationLog {
   timestamp: string;
@@ -27,6 +30,9 @@ export const VideoGrid = () => {
   const [mode, setMode] = useState<"daily" | "archive">("daily");
   const [maxFrames, setMaxFrames] = useState("50");
   const [fps, setFps] = useState("2");
+  const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState("");
+  const ffmpegRef = useRef(new FFmpeg());
   const queryClient = useQueryClient();
 
   const { data: videoGeneration } = useQuery({
@@ -55,27 +61,132 @@ export const VideoGrid = () => {
 
   const handleGenerateVideo = async () => {
     setIsGenerating(true);
+    setProgress(0);
+    setProgressMessage("Initializing video generation...");
+    
     try {
-      const { data, error } = await supabase.functions.invoke('generate-daily-video', {
-        body: {
-          mode,
-          maxFrames: parseInt(maxFrames),
-          fps: parseInt(fps),
-          source: "admin"
-        }
-      });
-
-      if (error) throw error;
-
-      toast.success(`Video generation started in ${mode} mode`);
+      const targetFrames = Math.min(parseInt(maxFrames), mode === "daily" ? 50 : 300);
       
-      // Refresh the video generation status
+      // Initialize FFmpeg if needed
+      setProgressMessage("Loading video processor...");
+      setProgress(5);
+      
+      const ffmpeg = ffmpegRef.current;
+      
+      if (!ffmpeg.loaded) {
+        const baseURL = 'https://unpkg.com/@ffmpeg/core-st@0.12.6/dist/esm';
+        await ffmpeg.load({
+          coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+          wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+          workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
+        });
+      }
+      
+      setProgressMessage("Fetching approved drawings...");
+      setProgress(15);
+      
+      // Fetch approved drawings
+      const { data: drawings } = await supabase
+        .from('drawings')
+        .select('image_path')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(targetFrames);
+
+      if (!drawings || drawings.length === 0) {
+        throw new Error('No approved drawings found');
+      }
+      
+      setProgressMessage(`Downloading ${drawings.length} images...`);
+      setProgress(25);
+      
+      // Download and prepare images
+      for (let i = 0; i < drawings.length; i++) {
+        const drawing = drawings[i];
+        const imageUrl = supabase.storage.from('optimized').getPublicUrl(drawing.image_path.split('/').pop() || '').data.publicUrl;
+        
+        try {
+          const imageData = await fetchFile(imageUrl);
+          await ffmpeg.writeFile(`image_${i.toString().padStart(4, '0')}.jpg`, imageData);
+        } catch (err) {
+          console.warn(`Failed to load image ${drawing.image_path}, skipping...`);
+        }
+        
+        setProgress(25 + (i / drawings.length) * 40);
+        setProgressMessage(`Downloaded ${i + 1}/${drawings.length} images...`);
+      }
+      
+      setProgressMessage("Creating video...");
+      setProgress(70);
+      
+      // Generate video using FFmpeg
+      const frameDuration = 1 / parseInt(fps);
+      await ffmpeg.exec([
+        '-framerate', fps,
+        '-i', 'image_%04d.jpg',
+        '-vf', 'scale=650:650:force_original_aspect_ratio=decrease,pad=650:650:(ow-iw)/2:(oh-ih)/2,setsar=1',
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv420p',
+        '-t', (drawings.length * frameDuration).toString(),
+        'output.mp4'
+      ]);
+      
+      setProgressMessage("Finalizing video...");
+      setProgress(85);
+      
+      // Read the generated video
+      const videoData = await ffmpeg.readFile('output.mp4');
+      const videoBlob = new Blob([videoData], { type: 'video/mp4' });
+      
+      setProgressMessage("Uploading video...");
+      setProgress(95);
+      
+      // Upload to storage
+      const videoPath = `${mode}/hearts-compilation.mp4`;
+      const { error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(videoPath, videoBlob, { 
+          upsert: true,
+          contentType: 'video/mp4'
+        });
+      
+      if (uploadError) throw uploadError;
+      
+      // Update generation record
+      await supabase
+        .from('video_generation')
+        .upsert({
+          id: '1',
+          processed_count: drawings.length,
+          last_processed_drawing_id: drawings[0]?.image_path || null,
+          updated_at: new Date().toISOString()
+        });
+      
+      setProgress(100);
+      setProgressMessage("Video generation complete!");
+      
+      toast.success(`Successfully generated ${mode} video with ${drawings.length} frames`);
+      
+      // Refresh queries
       queryClient.invalidateQueries({ queryKey: ["video-generation"] });
+      
+      // Clean up FFmpeg files
+      try {
+        for (let i = 0; i < drawings.length; i++) {
+          await ffmpeg.deleteFile(`image_${i.toString().padStart(4, '0')}.jpg`);
+        }
+        await ffmpeg.deleteFile('output.mp4');
+      } catch (cleanupError) {
+        console.warn('Cleanup failed:', cleanupError);
+      }
+      
     } catch (error: any) {
       console.error('Video generation error:', error);
       toast.error(`Failed to generate video: ${error.message}`);
     } finally {
       setIsGenerating(false);
+      setProgress(0);
+      setProgressMessage("");
     }
   };
 
@@ -179,8 +290,27 @@ export const VideoGrid = () => {
                 <Badge variant="outline">
                   {approvedDrawings} approved hearts available
                 </Badge>
+                {parseInt(maxFrames) > (mode === "daily" ? 50 : 300) && (
+                  <Badge variant="destructive" className="flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    Exceeds limit
+                  </Badge>
+                )}
               </div>
             </div>
+
+            {isGenerating && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Progress</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="w-full" />
+                {progressMessage && (
+                  <p className="text-sm text-muted-foreground">{progressMessage}</p>
+                )}
+              </div>
+            )}
 
             <Button 
               onClick={handleGenerateVideo} 
