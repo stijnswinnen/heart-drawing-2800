@@ -1,11 +1,11 @@
-import { Heart, MapPin } from "lucide-react";
+import { Heart, MapPin, VideoIcon } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface AdminSidebarProps {
   selectedStatus: "new" | "approved";
-  selectedSection: "hearts" | "locations";
+  selectedSection: "hearts" | "locations" | "videos";
   setSelectedStatus: (status: "new" | "approved") => void;
-  setSelectedSection: (section: "hearts" | "locations") => void;
+  setSelectedSection: (section: "hearts" | "locations" | "videos") => void;
   drawings: Tables<"drawings">[] | null;
   locations: Tables<"locations">[] | null;
 }
@@ -122,6 +122,30 @@ export const AdminSidebar = ({
               <span className="text-sm text-muted-foreground">
                 {approvedLocationsCount} locations
               </span>
+            </button>
+          </nav>
+        </div>
+
+        <div>
+          <h2 className="font-medium mb-4">Videos</h2>
+          <nav className="space-y-2">
+            <button
+              onClick={() => {
+                setSelectedSection("videos");
+              }}
+              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
+                selectedSection === "videos"
+                  ? "bg-zinc-900 text-white"
+                  : "hover:bg-zinc-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <VideoIcon
+                  className={selectedSection === "videos" ? "text-blue-500" : ""}
+                  size={20}
+                />
+                <span>Management</span>
+              </div>
             </button>
           </nav>
         </div>

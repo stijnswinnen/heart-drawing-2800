@@ -3,12 +3,13 @@ import { Tables } from "@/integrations/supabase/types";
 import { AdminSidebar } from "./AdminSidebar";
 import { DrawingGrid } from "./DrawingGrid";
 import { LocationsGrid } from "./LocationsGrid";
+import { VideoGrid } from "./VideoGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type DrawingStatus = "new" | "approved";
-type AdminSection = "hearts" | "locations";
+type AdminSection = "hearts" | "locations" | "videos";
 
 interface AdminContentProps {
   drawings: Tables<"drawings">[] | null;
@@ -213,7 +214,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
               onApprove={handleApproveDrawing}
               onDecline={handleDeclineDrawing}
             />
-          ) : (
+          ) : selectedSection === "locations" ? (
             <LocationsGrid
               locations={filteredLocations}
               selectedStatus={selectedStatus}
@@ -221,6 +222,8 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
               onDecline={handleDeclineLocation}
               onDelete={handleDeleteLocation}
             />
+          ) : (
+            <VideoGrid />
           )}
         </main>
       </div>
