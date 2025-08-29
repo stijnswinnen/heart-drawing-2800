@@ -201,14 +201,24 @@ async function processVideoJob(jobId: string) {
     let rendiJob: any = null;
     
     try {
-      const res = await fetch(endpoint, {
+      // First try with Bearer token
+      let res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${rendiApiKey}`
-        },
+        headers: { 'Authorization': `Bearer ${rendiApiKey}` },
         body: formData
       });
-      
+
+      if (!res.ok && (res.status === 401 || res.status === 403)) {
+        const bodyText = await res.text();
+        console.log(`Bearer auth rejected (${res.status}): ${bodyText}. Retrying with X-API-Key...`);
+        // Retry with X-API-Key header
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'X-API-Key': rendiApiKey },
+          body: formData
+        });
+      }
+
       if (res.ok) {
         rendiJob = await res.json();
         console.log('Rendi job submitted successfully:', rendiJob);
@@ -224,24 +234,30 @@ async function processVideoJob(jobId: string) {
 
     console.log('Rendi job created:', rendiJob);
 
+    // Determine job id key from response
+    const rendiJobId = rendiJob.id || rendiJob.job_id || rendiJob?.data?.id;
+    if (!rendiJobId) {
+      throw new Error('Rendi job ID missing in response');
+    }
+
     // Update job with Rendi job ID
     await supabase
       .from('video_jobs')
       .update({ 
-        rendi_job_id: rendiJob.id,
+        rendi_job_id: rendiJobId,
         progress: 60,
         logs: [
           ...job.logs || [],
           { 
             timestamp: new Date().toISOString(), 
-            message: `Rendi job created: ${rendiJob.id}` 
+            message: `Rendi job created: ${rendiJobId}` 
           }
         ]
       })
       .eq('id', jobId);
 
     // Poll for completion
-    await pollRendiJob(jobId, rendiJob.id);
+    await pollRendiJob(jobId, rendiJobId);
 
   } catch (error) {
     console.error('Error processing video job:', error);
@@ -297,9 +313,15 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
 
       for (let i = 0; i < statusUrls.length; i++) {
         try {
-          const res = await fetch(statusUrls[i], {
-            headers: { 'Authorization': `Bearer ${rendiApiKey}` }
-          });
+          // First try with Bearer
+          let res = await fetch(statusUrls[i], { headers: { 'Authorization': `Bearer ${rendiApiKey}` } });
+          if (!res.ok && (res.status === 401 || res.status === 403)) {
+            const bodyText = await res.text();
+            console.log(`Status Bearer rejected (${res.status}): ${bodyText}. Retrying with X-API-Key...`);
+            // Retry with X-API-Key
+            res = await fetch(statusUrls[i], { headers: { 'X-API-Key': rendiApiKey as string } });
+          }
+
           if (res.ok) {
             jobStatus = await res.json();
             break;
