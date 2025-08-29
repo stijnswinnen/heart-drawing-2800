@@ -65,6 +65,15 @@ export const VideoGrid = () => {
     setProgressMessage("Initializing video generation...");
     
     try {
+      // Record start of generation
+      await supabase
+        .from('video_generation')
+        .upsert({
+          id: '1',
+          processed_count: 0,
+          last_processed_drawing_id: null,
+          updated_at: new Date().toISOString(),
+        });
       const targetFrames = Math.min(parseInt(maxFrames), mode === "daily" ? 50 : 300);
       
       // Initialize FFmpeg if needed
@@ -199,7 +208,22 @@ export const VideoGrid = () => {
       
     } catch (error: any) {
       console.error('Video generation error:', error);
+      // Record failed generation attempt for visibility in the status card
+      try {
+        await supabase
+          .from('video_generation')
+          .upsert({
+            id: '1',
+            processed_count: 0,
+            last_processed_drawing_id: null,
+            updated_at: new Date().toISOString(),
+          });
+      } catch (logErr) {
+        console.warn('Failed to record error state:', logErr);
+      }
       toast.error(`Failed to generate video: ${error.message}`);
+      // Ensure UI reflects completion state
+      queryClient.invalidateQueries({ queryKey: ["video-generation"] });
     } finally {
       setIsGenerating(false);
       setProgress(0);
