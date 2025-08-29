@@ -304,10 +304,6 @@ export type Database = {
         Args: { user_email: string }
         Returns: undefined
       }
-      setup_video_generation_cron: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       verify_profile_secure: {
         Args: { p_email: string; p_token: string }
         Returns: boolean

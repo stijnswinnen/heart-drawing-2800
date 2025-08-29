@@ -66,14 +66,16 @@ export const VideoGrid = () => {
     
     try {
       // Record start of generation
-      await supabase
-        .from('video_generation')
-        .upsert({
-          id: '1',
-          processed_count: 0,
-          last_processed_drawing_id: null,
-          updated_at: new Date().toISOString(),
-        });
+      if (videoGeneration?.id) {
+        await supabase
+          .from('video_generation')
+          .update({
+            processed_count: 0,
+            last_processed_drawing_id: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', videoGeneration.id);
+      }
       const targetFrames = Math.min(parseInt(maxFrames), mode === "daily" ? 50 : 300);
       
       // Initialize FFmpeg if needed
@@ -179,14 +181,16 @@ export const VideoGrid = () => {
       if (uploadError) throw uploadError;
       
       // Update generation record
-      await supabase
-        .from('video_generation')
-        .upsert({
-          id: '1',
-          processed_count: drawings.length,
-          last_processed_drawing_id: drawings[0]?.image_path || null,
-          updated_at: new Date().toISOString()
-        });
+      if (videoGeneration?.id) {
+        await supabase
+          .from('video_generation')
+          .update({
+            processed_count: drawings.length,
+            last_processed_drawing_id: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', videoGeneration.id);
+      }
       
       setProgress(100);
       setProgressMessage("Video generation complete!");
@@ -210,14 +214,16 @@ export const VideoGrid = () => {
       console.error('Video generation error:', error);
       // Record failed generation attempt for visibility in the status card
       try {
-        await supabase
-          .from('video_generation')
-          .upsert({
-            id: '1',
-            processed_count: 0,
-            last_processed_drawing_id: null,
-            updated_at: new Date().toISOString(),
-          });
+        if (videoGeneration?.id) {
+          await supabase
+            .from('video_generation')
+            .update({
+              processed_count: 0,
+              last_processed_drawing_id: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', videoGeneration.id);
+        }
       } catch (logErr) {
         console.warn('Failed to record error state:', logErr);
       }
