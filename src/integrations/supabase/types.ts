@@ -237,6 +237,60 @@ export type Database = {
           },
         ]
       }
+      video_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          fps: number
+          id: string
+          job_type: string
+          logs: Json | null
+          max_frames: number
+          progress: number | null
+          rendi_job_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          video_path: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          fps: number
+          id?: string
+          job_type: string
+          logs?: Json | null
+          max_frames: number
+          progress?: number | null
+          rendi_job_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          video_path?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          fps?: number
+          id?: string
+          job_type?: string
+          logs?: Json | null
+          max_frames?: number
+          progress?: number | null
+          rendi_job_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          video_path?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       secure_profiles: {

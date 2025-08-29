@@ -31,3 +31,11 @@ verify_jwt = false
 [[functions]]
 name = "setup-video-cron"
 verify_jwt = false
+
+[[functions]]
+name = "video-jobs-create"
+verify_jwt = true
+
+[[functions]]
+name = "video-jobs-status"
+verify_jwt = true
