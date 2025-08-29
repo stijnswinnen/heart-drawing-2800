@@ -193,21 +193,43 @@ async function processVideoJob(jobId: string) {
 
     await updateJobProgress(jobId, 50, 'Submitting job to Rendi...');
 
-    // Submit job to Rendi.dev
-    const rendiResponse = await fetch('https://api.rendi.dev/jobs', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${rendiApiKey}`,
-      },
-      body: formData
-    });
+    // Submit job to Rendi.dev with fallback endpoints and header styles
+    const endpoints = [
+      { url: 'https://api.rendi.dev/jobs', headers: { 'Authorization': `Bearer ${rendiApiKey}` } },
+      { url: 'https://api.rendi.dev/v1/jobs', headers: { 'Authorization': `Bearer ${rendiApiKey}` } },
+      { url: 'https://api.rendi.dev/jobs', headers: { 'X-API-Key': rendiApiKey } },
+      { url: 'https://api.rendi.dev/v1/jobs', headers: { 'X-API-Key': rendiApiKey } },
+    ] as const;
 
-    if (!rendiResponse.ok) {
-      const errorText = await rendiResponse.text();
-      throw new Error(`Rendi API error: ${rendiResponse.status} - ${errorText}`);
+    let rendiJob: any = null;
+    let lastStatus = 0;
+    let lastBody = '';
+
+    for (let i = 0; i < endpoints.length; i++) {
+      const ep = endpoints[i];
+      try {
+        const res = await fetch(ep.url, {
+          method: 'POST',
+          headers: ep.headers,
+          body: formData
+        });
+        if (res.ok) {
+          rendiJob = await res.json();
+          break;
+        } else {
+          lastStatus = res.status;
+          lastBody = await res.text();
+          console.log(`Rendi submit attempt ${i + 1} failed at ${ep.url} -> ${lastStatus}: ${lastBody}`);
+        }
+      } catch (e) {
+        console.log(`Rendi submit attempt ${i + 1} threw error at ${ep.url}:`, e);
+      }
     }
 
-    const rendiJob = await rendiResponse.json();
+    if (!rendiJob) {
+      throw new Error(`Rendi API error after retries. Last response ${lastStatus} - ${lastBody}`);
+    }
+
     console.log('Rendi job created:', rendiJob);
 
     // Update job with Rendi job ID
@@ -271,17 +293,38 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
   
   while (attempts < maxAttempts) {
     try {
-      const statusResponse = await fetch(`https://api.rendi.dev/jobs/${rendiJobId}`, {
-        headers: {
-          'Authorization': `Bearer ${rendiApiKey}`,
-        }
-      });
+      // Try multiple endpoints for status
+      const statusUrls = [
+        `https://api.rendi.dev/jobs/${rendiJobId}`,
+        `https://api.rendi.dev/v1/jobs/${rendiJobId}`,
+      ];
 
-      if (!statusResponse.ok) {
-        throw new Error(`Status check failed: ${statusResponse.status}`);
+      let jobStatus: any = null;
+      let lastStatus = 0;
+      let lastBody = '';
+
+      for (let i = 0; i < statusUrls.length; i++) {
+        try {
+          const res = await fetch(statusUrls[i], {
+            headers: { 'Authorization': `Bearer ${rendiApiKey}` }
+          });
+          if (res.ok) {
+            jobStatus = await res.json();
+            break;
+          } else {
+            lastStatus = res.status;
+            lastBody = await res.text();
+            console.log(`Rendi status attempt ${i + 1} failed at ${statusUrls[i]} -> ${lastStatus}: ${lastBody}`);
+          }
+        } catch (e) {
+          console.log(`Rendi status attempt ${i + 1} threw error at ${statusUrls[i]}:`, e);
+        }
       }
 
-      const jobStatus = await statusResponse.json();
+      if (!jobStatus) {
+        throw new Error(`Status check failed: ${lastStatus} - ${lastBody}`);
+      }
+
       console.log('Rendi job status:', jobStatus);
 
       if (jobStatus.status === 'completed') {

@@ -69,15 +69,35 @@ serve(async (req) => {
       try {
         const rendiApiKey = Deno.env.get('RENDI_API_KEY');
         if (rendiApiKey) {
-          const statusResponse = await fetch(`https://api.rendi.dev/jobs/${job.rendi_job_id}`, {
-            headers: {
-              'Authorization': `Bearer ${rendiApiKey}`,
-            }
-          });
+          // Try multiple endpoints for status
+          const statusUrls = [
+            `https://api.rendi.dev/jobs/${job.rendi_job_id}`,
+            `https://api.rendi.dev/v1/jobs/${job.rendi_job_id}`,
+          ];
 
-          if (statusResponse.ok) {
-            const rendiStatus = await statusResponse.json();
-            
+          let rendiStatus: any = null;
+          let lastStatus = 0;
+          let lastBody = '';
+
+          for (let i = 0; i < statusUrls.length; i++) {
+            try {
+              const res = await fetch(statusUrls[i], {
+                headers: { 'Authorization': `Bearer ${rendiApiKey}` }
+              });
+              if (res.ok) {
+                rendiStatus = await res.json();
+                break;
+              } else {
+                lastStatus = res.status;
+                lastBody = await res.text();
+                console.log(`Rendi status (status endpoint) attempt ${i + 1} failed at ${statusUrls[i]} -> ${lastStatus}: ${lastBody}`);
+              }
+            } catch (e) {
+              console.log(`Rendi status (status endpoint) attempt ${i + 1} threw error at ${statusUrls[i]}:`, e);
+            }
+          }
+
+          if (rendiStatus) {
             // Update job status based on Rendi response
             if (rendiStatus.status === 'completed' && job.status !== 'completed') {
               // Download and upload video (this should normally be handled by the webhook or polling)
