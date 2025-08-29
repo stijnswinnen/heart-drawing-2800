@@ -39,3 +39,7 @@ verify_jwt = true
 [[functions]]
 name = "video-jobs-status"
 verify_jwt = true
+
+[[functions]]
+name = "rendi-auth-check"
+verify_jwt = true

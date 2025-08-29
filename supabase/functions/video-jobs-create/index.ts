@@ -199,7 +199,6 @@ async function processVideoJob(jobId: string) {
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
     let rendiJob: any = null;
-    
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -215,10 +214,9 @@ async function processVideoJob(jobId: string) {
         console.log(`Rendi submission failed -> ${res.status}: ${errorBody}`);
         throw new Error(`Rendi API error: ${res.status} - ${errorBody}`);
       }
-    }
     } catch (e) {
       console.log('Rendi submission threw error:', e);
-      throw new Error(`Failed to submit to Rendi: ${e.message}`);
+      throw new Error(`Failed to submit to Rendi: ${(e as Error).message}`);
     }
 
     console.log('Rendi job created:', rendiJob);
@@ -366,7 +364,7 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
       }
 
       // Wait 5 seconds before next poll
-      await new Deno.Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       attempts++;
       
     } catch (error) {
@@ -377,7 +375,7 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
         throw new Error(`Job polling failed after ${maxAttempts} attempts: ${error.message}`);
       }
       
-      await new Deno.Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
   
