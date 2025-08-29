@@ -189,34 +189,54 @@ async function processVideoJob(jobId: string) {
       'output.mp4'
     ];
 
-    formData.append('command', ffmpegCommand.join(' '));
+    formData.append('ffmpeg_command', ffmpegCommand.join(' '));
+    formData.append('max_command_run_seconds', String(15 * 60)); // 15 minutes
+    formData.append('vcpu_count', '2');
 
     await updateJobProgress(jobId, 50, 'Submitting job to Rendi...');
 
-    // Submit job to Rendi.dev using the correct FFmpeg endpoint
-    const endpoint = 'https://api.rendi.dev/v1/run-ffmpeg-command';
+    // Submit job to Rendi.dev (try multiple endpoints for compatibility)
+    const endpoints = [
+      'https://api.rendi.dev/v1/run-ffmpeg-command',
+      'https://api.rendi.dev/run-ffmpeg-command',
+    ];
     
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
     let rendiJob: any = null;
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'X-API-KEY': rendiApiKey },
-        body: formData
-      });
+    let lastStatus = 0;
+    let lastBody = '';
+    let lastUrl = '';
 
-      if (res.ok) {
-        rendiJob = await res.json();
-        console.log('Rendi job submitted successfully:', rendiJob);
-      } else {
-        const errorBody = await res.text();
-        console.log(`Rendi submission failed -> ${res.status}: ${errorBody}`);
-        throw new Error(`Rendi API error: ${res.status} - ${errorBody}`);
+    for (let i = 0; i < endpoints.length; i++) {
+      const url = endpoints[i];
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'X-API-KEY': rendiApiKey },
+          body: formData,
+        });
+
+        if (res.ok) {
+          rendiJob = await res.json();
+          console.log(`Rendi job submitted successfully via ${url}:`, rendiJob);
+          break;
+        } else {
+          lastStatus = res.status;
+          lastBody = await res.text();
+          lastUrl = url;
+          console.log(`Rendi submission failed at ${url} -> ${res.status}: ${lastBody}`);
+        }
+      } catch (e) {
+        lastStatus = 0;
+        lastBody = String(e);
+        lastUrl = url;
+        console.log(`Rendi submission error at ${url}:`, e);
       }
-    } catch (e) {
-      console.log('Rendi submission threw error:', e);
-      throw new Error(`Failed to submit to Rendi: ${(e as Error).message}`);
+    }
+
+    if (!rendiJob) {
+      throw new Error(`Rendi API error: ${lastStatus} - ${lastBody} (last tried: ${lastUrl})`);
     }
 
     console.log('Rendi job created:', rendiJob);
