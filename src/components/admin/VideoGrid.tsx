@@ -74,12 +74,29 @@ export const VideoGrid = () => {
       const ffmpeg = ffmpegRef.current;
       
       if (!ffmpeg.loaded) {
-        const baseURL = 'https://unpkg.com/@ffmpeg/core-st@0.12.6/dist/esm';
-        await ffmpeg.load({
-          coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-          wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-          workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
-        });
+        const cdnUrls = [
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.12.6/dist/esm',
+          'https://unpkg.com/@ffmpeg/core-st@0.12.6/dist/esm'
+        ];
+        
+        let loadError;
+        for (const baseURL of cdnUrls) {
+          try {
+            await ffmpeg.load({
+              coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+              wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+              workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
+            });
+            break; // Success, exit the loop
+          } catch (error) {
+            loadError = error;
+            console.warn(`Failed to load FFmpeg from ${baseURL}:`, error);
+          }
+        }
+        
+        if (!ffmpeg.loaded) {
+          throw new Error(`Failed to load FFmpeg from all CDNs. Last error: ${loadError?.message}`);
+        }
       }
       
       setProgressMessage("Fetching approved drawings...");
