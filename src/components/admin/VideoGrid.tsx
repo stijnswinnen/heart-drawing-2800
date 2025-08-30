@@ -12,7 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Play, RefreshCw, Clock, VideoIcon, Archive, AlertTriangle, ExternalLink, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Play, RefreshCw, Clock, VideoIcon, Archive, AlertTriangle, ExternalLink, Loader2, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface VideoJob {
   id: string;
@@ -34,6 +35,8 @@ export const VideoGrid = () => {
   const [maxFrames, setMaxFrames] = useState("50");
   const [fps, setFps] = useState("2");
   const [activeJob, setActiveJob] = useState<VideoJob | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<VideoJob | null>(null);
   const queryClient = useQueryClient();
 
   // Fetch approved drawings count
@@ -210,6 +213,37 @@ export const VideoGrid = () => {
         return <Badge variant="outline" className="bg-blue-100 text-blue-800">Processing</Badge>;
       default:
         return <Badge variant="outline">Pending</Badge>;
+    }
+  };
+
+  const handleDeleteJob = (job: VideoJob) => {
+    setSelectedJob(job);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteJob = async () => {
+    if (!selectedJob) return;
+
+    try {
+      toast.loading("Deleting job...");
+
+      const { error } = await supabase
+        .from('video_jobs')
+        .delete()
+        .eq('id', selectedJob.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success("Job deleted successfully!");
+      refetchJobs();
+      setDeleteDialogOpen(false);
+      setSelectedJob(null);
+
+    } catch (error: any) {
+      console.error('Error deleting job:', error);
+      toast.error(`Failed to delete job: ${error.message}`);
     }
   };
 
@@ -405,51 +439,61 @@ export const VideoGrid = () => {
                 <div className="space-y-2">
                       {videoJobs && videoJobs.length > 0 ? (
                         videoJobs.map((job) => (
-                          <div key={job.id} className="flex items-center justify-between p-2 border rounded-lg">
-                            <div className="flex items-center gap-2">
-                              {getStatusIcon(job.status)}
-                              <div>
-                                <p className="text-sm font-medium">
-                                  {job.job_type} - {job.max_frames} frames
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {new Date(job.created_at).toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right space-y-1">
-                              {getStatusBadge(job.status)}
-                              {job.status === 'processing' && (
-                                <div className="flex items-center gap-2 justify-end">
-                                  <p className="text-xs text-muted-foreground">{job.progress}%</p>
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={async () => {
-                                      try {
-                                        const { data: { session } } = await supabase.auth.getSession();
-                                        if (!session) throw new Error('Niet aangemeld');
-                                        toast.loading('Bezig met stoppen...');
-                                        const { error, data } = await supabase.functions.invoke('video-jobs-cancel', {
-                                          body: { jobId: job.id },
-                                          headers: { Authorization: `Bearer ${session.access_token}` },
-                                        });
-                                        if (error) throw new Error(error.message);
-                                        if (!data?.success) throw new Error(data?.error || 'Stoppen mislukt');
-                                        toast.success('Job gestopt');
-                                        await refetchJobs();
-                                      } catch (e: any) {
-                                        console.error(e);
-                                        toast.error(e.message || 'Stoppen mislukt');
-                                      }
-                                    }}
-                                  >
-                                    Stoppen
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                           <div key={job.id} className="flex items-center justify-between p-2 border rounded-lg">
+                             <div className="flex items-center gap-2">
+                               {getStatusIcon(job.status)}
+                               <div>
+                                 <p className="text-sm font-medium">
+                                   {job.job_type} - {job.max_frames} frames
+                                 </p>
+                                 <p className="text-xs text-muted-foreground">
+                                   {new Date(job.created_at).toLocaleString()}
+                                 </p>
+                               </div>
+                             </div>
+                             <div className="flex items-center gap-2">
+                               <div className="text-right space-y-1">
+                                 {getStatusBadge(job.status)}
+                                 {job.status === 'processing' && (
+                                   <div className="flex items-center gap-2 justify-end">
+                                     <p className="text-xs text-muted-foreground">{job.progress}%</p>
+                                     <Button
+                                       variant="destructive"
+                                       size="sm"
+                                       onClick={async () => {
+                                         try {
+                                           const { data: { session } } = await supabase.auth.getSession();
+                                           if (!session) throw new Error('Niet aangemeld');
+                                           toast.loading('Bezig met stoppen...');
+                                           const { error, data } = await supabase.functions.invoke('video-jobs-cancel', {
+                                             body: { jobId: job.id },
+                                             headers: { Authorization: `Bearer ${session.access_token}` },
+                                           });
+                                           if (error) throw new Error(error.message);
+                                           if (!data?.success) throw new Error(data?.error || 'Stoppen mislukt');
+                                           toast.success('Job gestopt');
+                                           await refetchJobs();
+                                         } catch (e: any) {
+                                           console.error(e);
+                                           toast.error(e.message || 'Stoppen mislukt');
+                                         }
+                                       }}
+                                     >
+                                       Stoppen
+                                     </Button>
+                                   </div>
+                                 )}
+                               </div>
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => handleDeleteJob(job)}
+                                 className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </div>
                         ))
                       ) : (
                     <div className="text-center py-4">
@@ -498,6 +542,41 @@ export const VideoGrid = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Verwijder Video Job</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze video job wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+              {selectedJob && (
+                <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
+                  <p><strong>Type:</strong> {selectedJob.job_type}</p>
+                  <p><strong>Frames:</strong> {selectedJob.max_frames}</p>
+                  <p><strong>FPS:</strong> {selectedJob.fps}</p>
+                  <p><strong>Status:</strong> {selectedJob.status}</p>
+                  <p><strong>Aangemaakt:</strong> {new Date(selectedJob.created_at).toLocaleString()}</p>
+                  {selectedJob.video_path && (
+                    <p className="text-yellow-600">
+                      <strong>Waarschuwing:</strong> Deze job heeft een bijbehorende video die ook verloren gaat.
+                    </p>
+                  )}
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteJob}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
