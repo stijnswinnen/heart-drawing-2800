@@ -356,6 +356,7 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
         jobStatus.status ??
         jobStatus.command?.status ??
         jobStatus.data?.status;
+      const normalizedStatus = (status ?? '').toString().toLowerCase();
 
       const outputUrl =
         jobStatus.output_url ??
@@ -370,27 +371,30 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
         jobStatus.output_files?.out_video?.file_id ??
         jobStatus.data?.output_files?.out_video?.file_id;
 
-      if (status === 'completed') {
+      if (['completed', 'success', 'succeeded'].includes(normalizedStatus)) {
         if (!outputUrl) {
           throw new Error('Rendi completed without output_url');
         }
         // Download the completed video
         const videoResponse = await fetch(outputUrl);
         const videoBlob = await videoResponse.blob();
-        
+        // Determine fps
+        const { data: jobRow } = await supabase
+          .from('video_jobs')
+          .select('fps')
+          .eq('id', jobId)
+          .single();
+        const fps = jobRow?.fps || 2;
         // Upload to Supabase storage with format-based path
-        const videoPath = `1080-1080-${job.fps || 2}fps/video_${Date.now()}.mp4`;
+        const videoPath = `1080-1080-${fps}fps/video_${Date.now()}.mp4`;
         const { error: uploadError } = await supabase.storage
           .from('videos')
           .upload(videoPath, videoBlob);
-
         if (uploadError) {
           throw new Error(`Upload failed: ${uploadError.message}`);
         }
-
         // Cleanup Rendi files after successful upload
         await cleanupRendiFiles(rendiJobId, fileId);
-
         // Mark job as completed
         await supabase
           .from('video_jobs')
@@ -407,17 +411,15 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
             ]
           })
           .eq('id', jobId);
-
         return;
-        
-      } else if (status === 'failed') {
+      } else if (['failed', 'error'].includes(normalizedStatus)) {
         const errMsg =
           jobStatus.error ??
           jobStatus.command?.error ??
           jobStatus.data?.error ??
           'Unknown error';
         throw new Error(`Rendi job failed: ${errMsg}`);
-      } else if (status === 'processing' || status === 'queued' || status === 'running') {
+      } else if (['processing', 'queued', 'running', 'pending', 'in_progress', 'started'].includes(normalizedStatus)) {
         // Update progress if available
         const rawProgress =
           jobStatus.progress ??

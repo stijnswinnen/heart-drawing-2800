@@ -132,31 +132,26 @@ serve(async (req) => {
               rendiStatus.output_files?.out_video?.file_id ??
               rendiStatus.data?.output_files?.out_video?.file_id;
             
-            // Update job status based on Rendi response
-            if (status === 'completed' && job.status !== 'completed') {
+            // Update job status based on Rendi response (normalize variants like SUCCESS)
+            const normalizedStatus = (status ?? '').toString().toLowerCase();
+            if (['completed', 'success', 'succeeded'].includes(normalizedStatus) && job.status !== 'completed') {
               console.log('Finalizing completed job - downloading video...');
-              
               if (!outputUrl) {
                 throw new Error('Rendi completed without output_url');
               }
-
               // Download the completed video
               const videoResponse = await fetch(outputUrl);
               const videoBlob = await videoResponse.blob();
-              
               // Upload to Supabase storage with format-based path
               const videoPath = `1080-1080-${job.fps || 2}fps/video_${Date.now()}.mp4`;
               const { error: uploadError } = await supabase.storage
                 .from('videos')
                 .upload(videoPath, videoBlob);
-
               if (uploadError) {
                 throw new Error(`Upload failed: ${uploadError.message}`);
               }
-
               // Cleanup Rendi files after successful upload
               await cleanupRendiFiles(job.rendi_job_id, fileId);
-
               // Mark job as completed
               await supabase
                 .from('video_jobs')
@@ -174,10 +169,8 @@ serve(async (req) => {
                   ]
                 })
                 .eq('id', jobId);
-                
               console.log('Job finalized successfully:', videoPath);
-              
-            } else if (status === 'failed') {
+            } else if (['failed', 'error'].includes(normalizedStatus)) {
               const errMsg =
                 rendiStatus.error ??
                 rendiStatus.command?.error ??
