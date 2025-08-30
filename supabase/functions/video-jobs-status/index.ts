@@ -82,6 +82,8 @@ serve(async (req) => {
         if (rendiApiKey) {
           // Try multiple endpoints for status
           const statusUrls = [
+            `https://api.rendi.dev/v1/commands/${job.rendi_job_id}`,
+            `https://api.rendi.dev/commands/${job.rendi_job_id}`,
             `https://api.rendi.dev/v1/jobs/${job.rendi_job_id}`,
             `https://api.rendi.dev/jobs/${job.rendi_job_id}`,
           ];
@@ -111,13 +113,30 @@ serve(async (req) => {
 
           if (rendiStatus) {
             console.log('Rendi status response:', rendiStatus);
+
+            const status =
+              rendiStatus.status ??
+              rendiStatus.command?.status ??
+              rendiStatus.data?.status;
+
+            const outputUrl =
+              rendiStatus.output_url ??
+              rendiStatus.outputUrl ??
+              rendiStatus.output_files?.out_video?.url ??
+              rendiStatus.output_files?.out_video ??
+              rendiStatus.result?.output_url ??
+              rendiStatus.data?.output_url;
             
             // Update job status based on Rendi response
-            if (rendiStatus.status === 'completed' && job.status !== 'completed') {
+            if (status === 'completed' && job.status !== 'completed') {
               console.log('Finalizing completed job - downloading video...');
               
+              if (!outputUrl) {
+                throw new Error('Rendi completed without output_url');
+              }
+
               // Download the completed video
-              const videoResponse = await fetch(rendiStatus.output_url);
+              const videoResponse = await fetch(outputUrl);
               const videoBlob = await videoResponse.blob();
               
               // Upload to Supabase storage
@@ -150,25 +169,34 @@ serve(async (req) => {
                 
               console.log('Job finalized successfully:', videoPath);
               
-            } else if (rendiStatus.status === 'failed') {
+            } else if (status === 'failed') {
+              const errMsg =
+                rendiStatus.error ??
+                rendiStatus.command?.error ??
+                rendiStatus.data?.error ??
+                'Unknown error';
               await supabase
                 .from('video_jobs')
                 .update({ 
                   status: 'failed',
-                  error_message: rendiStatus.error || 'Rendi job failed',
+                  error_message: errMsg,
                   completed_at: new Date().toISOString(),
                   logs: [
                     ...(job.logs || []),
                     { 
                       timestamp: new Date().toISOString(), 
-                      message: `Rendi job failed: ${rendiStatus.error || 'Unknown error'}` 
+                      message: `Rendi job failed: ${errMsg}` 
                     }
                   ]
                 })
                 .eq('id', jobId);
-            } else if (rendiStatus.progress !== undefined) {
-              // Update progress
-              const progress = 60 + Math.min(30, rendiStatus.progress || 0);
+            } else {
+              // Update progress if available
+              const rawProgress =
+                rendiStatus.progress ??
+                rendiStatus.command?.progress ??
+                rendiStatus.data?.progress ?? 0;
+              const progress = 60 + Math.min(30, Number(rawProgress) || 0);
               await supabase
                 .from('video_jobs')
                 .update({ 

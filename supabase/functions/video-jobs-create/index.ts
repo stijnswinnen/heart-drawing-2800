@@ -258,10 +258,16 @@ async function processVideoJob(jobId: string) {
 
     console.log('Rendi job created:', rendiJob);
 
-    // Determine job id key from response
-    const rendiJobId = rendiJob.id || rendiJob.job_id || rendiJob?.data?.id;
+    // Determine command/job id key from response
+    const rendiJobId =
+      rendiJob.command_id ||
+      rendiJob.id ||
+      rendiJob.job_id ||
+      rendiJob?.data?.command_id ||
+      rendiJob?.data?.id;
     if (!rendiJobId) {
-      throw new Error('Rendi job ID missing in response');
+      console.error('Unexpected Rendi response payload:', JSON.stringify(rendiJob));
+      throw new Error('Rendi job ID missing in response (expected command_id)');
     }
 
     // Update job with Rendi job ID
@@ -327,6 +333,8 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
     try {
       // Try multiple endpoints for status
       const statusUrls = [
+        `https://api.rendi.dev/v1/commands/${rendiJobId}`,
+        `https://api.rendi.dev/commands/${rendiJobId}`,
         `https://api.rendi.dev/v1/jobs/${rendiJobId}`,
         `https://api.rendi.dev/jobs/${rendiJobId}`,
       ];
@@ -358,9 +366,25 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
 
       console.log('Rendi job status:', jobStatus);
 
-      if (jobStatus.status === 'completed') {
+      const status =
+        jobStatus.status ??
+        jobStatus.command?.status ??
+        jobStatus.data?.status;
+
+      const outputUrl =
+        jobStatus.output_url ??
+        jobStatus.outputUrl ??
+        jobStatus.output_files?.out_video?.url ??
+        jobStatus.output_files?.out_video ??
+        jobStatus.result?.output_url ??
+        jobStatus.data?.output_url;
+
+      if (status === 'completed') {
+        if (!outputUrl) {
+          throw new Error('Rendi completed without output_url');
+        }
         // Download the completed video
-        const videoResponse = await fetch(jobStatus.output_url);
+        const videoResponse = await fetch(outputUrl);
         const videoBlob = await videoResponse.blob();
         
         // Upload to Supabase storage
@@ -392,11 +416,20 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
 
         return;
         
-      } else if (jobStatus.status === 'failed') {
-        throw new Error(`Rendi job failed: ${jobStatus.error || 'Unknown error'}`);
-      } else if (jobStatus.status === 'processing') {
+      } else if (status === 'failed') {
+        const errMsg =
+          jobStatus.error ??
+          jobStatus.command?.error ??
+          jobStatus.data?.error ??
+          'Unknown error';
+        throw new Error(`Rendi job failed: ${errMsg}`);
+      } else if (status === 'processing' || status === 'queued' || status === 'running') {
         // Update progress if available
-        const progress = 60 + Math.min(30, jobStatus.progress || 0);
+        const rawProgress =
+          jobStatus.progress ??
+          jobStatus.command?.progress ??
+          jobStatus.data?.progress ?? 0;
+        const progress = 60 + Math.min(30, Number(rawProgress) || 0);
         await updateJobProgress(jobId, progress, 'Processing video...');
       }
 
