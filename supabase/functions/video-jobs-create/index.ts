@@ -131,44 +131,51 @@ async function processVideoJob(jobId: string) {
 
     console.log(`Found ${drawings.length} approved drawings`);
 
-    // Update progress
-    await updateJobProgress(jobId, 10, 'Downloading images...');
+    // Build concat list of public optimized images
+    await updateJobProgress(jobId, 10, 'Building image list...');
 
-    // Download images from Supabase storage
-    const imageBlobs: Array<{ name: string; blob: Blob }> = [];
-    
+    // Build public URLs to optimized images and create an ffconcat list
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const optimizedUrls: string[] = [];
     for (let i = 0; i < drawings.length; i++) {
-      const drawing = drawings[i];
-      const { data: imageData } = await supabase.storage
-        .from('optimized')
-        .download(drawing.image_path);
-        
-      if (imageData) {
-        imageBlobs.push({
-          name: `image_${i.toString().padStart(4, '0')}.jpg`,
-          blob: imageData
-        });
-      }
-      
-      // Update progress
-      const progress = 10 + Math.floor((i / drawings.length) * 30);
-      await updateJobProgress(jobId, progress, `Downloaded ${i + 1}/${drawings.length} images`);
+      const cleanPath = (drawings[i].image_path || '').split('/').pop() || drawings[i].image_path;
+      // Prefer API to get public URL to handle any path nuances
+      const { data: pub } = supabase.storage.from('optimized').getPublicUrl(cleanPath);
+      const url = pub?.publicUrl || `${supabaseUrl}/storage/v1/object/public/optimized/${cleanPath}`;
+      optimizedUrls.push(url);
     }
 
-    if (imageBlobs.length === 0) {
-      throw new Error('Failed to download any images');
+    if (optimizedUrls.length === 0) {
+      throw new Error('No optimized image URLs available');
     }
 
-    // Upload frames to a public location that Rendi can access
-    await updateJobProgress(jobId, 40, 'Uploading frames to storage...');
-    for (const image of imageBlobs) {
-      const path = `jobs/${jobId}/frames/${image.name}`;
-      const { error: uploadErr } = await supabase.storage
-        .from('videos')
-        .upload(path, image.blob);
-      if (uploadErr) {
-        throw new Error(`Frame upload failed for ${image.name}: ${uploadErr.message}`);
-      }
+    // Create ffconcat content with per-image duration (1/fps seconds)
+    const perImageSeconds = Math.max(0.01, 1 / Math.max(1, Number(job.fps) || 1));
+    let listContent = 'ffconcat version 1.0\n';
+    for (const url of optimizedUrls) {
+      // Quote URL to be safe
+      listContent += `file '${url}'\n`;
+      listContent += `duration ${perImageSeconds}\n`;
+    }
+    // Repeat last file once (concat demuxer recommendation)
+    listContent += `file '${optimizedUrls[optimizedUrls.length - 1]}'\n`;
+
+    await updateJobProgress(jobId, 30, 'Uploading playlist...');
+
+    // Upload ffconcat list to public videos bucket
+    const listPath = `jobs/${jobId}/list.txt`;
+    const listBlob = new Blob([listContent], { type: 'text/plain' });
+    const { error: listUploadErr } = await supabase.storage
+      .from('videos')
+      .upload(listPath, listBlob);
+    if (listUploadErr) {
+      throw new Error(`Failed to upload concat list: ${listUploadErr.message}`);
+    }
+
+    const { data: listPub } = supabase.storage.from('videos').getPublicUrl(listPath);
+    const listUrl = listPub?.publicUrl;
+    if (!listUrl) {
+      throw new Error('Could not get public URL for concat list');
     }
 
     await updateJobProgress(jobId, 45, 'Preparing video generation...');
@@ -179,17 +186,12 @@ async function processVideoJob(jobId: string) {
       throw new Error('Rendi API key not configured');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const framesBaseUrl = `${supabaseUrl}/storage/v1/object/public/videos/jobs/${jobId}/frames/`;
-    const framesUrlPattern = `${framesBaseUrl}image_%04d.jpg`;
-    // Determine a sample frame to satisfy Rendi input_files requirement
-    const sampleFrame = imageBlobs[0]?.name || 'image_0001.jpg';
-    // Prepare FFmpeg command for video generation
-    const duration = 0.5; // seconds per image
+    // Prepare FFmpeg command using concat demuxer over remote URLs
     const ffmpegCommand = [
-      '-f', 'image2',
-      '-framerate', `${1 / duration}`,
-      '-i', '{{in_frames}}',
+      '-f', 'concat',
+      '-safe', '0',
+      '-protocol_whitelist', 'file,http,https,tcp,tls',
+      '-i', '{{list}}',
       '-vf', `fps=${job.fps},scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:-1:-1:color=black,format=yuv420p`,
       '-c:v', 'libx264',
       '-preset', 'medium',
@@ -207,9 +209,8 @@ async function processVideoJob(jobId: string) {
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
     // Build input/output files per Rendi API requirements
-    const input_files = { in_frames: framesUrlPattern };
+    const input_files = { list: listUrl };
     const output_files = { out_video: 'output.mp4' };
-
     const payload = {
       input_files,
       output_files,
