@@ -159,6 +159,18 @@ async function processVideoJob(jobId: string) {
       throw new Error('Failed to download any images');
     }
 
+    // Upload frames to a public location that Rendi can access
+    await updateJobProgress(jobId, 40, 'Uploading frames to storage...');
+    for (const image of imageBlobs) {
+      const path = `jobs/${jobId}/frames/${image.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('videos')
+        .upload(path, image.blob);
+      if (uploadErr) {
+        throw new Error(`Frame upload failed for ${image.name}: ${uploadErr.message}`);
+      }
+    }
+
     await updateJobProgress(jobId, 45, 'Preparing video generation...');
 
     // Prepare Rendi.dev job
@@ -167,20 +179,14 @@ async function processVideoJob(jobId: string) {
       throw new Error('Rendi API key not configured');
     }
 
-    // Create form data for Rendi
-    const formData = new FormData();
-    
-    // Add images to form data
-    imageBlobs.forEach((image) => {
-      formData.append('files', image.blob, image.name);
-    });
-
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const framesUrlPattern = `${supabaseUrl}/storage/v1/object/public/videos/jobs/${jobId}/frames/image_%04d.jpg`;
     // Prepare FFmpeg command for video generation
     const duration = 0.5; // seconds per image
     const ffmpegCommand = [
       '-f', 'image2',
       '-framerate', `${1/duration}`,
-      '-i', 'image_%04d.jpg',
+      '-i', framesUrlPattern,
       '-vf', `fps=${job.fps},scale=1920:1920:force_original_aspect_ratio=decrease,pad=1920:1920:-1:-1:color=black,format=yuv420p`,
       '-c:v', 'libx264',
       '-preset', 'medium',
@@ -188,33 +194,36 @@ async function processVideoJob(jobId: string) {
       '-movflags', '+faststart',
       'output.mp4'
     ];
-
-    formData.append('ffmpeg_command', ffmpegCommand.join(' '));
-    formData.append('max_command_run_seconds', String(15 * 60)); // 15 minutes
-    formData.append('vcpu_count', '2');
-
     await updateJobProgress(jobId, 50, 'Submitting job to Rendi...');
 
-    // Submit job to Rendi.dev (try multiple endpoints for compatibility)
+    // Submit job to Rendi.dev with JSON payload (preferred)
     const endpoints = [
       'https://api.rendi.dev/v1/run-ffmpeg-command',
       'https://api.rendi.dev/run-ffmpeg-command',
     ];
-    
+
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
+
+    const payload = {
+      ffmpeg_command: ffmpegCommand.join(' '),
+      max_command_run_seconds: 15 * 60,
+      vcpu_count: 2,
+    };
 
     let rendiJob: any = null;
     let lastStatus = 0;
     let lastBody = '';
     let lastUrl = '';
 
-    for (let i = 0; i < endpoints.length; i++) {
-      const url = endpoints[i];
+    for (const url of endpoints) {
       try {
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'X-API-KEY': rendiApiKey },
-          body: formData,
+          headers: {
+            'X-API-KEY': rendiApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         });
 
         if (res.ok) {
