@@ -118,22 +118,41 @@ async function processVideoJob(jobId: string) {
       throw new Error('Job not found');
     }
 
-    // Fetch approved drawings with sorting
-    let query = supabase
+    // Fetch approved drawings with sorting (avoid DB random ordering issues)
+    const baseQuery = supabase
       .from('drawings')
-      .select('image_path')
+      .select('image_path, created_at')
       .eq('status', 'approved');
-    
+
+    let drawings: Array<{ image_path: string }> = [];
+    let drawingsError: any = null;
+
     if (job.sorting === 'random') {
-      query = query.order('random()', { ascending: false });
+      // Fetch all approved drawings and shuffle client-side
+      const { data, error } = await baseQuery.order('created_at', { ascending: false });
+      drawingsError = error;
+      if (data && data.length > 0) {
+        // Fisher–Yates shuffle
+        for (let i = data.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [data[i], data[j]] = [data[j], data[i]];
+        }
+        drawings = data.slice(0, job.max_frames);
+      }
     } else {
-      // Default: new to old
-      query = query.order('created_at', { ascending: false });
+      const { data, error } = await baseQuery
+        .order('created_at', { ascending: false })
+        .limit(job.max_frames);
+      drawingsError = error;
+      drawings = data || [];
     }
-    
-    const { data: drawings } = await query.limit(job.max_frames);
+
+    if (drawingsError) {
+      throw new Error(`Failed to fetch approved drawings: ${drawingsError.message}`);
+    }
 
     if (!drawings || drawings.length === 0) {
+      console.log('No approved drawings returned. Sorting:', job.sorting);
       throw new Error('No approved drawings found');
     }
 
