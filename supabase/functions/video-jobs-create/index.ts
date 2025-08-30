@@ -188,9 +188,9 @@ async function processVideoJob(jobId: string) {
     const duration = 0.5; // seconds per image
     const ffmpegCommand = [
       '-f', 'image2',
-      '-framerate', `${1/duration}`,
-      '-i', framesUrlPattern,
-      '-vf', `fps=${job.fps},scale=1920:1920:force_original_aspect_ratio=decrease,pad=1920:1920:-1:-1:color=black,format=yuv420p`,
+      '-framerate', `${1 / duration}`,
+      '-i', '{{in_frames}}',
+      '-vf', `fps=${job.fps},scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:-1:-1:color=black,format=yuv420p`,
       '-c:v', 'libx264',
       '-preset', 'medium',
       '-crf', '23',
@@ -207,7 +207,7 @@ async function processVideoJob(jobId: string) {
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
     // Build input/output files per Rendi API requirements
-    const input_files = { in_sample: `${framesBaseUrl}${sampleFrame}` };
+    const input_files = { in_frames: framesUrlPattern };
     const output_files = { out_video: 'output.mp4' };
 
     const payload = {
