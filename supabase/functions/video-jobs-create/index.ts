@@ -180,7 +180,10 @@ async function processVideoJob(jobId: string) {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const framesUrlPattern = `${supabaseUrl}/storage/v1/object/public/videos/jobs/${jobId}/frames/image_%04d.jpg`;
+    const framesBaseUrl = `${supabaseUrl}/storage/v1/object/public/videos/jobs/${jobId}/frames/`;
+    const framesUrlPattern = `${framesBaseUrl}image_%04d.jpg`;
+    // Determine a sample frame to satisfy Rendi input_files requirement
+    const sampleFrame = imageBlobs[0]?.name || 'image_0001.jpg';
     // Prepare FFmpeg command for video generation
     const duration = 0.5; // seconds per image
     const ffmpegCommand = [
@@ -192,19 +195,24 @@ async function processVideoJob(jobId: string) {
       '-preset', 'medium',
       '-crf', '23',
       '-movflags', '+faststart',
-      'output.mp4'
+      '{{out_video}}'
     ];
     await updateJobProgress(jobId, 50, 'Submitting job to Rendi...');
 
-    // Submit job to Rendi.dev with JSON payload (preferred)
+    // Submit job to Rendi.dev with JSON payload (v1 endpoint)
     const endpoints = [
       'https://api.rendi.dev/v1/run-ffmpeg-command',
-      'https://api.rendi.dev/run-ffmpeg-command',
     ];
 
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
+    // Build input/output files per Rendi API requirements
+    const input_files = { in_sample: `${framesBaseUrl}${sampleFrame}` };
+    const output_files = { out_video: 'output.mp4' };
+
     const payload = {
+      input_files,
+      output_files,
       ffmpeg_command: ffmpegCommand.join(' '),
       max_command_run_seconds: 15 * 60,
       vcpu_count: 2,
@@ -319,8 +327,8 @@ async function pollRendiJob(jobId: string, rendiJobId: string) {
     try {
       // Try multiple endpoints for status
       const statusUrls = [
-        `https://api.rendi.dev/jobs/${rendiJobId}`,
         `https://api.rendi.dev/v1/jobs/${rendiJobId}`,
+        `https://api.rendi.dev/jobs/${rendiJobId}`,
       ];
 
       let jobStatus: any = null;
