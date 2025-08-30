@@ -122,10 +122,15 @@ serve(async (req) => {
             const outputUrl =
               rendiStatus.output_url ??
               rendiStatus.outputUrl ??
+              rendiStatus.output_files?.out_video?.storage_url ??
               rendiStatus.output_files?.out_video?.url ??
               rendiStatus.output_files?.out_video ??
               rendiStatus.result?.output_url ??
               rendiStatus.data?.output_url;
+
+            const fileId =
+              rendiStatus.output_files?.out_video?.file_id ??
+              rendiStatus.data?.output_files?.out_video?.file_id;
             
             // Update job status based on Rendi response
             if (status === 'completed' && job.status !== 'completed') {
@@ -139,8 +144,8 @@ serve(async (req) => {
               const videoResponse = await fetch(outputUrl);
               const videoBlob = await videoResponse.blob();
               
-              // Upload to Supabase storage
-              const videoPath = `${new Date().toISOString().split('T')[0]}/video_${Date.now()}.mp4`;
+              // Upload to Supabase storage with format-based path
+              const videoPath = `1080-1080-${job.fps || 2}fps/video_${Date.now()}.mp4`;
               const { error: uploadError } = await supabase.storage
                 .from('videos')
                 .upload(videoPath, videoBlob);
@@ -148,6 +153,9 @@ serve(async (req) => {
               if (uploadError) {
                 throw new Error(`Upload failed: ${uploadError.message}`);
               }
+
+              // Cleanup Rendi files after successful upload
+              await cleanupRendiFiles(job.rendi_job_id, fileId);
 
               // Mark job as completed
               await supabase
@@ -244,3 +252,33 @@ serve(async (req) => {
     });
   }
 });
+
+async function cleanupRendiFiles(rendiJobId: string, fileId?: string) {
+  const rendiApiKey = Deno.env.get('RENDI_API_KEY');
+  if (!rendiApiKey) {
+    console.log('No Rendi API key, skipping cleanup');
+    return;
+  }
+
+  try {
+    // Delete specific file if we have the file_id
+    if (fileId) {
+      const deleteFileRes = await fetch(`https://api.rendi.dev/v1/files/${fileId}`, {
+        method: 'DELETE',
+        headers: { 'X-API-KEY': rendiApiKey }
+      });
+      console.log(`Rendi file deletion (${fileId}):`, deleteFileRes.status);
+    }
+
+    // Delete all command files
+    const deleteCommandRes = await fetch(`https://api.rendi.dev/v1/commands/${rendiJobId}/files`, {
+      method: 'DELETE',
+      headers: { 'X-API-KEY': rendiApiKey }
+    });
+    console.log(`Rendi command files deletion (${rendiJobId}):`, deleteCommandRes.status);
+    
+  } catch (error) {
+    console.error('Error cleaning up Rendi files:', error);
+    // Don't throw - cleanup is best effort
+  }
+}
