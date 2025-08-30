@@ -168,7 +168,7 @@ async function processVideoJob(jobId: string) {
 
     const filters: string[] = [];
     for (let i = 0; i < optimizedUrls.length; i++) {
-      filters.push(`[${i}:v]scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2:color=black,format=yuv420p,setsar=1[v${i}]`);
+      filters.push(`[${i}:v]scale=w='min(iw,1080)':h='min(ih,1080)':force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2:color=white,format=yuv420p,setsar=1[v${i}]`);
     }
     const concatFilter = `${filters.join(';')};${optimizedUrls.map((_, i) => `[v${i}]`).join('')}concat=n=${optimizedUrls.length}:v=1:a=0[outv]`;
 
