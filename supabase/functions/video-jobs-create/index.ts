@@ -149,35 +149,9 @@ async function processVideoJob(jobId: string) {
       throw new Error('No optimized image URLs available');
     }
 
-    // Create ffconcat content with per-image duration (1/fps seconds)
-    const perImageSeconds = Math.max(0.01, 1 / Math.max(1, Number(job.fps) || 1));
-    let listContent = 'ffconcat version 1.0\n';
-    for (const url of optimizedUrls) {
-      // Quote URL to be safe
-      listContent += `file '${url}'\n`;
-      listContent += `duration ${perImageSeconds}\n`;
-    }
-    // Repeat last file once (concat demuxer recommendation)
-    listContent += `file '${optimizedUrls[optimizedUrls.length - 1]}'\n`;
-
-    await updateJobProgress(jobId, 30, 'Uploading playlist...');
-
-    // Upload ffconcat list to public videos bucket
-    const listPath = `jobs/${jobId}/list.txt`;
-    const listBlob = new Blob([listContent], { type: 'text/plain' });
-    const { error: listUploadErr } = await supabase.storage
-      .from('videos')
-      .upload(listPath, listBlob);
-    if (listUploadErr) {
-      throw new Error(`Failed to upload concat list: ${listUploadErr.message}`);
-    }
-
-    const { data: listPub } = supabase.storage.from('videos').getPublicUrl(listPath);
-    const listUrl = listPub?.publicUrl;
-    if (!listUrl) {
-      throw new Error('Could not get public URL for concat list');
-    }
-
+    // Using enumerated image inputs for Rendi; default 1s per image (size configurable later)
+    const perImageSeconds = 1;
+    await updateJobProgress(jobId, 30, 'Preparing input files...');
     await updateJobProgress(jobId, 45, 'Preparing video generation...');
 
     // Prepare Rendi.dev job
@@ -186,13 +160,23 @@ async function processVideoJob(jobId: string) {
       throw new Error('Rendi API key not configured');
     }
 
-    // Prepare FFmpeg command using concat demuxer over remote URLs
+    // Prepare FFmpeg command using enumerated image inputs
+    const inputArgs: string[] = [];
+    for (let i = 0; i < optimizedUrls.length; i++) {
+      inputArgs.push('-loop', '1', '-t', perImageSeconds.toString(), '-i', `{{in_${i}}}`);
+    }
+
+    const filters: string[] = [];
+    for (let i = 0; i < optimizedUrls.length; i++) {
+      filters.push(`[${i}:v]scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2:color=black,format=yuv420p,setsar=1[v${i}]`);
+    }
+    const concatFilter = `${filters.join(';')};${optimizedUrls.map((_, i) => `[v${i}]`).join('')}concat=n=${optimizedUrls.length}:v=1:a=0[outv]`;
+
     const ffmpegCommand = [
-      '-f', 'concat',
-      '-safe', '0',
-      '-protocol_whitelist', 'file,http,https,tcp,tls',
-      '-i', '{{list}}',
-      '-vf', `fps=${job.fps},scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:-1:-1:color=black,format=yuv420p`,
+      ...inputArgs,
+      '-filter_complex', concatFilter,
+      '-map', '[outv]',
+      '-r', String(job.fps || 2),
       '-c:v', 'libx264',
       '-preset', 'medium',
       '-crf', '23',
@@ -209,7 +193,8 @@ async function processVideoJob(jobId: string) {
     console.log('Submitting to Rendi with command:', ffmpegCommand.join(' '));
 
     // Build input/output files per Rendi API requirements
-    const input_files = { list: listUrl };
+    const input_files: Record<string, string> = {};
+    optimizedUrls.forEach((url, i) => { input_files[`in_${i}`] = url; });
     const output_files = { out_video: 'output.mp4' };
     const payload = {
       input_files,
