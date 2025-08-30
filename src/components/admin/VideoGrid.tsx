@@ -311,27 +311,54 @@ export const VideoGrid = () => {
                 <Alert>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <AlertDescription>
-                    Video generation is in progress. You can safely navigate away - the job will continue processing in the cloud.
+                    Video generation is in progress. Je kan dit veilig sluiten - de job blijft lopen in de cloud.
                   </AlertDescription>
                 </Alert>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Progress</span>
+                    <span>Voortgang</span>
                     <span>{activeJob.progress}%</span>
                   </div>
                   <Progress value={activeJob.progress} className="w-full" />
                   
-                  <div className="flex items-center gap-2 text-sm">
-                    {getStatusIcon(activeJob.status)}
-                    <span>{activeJob.job_type} video - {activeJob.max_frames} frames @ {activeJob.fps} FPS</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(activeJob.status)}
+                      <span>{activeJob.job_type} video - {activeJob.max_frames} frames @ {activeJob.fps} FPS</span>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession();
+                          if (!session) throw new Error('Niet aangemeld');
+                          toast.loading('Bezig met stoppen...');
+                          const { error, data } = await supabase.functions.invoke('video-jobs-cancel', {
+                            body: { jobId: activeJob.id },
+                            headers: { Authorization: `Bearer ${session.access_token}` },
+                          });
+                          if (error) throw new Error(error.message);
+                          if (!data?.success) throw new Error(data?.error || 'Stoppen mislukt');
+                          toast.success('Job gestopt');
+                          await refetchJobs();
+                        } catch (e: any) {
+                          console.error(e);
+                          toast.error(e.message || 'Stoppen mislukt');
+                        }
+                      }}
+                      disabled={activeJob.status !== 'processing' && activeJob.status !== 'pending'}
+                    >
+                      Stoppen
+                    </Button>
                   </div>
 
                   {activeJob.logs && activeJob.logs.length > 0 && (
                     <div className="mt-2">
-                      <p className="text-xs font-medium mb-1">Latest Log:</p>
+                      <p className="text-xs font-medium mb-1">Laatste log:</p>
                       <p className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
-                        {activeJob.logs[activeJob.logs.length - 1]?.message || 'No recent logs'}
+                        {activeJob.logs[activeJob.logs.length - 1]?.message || 'Geen recente logs'}
                       </p>
                     </div>
                   )}
@@ -376,31 +403,55 @@ export const VideoGrid = () => {
               <p className="text-sm font-medium mb-2">Recent Jobs</p>
               <ScrollArea className="h-48">
                 <div className="space-y-2">
-                  {videoJobs && videoJobs.length > 0 ? (
-                    videoJobs.map((job) => (
-                      <div key={job.id} className="flex items-center justify-between p-2 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(job.status)}
-                          <div>
-                            <p className="text-sm font-medium">
-                              {job.job_type} - {job.max_frames} frames
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(job.created_at).toLocaleString()}
-                            </p>
+                      {videoJobs && videoJobs.length > 0 ? (
+                        videoJobs.map((job) => (
+                          <div key={job.id} className="flex items-center justify-between p-2 border rounded-lg">
+                            <div className="flex items-center gap-2">
+                              {getStatusIcon(job.status)}
+                              <div>
+                                <p className="text-sm font-medium">
+                                  {job.job_type} - {job.max_frames} frames
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(job.created_at).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right space-y-1">
+                              {getStatusBadge(job.status)}
+                              {job.status === 'processing' && (
+                                <div className="flex items-center gap-2 justify-end">
+                                  <p className="text-xs text-muted-foreground">{job.progress}%</p>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={async () => {
+                                      try {
+                                        const { data: { session } } = await supabase.auth.getSession();
+                                        if (!session) throw new Error('Niet aangemeld');
+                                        toast.loading('Bezig met stoppen...');
+                                        const { error, data } = await supabase.functions.invoke('video-jobs-cancel', {
+                                          body: { jobId: job.id },
+                                          headers: { Authorization: `Bearer ${session.access_token}` },
+                                        });
+                                        if (error) throw new Error(error.message);
+                                        if (!data?.success) throw new Error(data?.error || 'Stoppen mislukt');
+                                        toast.success('Job gestopt');
+                                        await refetchJobs();
+                                      } catch (e: any) {
+                                        console.error(e);
+                                        toast.error(e.message || 'Stoppen mislukt');
+                                      }
+                                    }}
+                                  >
+                                    Stoppen
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          {getStatusBadge(job.status)}
-                          {job.status === 'processing' && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {job.progress}%
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
+                        ))
+                      ) : (
                     <div className="text-center py-4">
                       <p className="text-sm text-muted-foreground">No jobs found</p>
                     </div>
