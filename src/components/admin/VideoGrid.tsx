@@ -34,6 +34,7 @@ export const VideoGrid = () => {
   const [mode, setMode] = useState<"daily" | "archive">("daily");
   const [maxFrames, setMaxFrames] = useState("50");
   const [fps, setFps] = useState("2");
+  const [sorting, setSorting] = useState<"new_to_old" | "random">("new_to_old");
   const [activeJob, setActiveJob] = useState<VideoJob | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<VideoJob | null>(null);
@@ -133,7 +134,7 @@ export const VideoGrid = () => {
       return;
     }
 
-    const targetFrames = Math.min(parseInt(maxFrames), mode === "daily" ? 50 : 300);
+    const targetFrames = mode === "daily" ? 50 : parseInt(maxFrames);
     
     try {
       toast.loading("Creating video generation job...");
@@ -147,7 +148,8 @@ export const VideoGrid = () => {
         body: {
           mode,
           maxFrames: targetFrames,
-          fps: parseInt(fps)
+          fps: parseInt(fps),
+          sorting
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -283,32 +285,44 @@ export const VideoGrid = () => {
                   <SelectItem value="daily">
                     <div className="flex items-center gap-2">
                       <VideoIcon className="h-4 w-4" />
-                      Daily (Max 50 frames)
+                      Daily (50 frames)
                     </div>
                   </SelectItem>
                   <SelectItem value="archive">
                     <div className="flex items-center gap-2">
                       <Archive className="h-4 w-4" />
-                      Archive (Max 300 frames)
+                      Archive (choose amount)
                     </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            {mode === "archive" && (
+              <div className="space-y-2">
+                <Label htmlFor="maxFrames">Number of frames</Label>
+                <Input
+                  id="maxFrames"
+                  type="number"
+                  value={maxFrames}
+                  onChange={(e) => setMaxFrames(e.target.value)}
+                  min="1"
+                  placeholder="Enter number of frames"
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="maxFrames">Max Frames</Label>
-              <Input
-                id="maxFrames"
-                type="number"
-                value={maxFrames}
-                onChange={(e) => setMaxFrames(e.target.value)}
-                min="1"
-                max={mode === "daily" ? "50" : "300"}
-              />
-              <p className="text-sm text-muted-foreground">
-                Current limit: {mode === "daily" ? "50" : "300"} frames
-              </p>
+              <Label htmlFor="sorting">Sorting</Label>
+              <Select value={sorting} onValueChange={(value: "new_to_old" | "random") => setSorting(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new_to_old">New to old</SelectItem>
+                  <SelectItem value="random">Random</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -331,12 +345,6 @@ export const VideoGrid = () => {
                 <Badge variant="outline">
                   {approvedDrawings} approved hearts available
                 </Badge>
-                {parseInt(maxFrames) > (mode === "daily" ? 50 : 300) && (
-                  <Badge variant="destructive" className="flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    Exceeds limit
-                  </Badge>
-                )}
               </div>
             </div>
 

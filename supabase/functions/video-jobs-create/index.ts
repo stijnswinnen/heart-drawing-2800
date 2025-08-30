@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { mode, maxFrames, fps } = await req.json();
+    const { mode, maxFrames, fps, sorting } = await req.json();
     const authHeader = req.headers.get('Authorization');
     
     if (!authHeader) {
@@ -43,7 +43,7 @@ serve(async (req) => {
       throw new Error('Insufficient permissions');
     }
 
-    console.log('Creating video job:', { mode, maxFrames, fps });
+    console.log('Creating video job:', { mode, maxFrames, fps, sorting });
 
     // Create job record
     const { data: job, error: jobError } = await supabase
@@ -53,6 +53,7 @@ serve(async (req) => {
         job_type: mode,
         max_frames: maxFrames,
         fps: fps,
+        sorting: sorting || 'new_to_old',
         status: 'pending',
         logs: [{ 
           timestamp: new Date().toISOString(), 
@@ -117,13 +118,20 @@ async function processVideoJob(jobId: string) {
       throw new Error('Job not found');
     }
 
-    // Fetch approved drawings
-    const { data: drawings } = await supabase
+    // Fetch approved drawings with sorting
+    let query = supabase
       .from('drawings')
       .select('image_path')
-      .eq('status', 'approved')
-      .order('created_at', { ascending: true })
-      .limit(job.max_frames);
+      .eq('status', 'approved');
+    
+    if (job.sorting === 'random') {
+      query = query.order('random()', { ascending: false });
+    } else {
+      // Default: new to old
+      query = query.order('created_at', { ascending: false });
+    }
+    
+    const { data: drawings } = await query.limit(job.max_frames);
 
     if (!drawings || drawings.length === 0) {
       throw new Error('No approved drawings found');

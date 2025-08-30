@@ -249,6 +249,7 @@ export type Database = {
           max_frames: number
           progress: number | null
           rendi_job_id: string | null
+          sorting: string | null
           started_at: string | null
           status: string
           updated_at: string
@@ -266,6 +267,7 @@ export type Database = {
           max_frames: number
           progress?: number | null
           rendi_job_id?: string | null
+          sorting?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string
@@ -283,6 +285,7 @@ export type Database = {
           max_frames?: number
           progress?: number | null
           rendi_job_id?: string | null
+          sorting?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string
