@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Check, X, Trash2 } from "lucide-react";
+import { Check, X, Trash2, Edit } from "lucide-react";
 import { LocationRejectionDialog } from "./LocationRejectionDialog";
 import {
   AlertDialog,
@@ -30,6 +30,7 @@ interface LocationsGridProps {
   onApprove: (location: Tables<"locations">) => void;
   onDecline: (location: Tables<"locations">, reason: string) => void;
   onDelete: (location: Tables<"locations">) => void;
+  onEdit: (location: Tables<"locations">) => void;
 }
 
 export const LocationsGrid = ({
@@ -38,6 +39,7 @@ export const LocationsGrid = ({
   onApprove,
   onDecline,
   onDelete,
+  onEdit,
 }: LocationsGridProps) => {
   const [selectedLocation, setSelectedLocation] = useState<Tables<"locations"> | null>(null);
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
@@ -162,35 +164,43 @@ export const LocationsGrid = ({
                   {selectedStatus === "rejected" && (
                     <TableCell>{location.rejection_reason || "-"}</TableCell>
                   )}
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {selectedStatus === "new" && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onApprove(location)}
-                          >
-                            <Check className="h-4 w-4 text-green-500" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeclineClick(location)}
-                          >
-                            <X className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteClick(location)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                   <TableCell>
+                     <div className="flex gap-2">
+                       <Button
+                         variant="ghost"
+                         size="icon"
+                         onClick={() => onEdit(location)}
+                         title="Bewerken"
+                       >
+                         <Edit className="h-4 w-4 text-blue-500" />
+                       </Button>
+                       {selectedStatus === "new" && (
+                         <>
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={() => onApprove(location)}
+                           >
+                             <Check className="h-4 w-4 text-green-500" />
+                           </Button>
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={() => handleDeclineClick(location)}
+                           >
+                             <X className="h-4 w-4 text-red-500" />
+                           </Button>
+                         </>
+                       )}
+                       <Button
+                         variant="ghost"
+                         size="icon"
+                         onClick={() => handleDeleteClick(location)}
+                       >
+                         <Trash2 className="h-4 w-4 text-red-500" />
+                       </Button>
+                     </div>
+                   </TableCell>
                 </TableRow>
               );
             })}

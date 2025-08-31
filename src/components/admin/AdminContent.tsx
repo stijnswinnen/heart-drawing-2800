@@ -3,6 +3,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { AdminSidebar } from "./AdminSidebar";
 import { DrawingGrid } from "./DrawingGrid";
 import { LocationsGrid } from "./LocationsGrid";
+import { LocationEditDialog } from "./LocationEditDialog";
 import { VideoGrid } from "./VideoGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -18,6 +19,8 @@ interface AdminContentProps {
 export const AdminContent = ({ drawings }: AdminContentProps) => {
   const [selectedStatus, setSelectedStatus] = useState<DrawingStatus>("new");
   const [selectedSection, setSelectedSection] = useState<AdminSection>("hearts");
+  const [editingLocation, setEditingLocation] = useState<Tables<"locations"> | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch locations
@@ -191,6 +194,30 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
     }
   };
 
+  const handleEditLocation = (location: Tables<"locations">) => {
+    setEditingLocation(location);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveLocation = async (locationId: string, updates: Partial<Tables<"locations">>) => {
+    try {
+      const { error } = await supabase
+        .from("locations")
+        .update(updates)
+        .eq("id", locationId);
+
+      if (error) throw error;
+
+      toast.success("Locatie succesvol bijgewerkt");
+      queryClient.invalidateQueries({ queryKey: ["locations"] });
+      setIsEditDialogOpen(false);
+      setEditingLocation(null);
+    } catch (error) {
+      console.error("Error updating location:", error);
+      toast.error("Fout bij het bijwerken van de locatie");
+    }
+  };
+
   // Filter items based on selected status
   const filteredDrawings = drawings?.filter(drawing => drawing.status === selectedStatus) || null;
   const filteredLocations = locations?.filter(location => location.status === selectedStatus) || null;
@@ -221,12 +248,23 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
               onApprove={handleApproveLocation}
               onDecline={handleDeclineLocation}
               onDelete={handleDeleteLocation}
+              onEdit={handleEditLocation}
             />
           ) : (
             <VideoGrid />
           )}
         </main>
       </div>
+
+      <LocationEditDialog
+        location={editingLocation}
+        isOpen={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setEditingLocation(null);
+        }}
+        onSave={handleSaveLocation}
+      />
     </div>
   );
 };
