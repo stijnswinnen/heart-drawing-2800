@@ -30,7 +30,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     
     const newMap = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/2800love/cmf05cgl3002q01sje09q7jzy',
       center: [defaultLng, defaultLat],
       zoom: 12,
       minZoom: 11,
