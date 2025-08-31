@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Tables } from "@/integrations/supabase/types";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +44,19 @@ export const LocationEditDialog = ({
     status: "new" as "new" | "approved" | "rejected" | "pending_verification",
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch categories for the dropdown
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (location) {
@@ -166,12 +181,28 @@ export const LocationEditDialog = ({
             
             <div className="space-y-2">
               <Label htmlFor="category">Categorie</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
-                placeholder="PARK, MUSEUM, etc."
-              />
+              <Select 
+                value={formData.category || ""} 
+                onValueChange={(value) => handleInputChange("category", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecteer een categorie..." />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="">Geen categorie</SelectItem>
+                  {categories?.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.name}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: cat.color }}
+                        />
+                        {cat.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

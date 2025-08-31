@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
 import { Share2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 type Profile = { id: string; name: string; };
 
@@ -27,6 +28,22 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const currentLocation = useLocation();
+
+  // Fetch category data to get the color
+  const { data: categoryData } = useQuery({
+    queryKey: ["category", location.category],
+    queryFn: async () => {
+      if (!location.category) return null;
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("name", location.category)
+        .single();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!location.category,
+  });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -99,9 +116,12 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
         </div>
       )}
       
-      {location.category && (
+      {location.category && categoryData && (
         <div className="flex justify-end">
-          <span className="inline-block bg-pink-400 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase">
+          <span 
+            className="inline-block text-white text-xs font-semibold px-3 py-1 rounded-lg uppercase"
+            style={{ backgroundColor: categoryData.color }}
+          >
             {location.category}
           </span>
         </div>

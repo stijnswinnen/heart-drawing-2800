@@ -5,12 +5,13 @@ import { DrawingGrid } from "./DrawingGrid";
 import { LocationsGrid } from "./LocationsGrid";
 import { LocationEditDialog } from "./LocationEditDialog";
 import { VideoGrid } from "./VideoGrid";
+import { CategoriesGrid } from "./CategoriesGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type DrawingStatus = "new" | "approved";
-type AdminSection = "hearts" | "locations" | "videos";
+type AdminSection = "hearts" | "locations" | "videos" | "categories";
 
 interface AdminContentProps {
   drawings: Tables<"drawings">[] | null;
@@ -250,6 +251,8 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
               onDelete={handleDeleteLocation}
               onEdit={handleEditLocation}
             />
+          ) : selectedSection === "categories" ? (
+            <CategoriesGrid />
           ) : (
             <VideoGrid />
           )}
