@@ -87,10 +87,12 @@ export type Database = {
       }
       locations: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           heart_user_id: string | null
           id: string
+          image_path: string | null
           latitude: number
           longitude: number
           name: string
@@ -102,10 +104,12 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           heart_user_id?: string | null
           id?: string
+          image_path?: string | null
           latitude: number
           longitude: number
           name: string
@@ -117,10 +121,12 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           heart_user_id?: string | null
           id?: string
+          image_path?: string | null
           latitude?: number
           longitude?: number
           name?: string

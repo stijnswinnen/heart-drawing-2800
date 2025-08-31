@@ -16,6 +16,8 @@ interface LocationDetailsPanelProps {
     description: string | null;
     heart_user_id: string | null;
     recommendation: string | null;
+    image_path?: string | null;
+    category?: string | null;
   };
   onClose: () => void;
 }
@@ -87,6 +89,24 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
 
   return (
     <div className="p-4 space-y-4">
+      {location.image_path && (
+        <div className="w-full">
+          <img 
+            src={location.image_path} 
+            alt={location.name}
+            className="w-full h-48 object-cover rounded-lg"
+          />
+        </div>
+      )}
+      
+      {location.category && (
+        <div className="flex justify-end">
+          <span className="inline-block bg-pink-400 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase">
+            {location.category}
+          </span>
+        </div>
+      )}
+
       <div>
         <h2 className="text-5xl font-semibold uppercase leading-[60px]">{location.name}</h2>
         {!isLoading && profile && (

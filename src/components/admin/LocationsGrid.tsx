@@ -105,38 +105,60 @@ export const LocationsGrid = ({
     <>
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Naam</TableHead>
-              <TableHead>Beschrijving</TableHead>
-              <TableHead>Coördinaten</TableHead>
-              <TableHead>Aanbeveling</TableHead>
-              <TableHead>Gebruiker naam</TableHead>
-              <TableHead>Gebruiker email</TableHead>
-              {selectedStatus === "rejected" && <TableHead>Reden afkeuring</TableHead>}
-              <TableHead>Acties</TableHead>
-            </TableRow>
-          </TableHeader>
+           <TableHeader>
+             <TableRow>
+               <TableHead>Naam</TableHead>
+               <TableHead>Beschrijving</TableHead>
+               <TableHead>Afbeelding</TableHead>
+               <TableHead>Categorie</TableHead>
+               <TableHead>Coördinaten</TableHead>
+               <TableHead>Aanbeveling</TableHead>
+               <TableHead>Gebruiker naam</TableHead>
+               <TableHead>Gebruiker email</TableHead>
+               {selectedStatus === "rejected" && <TableHead>Reden afkeuring</TableHead>}
+               <TableHead>Acties</TableHead>
+             </TableRow>
+           </TableHeader>
           <TableBody>
             {locations.map((location) => {
               const profileInfo = getProfileInfo(location.heart_user_id);
               return (
-                <TableRow key={location.id}>
-                  <TableCell>{location.name}</TableCell>
-                  <TableCell>{location.description || "-"}</TableCell>
-                  <TableCell>
-                    <a 
-                      href={getGoogleMapsUrl(Number(location.latitude), Number(location.longitude))}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
-                    >
-                      {location.latitude}, {location.longitude}
-                    </a>
-                  </TableCell>
-                  <TableCell>{location.recommendation || "-"}</TableCell>
-                  <TableCell>{profileInfo.name}</TableCell>
-                  <TableCell>{profileInfo.email}</TableCell>
+                 <TableRow key={location.id}>
+                   <TableCell>{location.name}</TableCell>
+                   <TableCell>{location.description || "-"}</TableCell>
+                   <TableCell>
+                     {location.image_path ? (
+                       <img 
+                         src={location.image_path} 
+                         alt={location.name}
+                         className="w-16 h-12 object-cover rounded"
+                       />
+                     ) : (
+                       "-"
+                     )}
+                   </TableCell>
+                   <TableCell>
+                     {location.category ? (
+                       <span className="inline-block bg-pink-400 text-white text-xs font-semibold px-2 py-1 rounded uppercase">
+                         {location.category}
+                       </span>
+                     ) : (
+                       "-"
+                     )}
+                   </TableCell>
+                   <TableCell>
+                     <a 
+                       href={getGoogleMapsUrl(Number(location.latitude), Number(location.longitude))}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="text-blue-500 hover:underline"
+                     >
+                       {location.latitude}, {location.longitude}
+                     </a>
+                   </TableCell>
+                   <TableCell>{location.recommendation || "-"}</TableCell>
+                   <TableCell>{profileInfo.name}</TableCell>
+                   <TableCell>{profileInfo.email}</TableCell>
                   {selectedStatus === "rejected" && (
                     <TableCell>{location.rejection_reason || "-"}</TableCell>
                   )}

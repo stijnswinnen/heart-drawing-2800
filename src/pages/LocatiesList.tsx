@@ -35,7 +35,9 @@ const LocatiesList = () => {
                   name: selectedLocation.name,
                   description: selectedLocation.description,
                   heart_user_id: selectedLocation.heart_user_id || null,
-                  recommendation: selectedLocation.recommendation
+                  recommendation: selectedLocation.recommendation,
+                  image_path: selectedLocation.image_path || null,
+                  category: selectedLocation.category || null
                 }}
                 onClose={() => setSelectedLocationId(null)}
               />
