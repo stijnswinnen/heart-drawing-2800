@@ -65,7 +65,7 @@ export const LocationEditDialog = ({
         description: location.description || "",
         recommendation: location.recommendation || "",
         image_path: location.image_path || "",
-        category: location.category || "",
+        category: location.category || "none",
         latitude: location.latitude?.toString() || "",
         longitude: location.longitude?.toString() || "",
         status: location.status,
@@ -83,7 +83,7 @@ export const LocationEditDialog = ({
         description: formData.description || null,
         recommendation: formData.recommendation || null,
         image_path: formData.image_path || null,
-        category: formData.category || null,
+        category: formData.category === "none" ? null : formData.category || null,
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
         status: formData.status,
@@ -182,14 +182,14 @@ export const LocationEditDialog = ({
             <div className="space-y-2">
               <Label htmlFor="category">Categorie</Label>
               <Select 
-                value={formData.category || ""} 
+                value={formData.category} 
                 onValueChange={(value) => handleInputChange("category", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecteer een categorie..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="">Geen categorie</SelectItem>
+                <SelectContent className="bg-white z-50">
+                  <SelectItem value="none">Geen categorie</SelectItem>
                   {categories?.map((cat) => (
                     <SelectItem key={cat.id} value={cat.name}>
                       <div className="flex items-center gap-2">
