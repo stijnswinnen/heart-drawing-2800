@@ -88,7 +88,7 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
   return (
     <div className="p-4 space-y-4">
       <div>
-        <h2 className="text-xl font-semibold">{location.name}</h2>
+        <h2 className="text-5xl font-semibold uppercase leading-[60px]">{location.name}</h2>
         {!isLoading && profile && (
           <p className="text-sm text-gray-600">Gedeeld door {profile.name}</p>
         )}
