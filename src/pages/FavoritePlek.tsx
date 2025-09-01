@@ -40,7 +40,7 @@ const FavoritePlek = () => {
       </main>
       <div className="bg-primary px-4 py-8 md:px-8 md:py-12">
         <div className="container max-w-4xl mx-auto">
-          <LocationForm />
+          <LocationForm fullWidthMap />
         </div>
       </div>
     </div>

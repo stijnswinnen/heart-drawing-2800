@@ -7,7 +7,11 @@ import { LocationMapSection } from "./LocationMapSection";
 import { UserInfoSection } from "./UserInfoSection";
 import { LocationDetailsSection } from "./LocationDetailsSection";
 
-export const LocationForm = () => {
+interface LocationFormProps {
+  fullWidthMap?: boolean;
+}
+
+export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
   const session = useSession();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -201,6 +205,42 @@ export const LocationForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (fullWidthMap) {
+    return (
+      <>
+        {/* Full-width map section */}
+        <div className="w-full -mx-4 md:-mx-8">
+          <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
+        </div>
+        
+        {/* Form fields in container */}
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <UserInfoSection
+            name={name}
+            email={email}
+            onNameChange={setName}
+            onEmailChange={setEmail}
+          />
+
+          <LocationDetailsSection
+            locationName={locationName}
+            description={description}
+            recommendation={recommendation}
+            shareConsent={shareConsent}
+            onLocationNameChange={setLocationName}
+            onDescriptionChange={setDescription}
+            onRecommendationChange={setRecommendation}
+            onShareConsentChange={setShareConsent}
+          />
+
+          <Button type="submit" disabled={isSubmitting || !coordinates}>
+            {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
+          </Button>
+        </form>
+      </>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
