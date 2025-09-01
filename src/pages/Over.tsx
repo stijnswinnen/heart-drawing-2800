@@ -68,7 +68,7 @@ const Over = () => {
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            2800.<AnimatedWord>love</AnimatedWord> is een initiatief van Mechels fotograaf <a href="https://www.stijnswinnen.be" target="_blank" className="underline">Stijn Swinnen</a> en wordt onafhankelijk gefinancierd. Het project ontwikkelt zich in verschillende fases over de komende jaren.
+            2800.<AnimatedWord>love</AnimatedWord> is een initiatief van Mechels fotograaf <a href="https://www.stijnswinnen.be" target="_blank" className="underline">Stijn Swinnen</a> en wordt onafhankelijk gefinancierd.
           </p>
 
 
