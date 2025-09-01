@@ -73,29 +73,95 @@ export const LocationForm = () => {
     setIsSubmitting(true);
 
     try {
-      // First get or create profile
-      const { data: existingProfile, error: profileError } = await supabase
-        .rpc('get_profile_minimal_by_email', { p_email: email });
+      let profileId: string;
+      let isEmailVerified = false;
+      let needsVerification = false;
 
-      if (profileError) {
-        console.error("Error checking profile:", profileError);
-        toast.error("Er ging iets mis bij het controleren van je profiel");
-        setIsSubmitting(false);
-        return;
-      }
-
-      let profileId;
-      
-      if (existingProfile?.[0]) {
-        profileId = existingProfile[0].id;
-      } else if (session?.user?.id) {
+      if (session?.user?.id) {
+        // User is logged in - use their session
         profileId = session.user.id;
+        
+        // Check if their email is verified
+        const { data: sessionProfile } = await supabase
+          .from('profiles')
+          .select('email_verified')
+          .eq('id', session.user.id)
+          .single();
+        
+        isEmailVerified = sessionProfile?.email_verified || false;
+        if (!isEmailVerified) {
+          needsVerification = true;
+        }
       } else {
-        toast.error("Er ging iets mis bij het opslaan van je profiel");
-        setIsSubmitting(false);
-        return;
+        // User not logged in - check for existing profile or create new user
+        const { data: existingProfile, error: profileError } = await supabase
+          .rpc('get_profile_minimal_by_email', { p_email: email });
+
+        if (profileError) {
+          console.error("Error checking profile:", profileError);
+          toast.error("Er ging iets mis bij het controleren van je profiel");
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (existingProfile?.[0]) {
+          // Profile exists
+          profileId = existingProfile[0].id;
+          isEmailVerified = existingProfile[0].email_verified || false;
+          if (!isEmailVerified) {
+            needsVerification = true;
+          }
+        } else {
+          // No profile exists - create new user
+          const randomPassword = crypto.randomUUID();
+          const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: randomPassword,
+            options: {
+              data: {
+                name: name.trim()
+              }
+            }
+          });
+
+          if (signUpError) {
+            console.error("Error creating user:", signUpError);
+            toast.error("Er ging iets mis bij het aanmaken van je profiel");
+            setIsSubmitting(false);
+            return;
+          }
+
+          if (!authData.user?.id) {
+            toast.error("Er ging iets mis bij het aanmaken van je profiel");
+            setIsSubmitting(false);
+            return;
+          }
+
+          profileId = authData.user.id;
+          needsVerification = true;
+        }
       }
 
+      // Send verification email if needed
+      if (needsVerification) {
+        try {
+          const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+            body: { email }
+          });
+          
+          if (emailError) {
+            console.error("Error sending verification email:", emailError);
+            // Don't block submission if email fails
+          }
+        } catch (emailError) {
+          console.error("Error sending verification email:", emailError);
+          // Don't block submission if email fails
+        }
+      }
+
+      // Insert location with appropriate status
+      const locationStatus = isEmailVerified ? 'new' : 'pending_verification';
+      
       const { error } = await supabase.from("locations").insert({
         name: locationName,
         description: description.trim(),
@@ -105,11 +171,19 @@ export const LocationForm = () => {
         user_id: session?.user?.id || null,
         heart_user_id: profileId,
         share_consent: shareConsent,
+        status: locationStatus,
       });
 
       if (error) throw error;
 
-      toast.success("Locatie succesvol toegevoegd!");
+      // Show appropriate success message
+      if (isEmailVerified) {
+        toast.success("Locatie succesvol toegevoegd!");
+      } else {
+        toast.success("Verificatie e-mail verzonden. Je locatie staat in de wacht tot je e-mailadres is bevestigd.");
+      }
+
+      // Reset form
       setLocationName("");
       setDescription("");
       setRecommendation("");
