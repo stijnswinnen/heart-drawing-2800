@@ -129,7 +129,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   if (isMobile) {
     return (
       <>
-        <div className="h-16 bg-[#F26D85]/10 backdrop-blur-sm border-b border-white/20 relative" />
+        <div className="h-16 bg-[#F26D85]/10 backdrop-blur-sm relative" />
         <div className="absolute top-4 right-4 z-50">
           <Sheet>
             <SheetTrigger asChild>
@@ -154,7 +154,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   return (
     <>
-      <nav className="w-full bg-[#F26D85]/10 backdrop-blur-sm h-16 px-4 border-b border-white/20">
+      <nav className="w-full bg-[#F26D85]/10 backdrop-blur-sm h-16 px-4">
         <NavLinks />
       </nav>
       {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
