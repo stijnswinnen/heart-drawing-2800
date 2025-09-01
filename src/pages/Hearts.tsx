@@ -8,7 +8,7 @@ export default function Hearts() {
     <div className="min-h-screen flex flex-col">
       <HeartTrail />
       <Navigation />
-      <div className="container mx-auto px-4 flex-grow flex items-center justify-center pt-20">
+      <div className="container mx-auto px-4 flex-grow flex items-center justify-center pt-4">
         <RandomApprovedHeart />
       </div>
       

@@ -34,7 +34,7 @@ const Over = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8 pt-16">
+    <div className="min-h-screen w-full px-4 md:px-8">
       <HeartTrail />
       <Navigation />
       <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left mt-8">

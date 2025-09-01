@@ -42,7 +42,7 @@ export default function Index() {
 
   return (
     <DrawingProvider>
-      <div className="pt-16">
+      <div>
         <Navigation isDrawing={isDrawing} />
         <DrawingTitle 
           isDrawing={isDrawing} 

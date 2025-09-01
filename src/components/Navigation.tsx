@@ -75,16 +75,16 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   };
 
   const NavLinks = () => (
-    <div className="flex flex-col md:flex-row items-center w-full relative">
-      <ul className="flex flex-col md:flex-row justify-center items-center gap-1 font-['Inter'] w-full">
+    <div className="flex flex-col md:flex-row items-center w-full relative h-full">
+      <ul className="flex flex-col md:flex-row justify-center items-center font-['Inter'] w-full h-full">
         {links.map((link) => (
-          <li key={link.path}>
+          <li key={link.path} className="h-full">
             <Link
               to={link.path}
-              className={`px-6 py-3 rounded-full transition-all duration-300 hover:animate-fade-in-from-top ${
+              className={`px-6 h-full flex items-center transition-all duration-300 ${
                 location.pathname === link.path 
-                  ? "bg-white text-primary-dark font-medium shadow-sm" 
-                  : "text-foreground hover:bg-white/10"
+                  ? "bg-white font-medium shadow-sm" 
+                  : "text-foreground"
               }`}
             >
               {link.label}
@@ -129,8 +129,8 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   if (isMobile) {
     return (
       <>
-        <div className="fixed top-0 left-0 right-0 h-16 bg-[#F26D85]/10 backdrop-blur-sm border-b border-white/20 z-40" />
-        <div className="fixed top-4 right-4 z-50">
+        <div className="h-16 bg-[#F26D85]/10 backdrop-blur-sm border-b border-white/20 relative" />
+        <div className="absolute top-4 right-4 z-50">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="bg-white/90 hover:bg-white">
@@ -154,7 +154,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 w-full bg-[#F26D85]/10 backdrop-blur-sm py-4 px-4 border-b border-white/20 z-40">
+      <nav className="w-full bg-[#F26D85]/10 backdrop-blur-sm h-16 px-4 border-b border-white/20">
         <NavLinks />
       </nav>
       {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
