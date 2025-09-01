@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-type DrawingStatus = "new" | "approved";
+type DrawingStatus = "new" | "approved" | "pending_verification";
 type AdminSection = "hearts" | "locations" | "videos" | "categories";
 
 interface AdminContentProps {
@@ -221,7 +221,12 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
   // Filter items based on selected status
   const filteredDrawings = drawings?.filter(drawing => drawing.status === selectedStatus) || null;
-  const filteredLocations = locations?.filter(location => location.status === selectedStatus) || null;
+  const filteredLocations = locations?.filter(location => {
+    if (selectedStatus === "pending_verification") {
+      return location.status === "pending_verification";
+    }
+    return location.status === selectedStatus;
+  }) || null;
 
   return (
     <div className="container mx-auto px-4 py-8">

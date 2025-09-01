@@ -2,9 +2,9 @@ import { Heart, MapPin, VideoIcon, Tag } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface AdminSidebarProps {
-  selectedStatus: "new" | "approved";
+  selectedStatus: "new" | "approved" | "pending_verification";
   selectedSection: "hearts" | "locations" | "videos" | "categories";
-  setSelectedStatus: (status: "new" | "approved") => void;
+  setSelectedStatus: (status: "new" | "approved" | "pending_verification") => void;
   setSelectedSection: (section: "hearts" | "locations" | "videos" | "categories") => void;
   drawings: Tables<"drawings">[] | null;
   locations: Tables<"locations">[] | null;
@@ -22,6 +22,7 @@ export const AdminSidebar = ({
   const approvedDrawingsCount = drawings?.filter(drawing => drawing.status === "approved").length || 0;
   const newLocationsCount = locations?.filter(location => location.status === "new").length || 0;
   const approvedLocationsCount = locations?.filter(location => location.status === "approved").length || 0;
+  const pendingLocationsCount = locations?.filter(location => location.status === "pending_verification").length || 0;
 
   return (
     <aside className="w-64 flex-shrink-0">
@@ -121,6 +122,28 @@ export const AdminSidebar = ({
               </div>
               <span className="text-sm text-muted-foreground">
                 {approvedLocationsCount} locations
+              </span>
+            </button>
+            <button
+              onClick={() => {
+                setSelectedSection("locations");
+                setSelectedStatus("pending_verification");
+              }}
+              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
+                selectedSection === "locations" && selectedStatus === "pending_verification"
+                  ? "bg-zinc-900 text-white"
+                  : "hover:bg-zinc-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin
+                  className={selectedSection === "locations" && selectedStatus === "pending_verification" ? "text-yellow-500" : ""}
+                  size={20}
+                />
+                <span>Pending Verification</span>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {pendingLocationsCount} locations
               </span>
             </button>
             <button

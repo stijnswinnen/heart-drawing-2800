@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface DrawingGridProps {
   drawings: Tables<"drawings">[] | null;
-  selectedStatus: "new" | "approved";
+  selectedStatus: "new" | "approved" | "pending_verification";
   onApprove: (drawing: Tables<"drawings">) => Promise<void>;
   onDecline: (drawing: Tables<"drawings">) => Promise<void>;
 }

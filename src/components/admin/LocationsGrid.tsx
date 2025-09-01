@@ -26,7 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface LocationsGridProps {
   locations: Tables<"locations">[] | null;
-  selectedStatus: "new" | "approved" | "rejected";
+  selectedStatus: "new" | "approved" | "rejected" | "pending_verification";
   onApprove: (location: Tables<"locations">) => void;
   onDecline: (location: Tables<"locations">, reason: string) => void;
   onDelete: (location: Tables<"locations">) => void;
@@ -74,6 +74,8 @@ export const LocationsGrid = ({
             ? "Geen nieuwe locaties om te beoordelen"
             : selectedStatus === "approved"
             ? "Nog geen goedgekeurde locaties"
+            : selectedStatus === "pending_verification"
+            ? "Geen locaties wachtend op e-mailverificatie"
             : "Geen afgekeurde locaties"}
         </p>
       </div>
@@ -174,24 +176,29 @@ export const LocationsGrid = ({
                        >
                          <Edit className="h-4 w-4 text-blue-500" />
                        </Button>
-                       {selectedStatus === "new" && (
-                         <>
-                           <Button
-                             variant="ghost"
-                             size="icon"
-                             onClick={() => onApprove(location)}
-                           >
-                             <Check className="h-4 w-4 text-green-500" />
-                           </Button>
-                           <Button
-                             variant="ghost"
-                             size="icon"
-                             onClick={() => handleDeclineClick(location)}
-                           >
-                             <X className="h-4 w-4 text-red-500" />
-                           </Button>
-                         </>
-                       )}
+                        {selectedStatus === "new" && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onApprove(location)}
+                            >
+                              <Check className="h-4 w-4 text-green-500" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeclineClick(location)}
+                            >
+                              <X className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </>
+                        )}
+                        {selectedStatus === "pending_verification" && (
+                          <div className="text-sm text-yellow-600 font-medium">
+                            Wacht op e-mailverificatie
+                          </div>
+                        )}
                        <Button
                          variant="ghost"
                          size="icon"
