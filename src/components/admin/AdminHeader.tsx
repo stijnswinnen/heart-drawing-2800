@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { cleanupAuthState } from "@/utils/authCleanup";
 
 export const AdminHeader = () => {
   const session = useSession();
@@ -11,12 +12,30 @@ export const AdminHeader = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (error: any) {
+        // Handle session_not_found as successful logout since user is effectively logged out
+        if (!error?.message?.includes('session_not_found')) {
+          console.error('Logout error:', error);
+          // Don't show error for session_not_found since user is already logged out
+        }
+      }
+      
+      // Force page refresh for clean state and show success message
       toast.success("Logged out successfully");
-      navigate("/auth");
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
     } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Failed to log out");
+      console.error("Unexpected error during logout:", error);
+      // Even if there's an error, ensure user is logged out locally
+      cleanupAuthState();
+      window.location.href = '/auth';
     }
   };
 

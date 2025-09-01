@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { AuthDialog } from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cleanupAuthState } from "@/utils/authCleanup";
 
 export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const location = useLocation();
@@ -51,26 +52,34 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Logout error:', error);
-        toast.error('Er ging iets mis bij het uitloggen');
-        return;
-      }
+      // Clean up auth state first
+      cleanupAuthState();
       
-      // Clear any stored session data
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.clear();
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (error: any) {
+        // Handle session_not_found as successful logout since user is effectively logged out
+        if (!error?.message?.includes('session_not_found')) {
+          console.error('Logout error:', error);
+          // Don't show error for session_not_found since user is already logged out
+        }
+      }
       
       // Reset session state
       setSession(null);
       
-      // Navigate to home and show success message
-      navigate('/');
+      // Force page refresh for clean state and show success message
       toast.success('Je bent succesvol uitgelogd');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (error) {
       console.error('Unexpected error during logout:', error);
-      toast.error('Er ging iets mis bij het uitloggen');
+      // Even if there's an error, ensure user is logged out locally
+      setSession(null);
+      cleanupAuthState();
+      window.location.href = '/';
     }
   };
 
