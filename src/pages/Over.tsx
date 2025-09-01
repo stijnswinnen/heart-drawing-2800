@@ -73,7 +73,7 @@ const Over = () => {
 
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            Doe mee en teken jouw <AnimatedWord>hart</AnimatedWord> voor Mechelen! <Link to="/" className="underline">Teken hier je <AnimatedWord>hart</AnimatedWord></Link> en laat je creativiteit de vrije loop. Volg ons ook op Instagram <a href="https://www.instagram.com/2800loves" target="_blank" rel="noopener noreferrer" className="underline">@2800loves</a> om op de hoogte te blijven van de laatste ontwikkelingen.
+            <Link to="/" className="underline">Doe mee en teken jouw <AnimatedWord>hart</AnimatedWord></Link> voor Mechelen! Volg dit project op Instagram <a href="https://www.instagram.com/2800loves" target="_blank" rel="noopener noreferrer" className="underline">@2800loves</a>.
           </p>
         </div>
       </div>
