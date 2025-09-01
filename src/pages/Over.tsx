@@ -44,7 +44,7 @@ const Over = () => {
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            We combineren nieuwe media, generatieve kunst en jouw creatieve input om onze <AnimatedWord>geliefde</AnimatedWord> stad in de kijker te zetten.
+            Met dit initiatief zetten we de fijnste plekken in de stad Mechelen op een positieve manier in de kijker.
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
