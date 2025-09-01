@@ -83,7 +83,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
               to={link.path}
               className={`px-6 h-full flex items-center transition-all duration-300 ${
                 location.pathname === link.path 
-                  ? "bg-white font-medium shadow-sm" 
+                  ? "bg-white" 
                   : "text-foreground"
               }`}
             >
