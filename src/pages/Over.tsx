@@ -71,9 +71,6 @@ const Over = () => {
             2800.<AnimatedWord>love</AnimatedWord> is een initiatief van Mechels fotograaf <a href="https://www.stijnswinnen.be" target="_blank" className="underline">Stijn Swinnen</a> en wordt onafhankelijk gefinancierd. Het project ontwikkelt zich in verschillende fases over de komende jaren.
           </p>
 
-          <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            Het is onze manier om iets terug te geven aan de gemeenschap en onze <AnimatedWord>liefde</AnimatedWord> voor Mechelen te delen.
-          </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
             Doe mee en teken jouw <AnimatedWord>hart</AnimatedWord> voor Mechelen! <Link to="/" className="underline">Teken hier je <AnimatedWord>hart</AnimatedWord></Link> en laat je creativiteit de vrije loop. Volg ons ook op Instagram <a href="https://www.instagram.com/2800loves" target="_blank" rel="noopener noreferrer" className="underline">@2800loves</a> om op de hoogte te blijven van de laatste ontwikkelingen.
