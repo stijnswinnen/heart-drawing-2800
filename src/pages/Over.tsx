@@ -56,7 +56,7 @@ const Over = () => {
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
-            <Link to="/" className="underline hover:opacity-70 transition-opacity">Teken een <AnimatedWord>hart</AnimatedWord></Link> en voeg het toe aan de collectie. We verzamelen 2800 hartjes! Met behulp van animatie en AI brengen we jouw <AnimatedWord>hart</AnimatedWord> later tot leven.
+            <Link to="/" className="underline hover:opacity-70 transition-opacity">Teken een <AnimatedWord>hart</AnimatedWord></Link> en voeg het toe aan de collectie. Zo willen we 2800 unieke hartjes verzamelen. Met behulp van animatie en AI brengen we jouw <AnimatedWord>hart</AnimatedWord> later tot leven.
           </p>
 
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
