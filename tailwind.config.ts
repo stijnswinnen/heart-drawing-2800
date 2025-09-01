@@ -59,12 +59,21 @@ export default {
         "slide-in-right": {
           "0%": { transform: "translateX(-20px)", opacity: "0" },
           "100%": { transform: "translateX(0)", opacity: "1" }
+        },
+        "fade-in-from-top": {
+          "0%": { 
+            background: "linear-gradient(to bottom, rgba(242, 109, 133, 0.1) 0%, rgba(242, 109, 133, 0.1) 0%, transparent 0%)"
+          },
+          "100%": { 
+            background: "linear-gradient(to bottom, rgba(242, 109, 133, 0.2) 0%, rgba(242, 109, 133, 0.2) 100%, transparent 100%)"
+          }
         }
       },
       animation: {
         "fade-in": "fade-in 0.5s ease-out",
         "pulse": "pulse 1.5s ease-in-out infinite",
-        "slide-in-right": "slide-in-right 1s ease-out"
+        "slide-in-right": "slide-in-right 1s ease-out",
+        "fade-in-from-top": "fade-in-from-top 0.3s ease"
       }
     },
   },

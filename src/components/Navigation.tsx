@@ -76,13 +76,15 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   const NavLinks = () => (
     <div className="flex flex-col md:flex-row items-center w-full relative">
-      <ul className="flex flex-col md:flex-row justify-center items-center gap-8 font-['Inter'] w-full">
+      <ul className="flex flex-col md:flex-row justify-center items-center gap-1 font-['Inter'] w-full">
         {links.map((link) => (
           <li key={link.path}>
             <Link
               to={link.path}
-              className={`text hover:opacity-70 transition-opacity ${
-                location.pathname === link.path ? "opacity-70" : "opacity-100"
+              className={`px-6 py-3 rounded-full transition-all duration-300 hover:animate-fade-in-from-top ${
+                location.pathname === link.path 
+                  ? "bg-white text-primary-dark font-medium shadow-sm" 
+                  : "text-foreground hover:bg-white/10"
               }`}
             >
               {link.label}
@@ -95,6 +97,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
           <>
             <Button 
               variant="outline" 
+              size="sm"
               asChild
             >
               <Link to="/profile">
@@ -104,6 +107,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
             </Button>
             <Button 
               variant="outline" 
+              size="sm"
               onClick={handleLogout}
             >
               Uitloggen
@@ -112,6 +116,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
         ) : (
           <Button 
             variant="outline" 
+            size="sm"
             onClick={() => setShowAuth(true)}
           >
             Inloggen
@@ -123,30 +128,33 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   if (isMobile) {
     return (
-      <div className="fixed top-4 right-4 z-50">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Menu</SheetTitle>
-            </SheetHeader>
-            <nav className="mt-8">
-              <NavLinks />
-            </nav>
-          </SheetContent>
-        </Sheet>
-        {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
-      </div>
+      <>
+        <div className="fixed top-0 left-0 right-0 h-16 bg-[#F26D85]/10 backdrop-blur-sm border-b border-white/20 z-40" />
+        <div className="fixed top-4 right-4 z-50">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="bg-white/90 hover:bg-white">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="bg-[#F26D85]/10 backdrop-blur-sm">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="mt-8">
+                <NavLinks />
+              </nav>
+            </SheetContent>
+          </Sheet>
+          {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <nav className="w-full py-8">
+      <nav className="fixed top-0 left-0 right-0 w-full bg-[#F26D85]/10 backdrop-blur-sm py-4 px-4 border-b border-white/20 z-40">
         <NavLinks />
       </nav>
       {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}

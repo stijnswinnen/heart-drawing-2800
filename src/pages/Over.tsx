@@ -34,10 +34,10 @@ const Over = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8">
+    <div className="min-h-screen w-full px-4 md:px-8 pt-16">
       <HeartTrail />
       <Navigation />
-      <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left mt-24">
+      <div className="max-w-[1200px] mx-auto md:pl-[10%] text-left mt-8">
         <div className="space-y-8 font-['Montserrat_Alternates'] text-xl md:text-[50px] font-normal md:leading-[4rem] leading-8">
           <p className="opacity-0 transition-opacity duration-1000 ease-in fade-in-p">
             2800.<AnimatedWord>love</AnimatedWord> is een groeiend project dat de <AnimatedWord>liefde</AnimatedWord> voor Mechelen viert – en jij kan meedoen!
