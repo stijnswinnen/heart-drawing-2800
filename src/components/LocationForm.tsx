@@ -210,34 +210,36 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
     return (
       <>
         {/* Full-width map section */}
-        <div className="w-full -mx-4 md:-mx-8">
+        <div className="w-full">
           <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
         </div>
         
         {/* Form fields in container */}
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          <UserInfoSection
-            name={name}
-            email={email}
-            onNameChange={setName}
-            onEmailChange={setEmail}
-          />
+        <div className="container max-w-4xl mx-auto px-4 py-8 md:px-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <UserInfoSection
+              name={name}
+              email={email}
+              onNameChange={setName}
+              onEmailChange={setEmail}
+            />
 
-          <LocationDetailsSection
-            locationName={locationName}
-            description={description}
-            recommendation={recommendation}
-            shareConsent={shareConsent}
-            onLocationNameChange={setLocationName}
-            onDescriptionChange={setDescription}
-            onRecommendationChange={setRecommendation}
-            onShareConsentChange={setShareConsent}
-          />
+            <LocationDetailsSection
+              locationName={locationName}
+              description={description}
+              recommendation={recommendation}
+              shareConsent={shareConsent}
+              onLocationNameChange={setLocationName}
+              onDescriptionChange={setDescription}
+              onRecommendationChange={setRecommendation}
+              onShareConsentChange={setShareConsent}
+            />
 
-          <Button type="submit" disabled={isSubmitting || !coordinates}>
-            {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
-          </Button>
-        </form>
+            <Button type="submit" disabled={isSubmitting || !coordinates}>
+              {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
+            </Button>
+          </form>
+        </div>
       </>
     );
   }
