@@ -146,7 +146,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="bg-white">
+            <SheetContent className="!bg-white">
               <SheetHeader>
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
