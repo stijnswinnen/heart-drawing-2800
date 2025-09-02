@@ -6,6 +6,19 @@ import { toast } from "sonner";
 import { LocationMapSection } from "./LocationMapSection";
 import { UserInfoSection } from "./UserInfoSection";
 import { LocationDetailsSection } from "./LocationDetailsSection";
+import { NewsletterField } from "./form/NewsletterField";
+import { PrivacyConsentField } from "./form/PrivacyConsentField";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form } from "@/components/ui/form";
+
+const formSchema = z.object({
+  newsletter: z.boolean().default(false),
+  privacyConsent: z.boolean().refine((val) => val === true, {
+    message: "Je moet akkoord gaan met de privacyverklaring om verder te gaan.",
+  }),
+});
 
 interface LocationFormProps {
   fullWidthMap?: boolean;
@@ -22,18 +35,30 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      newsletter: false,
+      privacyConsent: false,
+    },
+  });
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (session?.user?.id) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('name, email')
+          .select('name, email, marketing_consent')
           .eq('id', session.user.id)
           .single();
 
         if (profile) {
           setName(profile.name || '');
           setEmail(profile.email || '');
+          form.reset({
+            newsletter: profile.marketing_consent || false,
+            privacyConsent: false,
+          });
         }
       }
     };
@@ -44,6 +69,15 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate form fields first
+    const formValues = form.getValues();
+    const formValidation = await form.trigger();
+    
+    if (!formValidation) {
+      toast.error("Controleer je gegevens en probeer opnieuw");
+      return;
+    }
+
     if (!coordinates) {
       toast.error("Selecteer eerst een locatie op de kaart");
       return;
@@ -85,12 +119,18 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
         // User is logged in - use their session
         profileId = session.user.id;
         
-        // Check if their email is verified
+        // Check if their email is verified and update marketing consent
         const { data: sessionProfile } = await supabase
           .from('profiles')
           .select('email_verified')
           .eq('id', session.user.id)
           .single();
+        
+        // Update marketing consent for existing user
+        await supabase
+          .from('profiles')
+          .update({ marketing_consent: formValues.newsletter })
+          .eq('id', session.user.id);
         
         isEmailVerified = sessionProfile?.email_verified || false;
         if (!isEmailVerified) {
@@ -123,7 +163,8 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
             password: randomPassword,
             options: {
               data: {
-                name: name.trim()
+                name: name.trim(),
+                marketing_consent: formValues.newsletter
               }
             }
           });
@@ -193,6 +234,10 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
       setRecommendation("");
       setCoordinates(null);
       setShareConsent(false);
+      form.reset({
+        newsletter: false,
+        privacyConsent: false,
+      });
       
       if (!session) {
         setName("");
@@ -216,59 +261,69 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
         
         {/* Form fields in container */}
         <div className="container max-w-4xl mx-auto px-4 py-8 md:px-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <UserInfoSection
-              name={name}
-              email={email}
-              onNameChange={setName}
-              onEmailChange={setEmail}
-            />
+          <Form {...form}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <UserInfoSection
+                name={name}
+                email={email}
+                onNameChange={setName}
+                onEmailChange={setEmail}
+              />
 
-            <LocationDetailsSection
-              locationName={locationName}
-              description={description}
-              recommendation={recommendation}
-              shareConsent={shareConsent}
-              onLocationNameChange={setLocationName}
-              onDescriptionChange={setDescription}
-              onRecommendationChange={setRecommendation}
-              onShareConsentChange={setShareConsent}
-            />
+              <LocationDetailsSection
+                locationName={locationName}
+                description={description}
+                recommendation={recommendation}
+                shareConsent={shareConsent}
+                onLocationNameChange={setLocationName}
+                onDescriptionChange={setDescription}
+                onRecommendationChange={setRecommendation}
+                onShareConsentChange={setShareConsent}
+              />
 
-            <Button type="submit" disabled={isSubmitting || !coordinates}>
-              {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
-            </Button>
-          </form>
+              <NewsletterField form={form} disabled={isSubmitting} />
+              <PrivacyConsentField form={form} />
+
+              <Button type="submit" disabled={isSubmitting || !coordinates}>
+                {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
+              </Button>
+            </form>
+          </Form>
         </div>
       </>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
-      
-      <UserInfoSection
-        name={name}
-        email={email}
-        onNameChange={setName}
-        onEmailChange={setEmail}
-      />
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
+        
+        <UserInfoSection
+          name={name}
+          email={email}
+          onNameChange={setName}
+          onEmailChange={setEmail}
+        />
 
-      <LocationDetailsSection
-        locationName={locationName}
-        description={description}
-        recommendation={recommendation}
-        shareConsent={shareConsent}
-        onLocationNameChange={setLocationName}
-        onDescriptionChange={setDescription}
-        onRecommendationChange={setRecommendation}
-        onShareConsentChange={setShareConsent}
-      />
+        <LocationDetailsSection
+          locationName={locationName}
+          description={description}
+          recommendation={recommendation}
+          shareConsent={shareConsent}
+          onLocationNameChange={setLocationName}
+          onDescriptionChange={setDescription}
+          onRecommendationChange={setRecommendation}
+          onShareConsentChange={setShareConsent}
+        />
 
-      <Button type="submit" disabled={isSubmitting || !coordinates}>
-        {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
-      </Button>
-    </form>
+        <NewsletterField form={form} disabled={isSubmitting} />
+        <PrivacyConsentField form={form} />
+
+        <Button type="submit" disabled={isSubmitting || !coordinates}>
+          {isSubmitting ? "Bezig met versturen..." : "Deel jouw favoriete plaats"}
+        </Button>
+      </form>
+    </Form>
   );
 };
