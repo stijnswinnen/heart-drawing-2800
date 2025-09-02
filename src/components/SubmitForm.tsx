@@ -69,6 +69,8 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
   }, [session, form]);
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (isVerifying) return; // Prevent double-submit
+    
     try {
       setIsVerifying(true);
       console.log('Starting submission process with data:', { ...data, email: '***' });
@@ -128,7 +130,11 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form 
+            onSubmit={form.handleSubmit(handleSubmit)} 
+            className="space-y-4"
+            style={{ pointerEvents: isVerifying ? 'none' : 'auto' }}
+          >
             <FormFields form={form} />
             <NewsletterField form={form} />
             <PrivacyConsentField form={form} />

@@ -69,6 +69,8 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (isSubmitting) return; // Prevent double-submit
+    
     // Validate form fields first
     const formValues = form.getValues();
     const formValidation = await form.trigger();
@@ -262,7 +264,11 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
         {/* Form fields in container */}
         <div className="container max-w-4xl mx-auto px-4 py-8 md:px-8">
           <Form {...form}>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form 
+              onSubmit={handleSubmit} 
+              className="space-y-6"
+              style={{ pointerEvents: isSubmitting ? 'none' : 'auto' }}
+            >
               <UserInfoSection
                 name={name}
                 email={email}
@@ -296,7 +302,11 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form 
+        onSubmit={handleSubmit} 
+        className="space-y-6"
+        style={{ pointerEvents: isSubmitting ? 'none' : 'auto' }}
+      >
         <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
         
         <UserInfoSection

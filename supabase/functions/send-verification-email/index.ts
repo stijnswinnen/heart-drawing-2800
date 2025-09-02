@@ -28,10 +28,10 @@ const handler = async (req: Request): Promise<Response> => {
     const { email }: EmailRequest = await req.json();
     console.log("Sending verification email to:", email);
 
-    // Get user profile data
+    // Get user profile data including last send timestamp
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("verification_token, name")
+      .select("verification_token, name, last_verification_email_sent_at")
       .eq("email", email)
       .maybeSingle();
 
@@ -45,7 +45,24 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Profile not found");
     }
 
-    // Generate new verification token if needed
+    // Check if we sent an email recently (2 minute throttle)
+    if (profile.last_verification_email_sent_at) {
+      const lastSent = new Date(profile.last_verification_email_sent_at);
+      const now = new Date();
+      const timeDiff = (now.getTime() - lastSent.getTime()) / 1000; // seconds
+      
+      if (timeDiff < 120) { // 2 minutes = 120 seconds
+        console.log(`Email throttled for ${email}, last sent ${Math.floor(timeDiff)}s ago`);
+        return new Response(JSON.stringify({ 
+          message: "Verification email sent recently, please wait before requesting another" 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429,
+        });
+      }
+    }
+
+    // Generate new verification token
     const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({
