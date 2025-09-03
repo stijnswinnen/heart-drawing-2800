@@ -92,7 +92,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
 
         // Send verification email using the edge function
         const { data: verificationData, error: verificationError } = await supabase.functions.invoke('send-verification-email', {
-          body: { email: data.email }
+          body: { email: data.email, force: true }
         });
 
         if (verificationError) {

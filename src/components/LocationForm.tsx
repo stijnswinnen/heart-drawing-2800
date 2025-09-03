@@ -189,7 +189,7 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
       if (needsVerification) {
         try {
           const { data: verificationData, error: emailError } = await supabase.functions.invoke('send-verification-email', {
-            body: { email }
+            body: { email, force: true }
           });
           
           if (emailError) {
