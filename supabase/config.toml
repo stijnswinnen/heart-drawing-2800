@@ -43,3 +43,7 @@ verify_jwt = true
 [[functions]]
 name = "rendi-auth-check"
 verify_jwt = true
+
+[[functions]]
+name = "send-test-email"
+verify_jwt = false
