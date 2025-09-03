@@ -69,8 +69,6 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isSubmitting) return; // Prevent double-submit
-    
     // Validate form fields first
     const formValues = form.getValues();
     const formValidation = await form.trigger();
@@ -159,28 +157,32 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
           }
         } else {
           // No profile exists - create new user
-          const { data: createUserData, error: createUserError } = await supabase.functions.invoke('create-auth-user', {
-            body: { 
-              email,
-              name: name.trim(),
-              marketing_consent: formValues.newsletter
+          const randomPassword = crypto.randomUUID();
+          const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: randomPassword,
+            options: {
+              data: {
+                name: name.trim(),
+                marketing_consent: formValues.newsletter
+              }
             }
           });
 
-          if (createUserError) {
-            console.error("Error creating user:", createUserError);
+          if (signUpError) {
+            console.error("Error creating user:", signUpError);
             toast.error("Er ging iets mis bij het aanmaken van je profiel");
             setIsSubmitting(false);
             return;
           }
 
-          if (!createUserData?.user_id) {
+          if (!authData.user?.id) {
             toast.error("Er ging iets mis bij het aanmaken van je profiel");
             setIsSubmitting(false);
             return;
           }
 
-          profileId = createUserData.user_id;
+          profileId = authData.user.id;
           needsVerification = true;
         }
       }
@@ -188,24 +190,13 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
       // Send verification email if needed
       if (needsVerification) {
         try {
-          const { data: verificationData, error: emailError } = await supabase.functions.invoke('send-verification-email', {
-            body: { email, force: true }
+          const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+            body: { email }
           });
           
           if (emailError) {
             console.error("Error sending verification email:", emailError);
             // Don't block submission if email fails
-          } else if (verificationData?.outcome === 'already_verified') {
-            toast.info("Je e-mailadres is al geverifieerd.");
-          } else if (verificationData?.outcome === 'throttled') {
-            toast.info("Verificatie e-mail werd recent al verzonden.");
-          } else if (verificationData?.outcome === 'sent') {
-            if (verificationData?.email_id) {
-              console.log("Resend email id:", verificationData.email_id);
-            }
-            // proceed silently; we'll show a final success toast below
-          } else if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
-            toast.info("Verificatie e-mail werd recent al verzonden.");
           }
         } catch (emailError) {
           console.error("Error sending verification email:", emailError);
@@ -271,11 +262,7 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
         {/* Form fields in container */}
         <div className="container max-w-4xl mx-auto px-4 py-8 md:px-8">
           <Form {...form}>
-            <form 
-              onSubmit={handleSubmit} 
-              className="space-y-6"
-              style={{ pointerEvents: isSubmitting ? 'none' : 'auto' }}
-            >
+            <form onSubmit={handleSubmit} className="space-y-6">
               <UserInfoSection
                 name={name}
                 email={email}
@@ -309,11 +296,7 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
 
   return (
     <Form {...form}>
-      <form 
-        onSubmit={handleSubmit} 
-        className="space-y-6"
-        style={{ pointerEvents: isSubmitting ? 'none' : 'auto' }}
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
         <LocationMapSection onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })} />
         
         <UserInfoSection

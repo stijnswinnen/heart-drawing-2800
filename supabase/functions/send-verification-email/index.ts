@@ -12,7 +12,6 @@ const corsHeaders = {
 
 interface EmailRequest {
   email: string;
-  force?: boolean;
 }
 
 const supabase = createClient(
@@ -26,13 +25,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, force = false }: EmailRequest = await req.json();
-    console.log("Sending verification email to:", email, "force:", force);
+    const { email }: EmailRequest = await req.json();
+    console.log("Sending verification email to:", email);
 
-    // Get user profile data including last send timestamp
+    // Get user profile data
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("verification_token, name, last_verification_email_sent_at, email_verified")
+      .select("verification_token, name")
       .eq("email", email)
       .maybeSingle();
 
@@ -46,45 +45,13 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Profile not found");
     }
 
-    // Check if email is already verified
-    if (profile.email_verified) {
-      console.log(`Email already verified for ${email}, skipping send`);
-      return new Response(JSON.stringify({ 
-        message: "E-mailadres is al geverifieerd",
-        outcome: "already_verified"
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    // Check if we sent an email recently (2 minute throttle)
-    if (!force && profile.last_verification_email_sent_at) {
-      const lastSent = new Date(profile.last_verification_email_sent_at);
-      const now = new Date();
-      const timeDiff = (now.getTime() - lastSent.getTime()) / 1000; // seconds
-      const secondsRemaining = Math.max(0, 120 - Math.floor(timeDiff));
-      
-      if (timeDiff < 120) { // 2 minutes = 120 seconds
-        console.log(`Email throttled for ${email}, last sent ${Math.floor(timeDiff)}s ago (remaining: ${secondsRemaining}s)`);
-        return new Response(JSON.stringify({ 
-          message: "Verificatie e-mail werd recent al verzonden",
-          outcome: "throttled",
-          seconds_remaining: secondsRemaining
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
-      }
-    }
-
-    // Generate new verification token (but don't update last_sent timestamp yet)
-    const newToken = crypto.randomUUID();
+    // Generate new verification token if needed
     const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({
-        verification_token: newToken,
+        verification_token: crypto.randomUUID(),
         verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
+        last_verification_email_sent_at: new Date().toISOString()
       })
       .eq("email", email)
       .select()
@@ -95,9 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to generate verification token");
     }
 
-    // Safer verification URL construction
-    const origin = req.headers.get("origin") || "https://6b797aa3-1275-487b-bf6c-83dfe8adaff3.sandbox.lovable.dev";
-    const verificationUrl = `${origin}/verify?token=${newToken}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = `${req.headers.get("origin")}/verify?token=${updatedProfile.verification_token}&email=${encodeURIComponent(email)}`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -141,35 +106,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok) {
       const error = await res.text();
-      console.error("Resend API error:", res.status, error);
-      throw new Error(`Failed to send verification email: ${res.status} ${error}`);
+      console.error("Resend API error:", error);
+      throw new Error(`Failed to send verification email: ${error}`);
     }
 
-    const resendResponse = await res.json();
-    console.log("Email sent successfully via Resend:", {
-      email_id: resendResponse.id,
-      to: email,
-      from: "verify@2800.love",
-      origin
-    });
-    // Only update timestamp after successful send
-    const { error: timestampError } = await supabase
-      .from("profiles")
-      .update({
-        last_verification_email_sent_at: new Date().toISOString()
-      })
-      .eq("email", email);
-
-    if (timestampError) {
-      console.error("Error updating timestamp:", timestampError);
-      // Don't throw error here as email was sent successfully
-    }
-
-    return new Response(JSON.stringify({ 
-      message: "Verification email sent",
-      outcome: "sent",
-      email_id: resendResponse.id 
-    }), {
+    return new Response(JSON.stringify({ message: "Verification email sent" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

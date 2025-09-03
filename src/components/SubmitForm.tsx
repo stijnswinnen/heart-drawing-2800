@@ -69,30 +69,36 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
   }, [session, form]);
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    if (isVerifying) return; // Prevent double-submit
-    
     try {
       setIsVerifying(true);
       console.log('Starting submission process with data:', { ...data, email: '***' });
 
       if (!session?.user) {
-        // Create auth user without sending Supabase emails
-        const { data: createUserData, error: createUserError } = await supabase.functions.invoke('create-auth-user', {
-          body: { 
-            email: data.email,
-            name: data.name,
-            marketing_consent: data.newsletter
-          }
+        // Create auth user with email verification enabled
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: data.email,
+          password: crypto.randomUUID(),
+          options: {
+            data: {
+              name: data.name,
+              marketing_consent: data.newsletter,
+            },
+            emailRedirectTo: `${window.location.origin}/verify`,
+          },
         });
 
-        if (createUserError) {
-          console.error('Error creating user:', createUserError);
+        if (signUpError) {
+          console.error('Error signing up:', signUpError);
           throw new Error("Failed to create user account");
         }
 
+        if (!authData.user?.id) {
+          throw new Error("No user ID returned from signup");
+        }
+
         // Send verification email using the edge function
-        const { data: verificationData, error: verificationError } = await supabase.functions.invoke('send-verification-email', {
-          body: { email: data.email, force: true }
+        const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
+          body: { email: data.email }
         });
 
         if (verificationError) {
@@ -100,21 +106,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           throw new Error("Failed to send verification email");
         }
 
-        // Show appropriate success message based on outcome
-        if (verificationData?.outcome === 'already_verified') {
-          toast.info("Je e-mailadres is al geverifieerd.");
-        } else if (verificationData?.outcome === 'throttled') {
-          toast.info("Je hebt recent al een verificatie e-mail ontvangen. Check je inbox.");
-        } else if (verificationData?.outcome === 'sent') {
-          if (verificationData?.email_id) {
-            console.log("Resend email id:", verificationData.email_id);
-          }
-          toast.success("Check je e-mail om je account te verifiëren.");
-        } else if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
-          toast.info("Je hebt recent al een verificatie e-mail ontvangen. Check je inbox.");
-        } else {
-          toast.success("Check je e-mail om je account te verifiëren.");
-        }
+        toast.success("Check je e-mail om je account te verifiëren.");
       }
 
       onSubmit(data);
@@ -136,11 +128,7 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form 
-            onSubmit={form.handleSubmit(handleSubmit)} 
-            className="space-y-4"
-            style={{ pointerEvents: isVerifying ? 'none' : 'auto' }}
-          >
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormFields form={form} />
             <NewsletterField form={form} />
             <PrivacyConsentField form={form} />
