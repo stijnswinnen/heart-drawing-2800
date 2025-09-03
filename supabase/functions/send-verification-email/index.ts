@@ -31,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get user profile data including last send timestamp
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("verification_token, name, last_verification_email_sent_at")
+      .select("verification_token, name, last_verification_email_sent_at, email_verified")
       .eq("email", email)
       .maybeSingle();
 
@@ -43,6 +43,17 @@ const handler = async (req: Request): Promise<Response> => {
     if (!profile) {
       console.error("No profile found for email:", email);
       throw new Error("Profile not found");
+    }
+
+    // Check if email is already verified
+    if (profile.email_verified) {
+      console.log(`Email already verified for ${email}, skipping send`);
+      return new Response(JSON.stringify({ 
+        message: "E-mailadres is al geverifieerd" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     // Check if we sent an email recently (2 minute throttle)
@@ -62,13 +73,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Generate new verification token
+    // Generate new verification token (but don't update last_sent timestamp yet)
+    const newToken = crypto.randomUUID();
     const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({
-        verification_token: crypto.randomUUID(),
+        verification_token: newToken,
         verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
-        last_verification_email_sent_at: new Date().toISOString()
       })
       .eq("email", email)
       .select()
@@ -79,7 +90,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to generate verification token");
     }
 
-    const verificationUrl = `${req.headers.get("origin")}/verify?token=${updatedProfile.verification_token}&email=${encodeURIComponent(email)}`;
+    // Safer verification URL construction
+    const origin = req.headers.get("origin") || "https://6b797aa3-1275-487b-bf6c-83dfe8adaff3.sandbox.lovable.dev";
+    const verificationUrl = `${origin}/verify?token=${newToken}&email=${encodeURIComponent(email)}`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -123,11 +136,30 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok) {
       const error = await res.text();
-      console.error("Resend API error:", error);
-      throw new Error(`Failed to send verification email: ${error}`);
+      console.error("Resend API error:", res.status, error);
+      throw new Error(`Failed to send verification email: ${res.status} ${error}`);
     }
 
-    return new Response(JSON.stringify({ message: "Verification email sent" }), {
+    const resendResponse = await res.json();
+    console.log("Email sent successfully via Resend:", resendResponse.id);
+
+    // Only update timestamp after successful send
+    const { error: timestampError } = await supabase
+      .from("profiles")
+      .update({
+        last_verification_email_sent_at: new Date().toISOString()
+      })
+      .eq("email", email);
+
+    if (timestampError) {
+      console.error("Error updating timestamp:", timestampError);
+      // Don't throw error here as email was sent successfully
+    }
+
+    return new Response(JSON.stringify({ 
+      message: "Verification email sent",
+      email_id: resendResponse.id 
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
