@@ -100,9 +100,18 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           throw new Error("Failed to send verification email");
         }
 
-        // Show appropriate success message
-        if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
-          toast.success("Je hebt recent al een verificatie e-mail ontvangen. Check je inbox.");
+        // Show appropriate success message based on outcome
+        if (verificationData?.outcome === 'already_verified') {
+          toast.info("Je e-mailadres is al geverifieerd.");
+        } else if (verificationData?.outcome === 'throttled') {
+          toast.info("Je hebt recent al een verificatie e-mail ontvangen. Check je inbox.");
+        } else if (verificationData?.outcome === 'sent') {
+          if (verificationData?.email_id) {
+            console.log("Resend email id:", verificationData.email_id);
+          }
+          toast.success("Check je e-mail om je account te verifiëren.");
+        } else if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
+          toast.info("Je hebt recent al een verificatie e-mail ontvangen. Check je inbox.");
         } else {
           toast.success("Check je e-mail om je account te verifiëren.");
         }

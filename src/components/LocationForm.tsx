@@ -195,9 +195,17 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
           if (emailError) {
             console.error("Error sending verification email:", emailError);
             // Don't block submission if email fails
+          } else if (verificationData?.outcome === 'already_verified') {
+            toast.info("Je e-mailadres is al geverifieerd.");
+          } else if (verificationData?.outcome === 'throttled') {
+            toast.info("Verificatie e-mail werd recent al verzonden.");
+          } else if (verificationData?.outcome === 'sent') {
+            if (verificationData?.email_id) {
+              console.log("Resend email id:", verificationData.email_id);
+            }
+            // proceed silently; we'll show a final success toast below
           } else if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
-            // Email was throttled, but that's okay
-            console.log("Verification email was throttled - user already got one recently");
+            toast.info("Verificatie e-mail werd recent al verzonden.");
           }
         } catch (emailError) {
           console.error("Error sending verification email:", emailError);

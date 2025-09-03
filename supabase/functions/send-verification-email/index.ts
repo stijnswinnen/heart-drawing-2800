@@ -12,6 +12,7 @@ const corsHeaders = {
 
 interface EmailRequest {
   email: string;
+  force?: boolean;
 }
 
 const supabase = createClient(
@@ -25,8 +26,8 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email }: EmailRequest = await req.json();
-    console.log("Sending verification email to:", email);
+    const { email, force = false }: EmailRequest = await req.json();
+    console.log("Sending verification email to:", email, "force:", force);
 
     // Get user profile data including last send timestamp
     const { data: profile, error: profileError } = await supabase
@@ -49,7 +50,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (profile.email_verified) {
       console.log(`Email already verified for ${email}, skipping send`);
       return new Response(JSON.stringify({ 
-        message: "E-mailadres is al geverifieerd" 
+        message: "E-mailadres is al geverifieerd",
+        outcome: "already_verified"
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -57,15 +59,18 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Check if we sent an email recently (2 minute throttle)
-    if (profile.last_verification_email_sent_at) {
+    if (!force && profile.last_verification_email_sent_at) {
       const lastSent = new Date(profile.last_verification_email_sent_at);
       const now = new Date();
       const timeDiff = (now.getTime() - lastSent.getTime()) / 1000; // seconds
+      const secondsRemaining = Math.max(0, 120 - Math.floor(timeDiff));
       
       if (timeDiff < 120) { // 2 minutes = 120 seconds
-        console.log(`Email throttled for ${email}, last sent ${Math.floor(timeDiff)}s ago`);
+        console.log(`Email throttled for ${email}, last sent ${Math.floor(timeDiff)}s ago (remaining: ${secondsRemaining}s)`);
         return new Response(JSON.stringify({ 
-          message: "Verificatie e-mail werd recent al verzonden" 
+          message: "Verificatie e-mail werd recent al verzonden",
+          outcome: "throttled",
+          seconds_remaining: secondsRemaining
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
@@ -141,8 +146,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const resendResponse = await res.json();
-    console.log("Email sent successfully via Resend:", resendResponse.id);
-
+    console.log("Email sent successfully via Resend:", {
+      email_id: resendResponse.id,
+      to: email,
+      from: "verify@2800.love",
+      origin
+    });
     // Only update timestamp after successful send
     const { error: timestampError } = await supabase
       .from("profiles")
@@ -158,6 +167,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ 
       message: "Verification email sent",
+      outcome: "sent",
       email_id: resendResponse.id 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
