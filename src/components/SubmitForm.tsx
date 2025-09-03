@@ -76,30 +76,22 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       console.log('Starting submission process with data:', { ...data, email: '***' });
 
       if (!session?.user) {
-        // Create auth user with email verification enabled
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: data.email,
-          password: crypto.randomUUID(),
-          options: {
-            data: {
-              name: data.name,
-              marketing_consent: data.newsletter,
-            },
-            emailRedirectTo: `${window.location.origin}/verify`,
-          },
+        // Create auth user without sending Supabase emails
+        const { data: createUserData, error: createUserError } = await supabase.functions.invoke('create-auth-user', {
+          body: { 
+            email: data.email,
+            name: data.name,
+            marketing_consent: data.newsletter
+          }
         });
 
-        if (signUpError) {
-          console.error('Error signing up:', signUpError);
+        if (createUserError) {
+          console.error('Error creating user:', createUserError);
           throw new Error("Failed to create user account");
         }
 
-        if (!authData.user?.id) {
-          throw new Error("No user ID returned from signup");
-        }
-
         // Send verification email using the edge function
-        const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
+        const { data: verificationData, error: verificationError } = await supabase.functions.invoke('send-verification-email', {
           body: { email: data.email }
         });
 
@@ -108,7 +100,12 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
           throw new Error("Failed to send verification email");
         }
 
-        toast.success("Check je e-mail om je account te verifiëren.");
+        // Show appropriate success message
+        if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
+          toast.success("Je hebt recent al een verificatie e-mail ontvangen. Check je inbox.");
+        } else {
+          toast.success("Check je e-mail om je account te verifiëren.");
+        }
       }
 
       onSubmit(data);

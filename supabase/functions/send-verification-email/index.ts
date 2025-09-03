@@ -54,10 +54,10 @@ const handler = async (req: Request): Promise<Response> => {
       if (timeDiff < 120) { // 2 minutes = 120 seconds
         console.log(`Email throttled for ${email}, last sent ${Math.floor(timeDiff)}s ago`);
         return new Response(JSON.stringify({ 
-          message: "Verification email sent recently, please wait before requesting another" 
+          message: "Verificatie e-mail werd recent al verzonden" 
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 429,
+          status: 200,
         });
       }
     }

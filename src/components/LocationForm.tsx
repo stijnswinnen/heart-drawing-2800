@@ -159,32 +159,28 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
           }
         } else {
           // No profile exists - create new user
-          const randomPassword = crypto.randomUUID();
-          const { data: authData, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password: randomPassword,
-            options: {
-              data: {
-                name: name.trim(),
-                marketing_consent: formValues.newsletter
-              }
+          const { data: createUserData, error: createUserError } = await supabase.functions.invoke('create-auth-user', {
+            body: { 
+              email,
+              name: name.trim(),
+              marketing_consent: formValues.newsletter
             }
           });
 
-          if (signUpError) {
-            console.error("Error creating user:", signUpError);
+          if (createUserError) {
+            console.error("Error creating user:", createUserError);
             toast.error("Er ging iets mis bij het aanmaken van je profiel");
             setIsSubmitting(false);
             return;
           }
 
-          if (!authData.user?.id) {
+          if (!createUserData?.user_id) {
             toast.error("Er ging iets mis bij het aanmaken van je profiel");
             setIsSubmitting(false);
             return;
           }
 
-          profileId = authData.user.id;
+          profileId = createUserData.user_id;
           needsVerification = true;
         }
       }
@@ -192,13 +188,16 @@ export const LocationForm = ({ fullWidthMap = false }: LocationFormProps) => {
       // Send verification email if needed
       if (needsVerification) {
         try {
-          const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+          const { data: verificationData, error: emailError } = await supabase.functions.invoke('send-verification-email', {
             body: { email }
           });
           
           if (emailError) {
             console.error("Error sending verification email:", emailError);
             // Don't block submission if email fails
+          } else if (verificationData?.message === "Verificatie e-mail werd recent al verzonden") {
+            // Email was throttled, but that's okay
+            console.log("Verification email was throttled - user already got one recently");
           }
         } catch (emailError) {
           console.error("Error sending verification email:", emailError);
