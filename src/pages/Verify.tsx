@@ -22,38 +22,17 @@ export default function Verify() {
           throw new Error("Ongeldige verificatie link");
         }
 
-        // First try to refresh the session to handle Supabase email verification
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.error('Session refresh error:', refreshError);
-          // Continue anyway as we might be handling a manual verification
+        // Use secure RPC for verification
+        const { data: verified, error: verifyError } = await supabase
+          .rpc('verify_profile_secure', { p_email: email, p_token: token });
+
+        if (verifyError || !verified) {
+          console.error('Verification failed:', verifyError);
+          throw new Error("Verificatie mislukt - ongeldig token of e-mailadres");
         }
 
-        // Get current user state
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError) {
-          console.error('Error getting user:', userError);
-          throw new Error("Er is een fout opgetreden bij het ophalen van je gebruikersgegevens");
-        }
-
-        if (user?.email_confirmed_at) {
-          // Supabase auth verification succeeded
-          toast.success("E-mailadres succesvol geverifieerd!");
-          setVerificationComplete(true);
-        } else {
-          // Use secure RPC for verification
-          const { data: verified, error: verifyError } = await supabase
-            .rpc('verify_profile_secure', { p_email: email, p_token: token });
-
-          if (verifyError || !verified) {
-            console.error('Verification failed:', verifyError);
-            throw new Error("Verificatie mislukt - ongeldig token of e-mailadres");
-          }
-
-          toast.success("E-mailadres succesvol geverifieerd!");
-          setVerificationComplete(true);
-        }
+        toast.success("E-mailadres succesvol geverifieerd!");
+        setVerificationComplete(true);
       } catch (error: any) {
         console.error("Error verifying email:", error);
         toast.error(error.message || "Er is iets misgegaan bij het verifiëren van je e-mailadres");

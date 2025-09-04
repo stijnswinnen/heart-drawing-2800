@@ -52,18 +52,7 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      // Check if the profile exists and is verified
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email_verified')
-        .eq('id', session?.user?.id)
-        .single();
-
-      if (!profile?.email_verified) {
-        toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
-      } else {
-        toast.success("Tekening werd met succes doorgestuurd!");
-      }
+      toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
 
       setShowConfetti(true);
       setShowSubmitForm(false);
