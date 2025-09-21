@@ -52,7 +52,7 @@ export const DrawingSubmissionHandler = ({
         return;
       }
 
-      toast.success("We hebben je een verificatie e-mail gestuurd. Controleer je inbox en klik op de verificatielink.");
+      toast.success("Je hart is ingediend! Check je e-mail voor de verificatielink om het te publiceren.");
 
       setShowConfetti(true);
       setShowSubmitForm(false);

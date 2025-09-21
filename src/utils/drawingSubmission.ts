@@ -73,6 +73,24 @@ export const submitDrawing = async (
 
     profileId = profile.id;
     console.log('Created new profile with ID:', profileId);
+
+    // Send verification email after profile creation
+    try {
+      console.log('Sending verification email...');
+      const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+        body: { email: data.email }
+      });
+
+      if (emailError) {
+        console.error('Warning: Failed to send verification email:', emailError);
+        // Don't throw error - continue with drawing submission
+      } else {
+        console.log('Verification email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('Warning: Error sending verification email:', emailError);
+      // Continue with drawing submission even if email fails
+    }
   }
 
   console.log('Converting canvas to blob...');

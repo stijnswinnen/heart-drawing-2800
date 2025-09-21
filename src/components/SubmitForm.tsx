@@ -73,22 +73,10 @@ export const SubmitForm = ({ onClose, onSubmit }: SubmitFormProps) => {
       setIsVerifying(true);
       console.log('Starting submission process with data:', { ...data, email: '***' });
 
-      // Send verification email using the edge function
-      const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
-        body: { email: data.email }
-      });
-
-      if (verificationError) {
-        console.error('Error sending verification email:', verificationError);
-        throw new Error("Failed to send verification email");
-      }
-
-      toast.success("Check je e-mail om je account te verifiëren.");
-
       onSubmit(data);
     } catch (error: any) {
       console.error("Error in form submission:", error);
-      toast.error(error.message || "Er is iets misgegaan bij het versturen van de verificatie e-mail");
+      toast.error(error.message || "Er is iets misgegaan");
     } finally {
       setIsVerifying(false);
     }
