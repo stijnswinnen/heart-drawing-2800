@@ -53,8 +53,8 @@ export const submitDrawing = async (
   } else {
     // Create new profile
     console.log('Creating new profile...');
-    const newProfileId = uuidv4();
-    const { data: profile, error: insertError } = await supabase
+    const newProfileId = userId ?? uuidv4();
+    const { error: insertError } = await supabase
       .from('profiles')
       .insert({
         id: newProfileId,
@@ -62,16 +62,14 @@ export const submitDrawing = async (
         name: data.name,
         marketing_consent: data.newsletter,
         email_verified: false
-      })
-      .select()
-      .single();
+      });
 
     if (insertError) {
       console.error('Error creating profile:', insertError);
       throw new Error("Failed to save user information: " + insertError.message);
     }
 
-    profileId = profile.id;
+    profileId = newProfileId;
     console.log('Created new profile with ID:', profileId);
 
     // Send verification email after profile creation
