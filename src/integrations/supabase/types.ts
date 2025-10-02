@@ -183,6 +183,7 @@ export type Database = {
           reminder_sent_at: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
+          user_id: string | null
           verification_token: string | null
           verification_token_expires_at: string | null
         }
@@ -197,6 +198,7 @@ export type Database = {
           reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          user_id?: string | null
           verification_token?: string | null
           verification_token_expires_at?: string | null
         }
@@ -211,6 +213,7 @@ export type Database = {
           reminder_sent_at?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          user_id?: string | null
           verification_token?: string | null
           verification_token_expires_at?: string | null
         }
