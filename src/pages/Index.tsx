@@ -8,6 +8,7 @@ import { DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
 import { Navigation } from "@/components/Navigation";
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Index() {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -16,6 +17,7 @@ export default function Index() {
   const [session, setSession] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [canvasKey, setCanvasKey] = useState(1);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -24,12 +26,14 @@ export default function Index() {
     };
     fetchSession();
 
-    // Show the toast notification on page load
-    toast({
-      title: "Klik op het hart om te starten.",
-      duration: 5000,
-    });
-  }, []);
+    // Show the toast notification on page load only on mobile
+    if (isMobile) {
+      toast({
+        title: "Druk op het hart om te beginnen.",
+        duration: 5000,
+      });
+    }
+  }, [isMobile]);
 
   const handleHeartClick = () => {
     setIsDrawing(true);
