@@ -225,7 +225,7 @@ export type Database = {
           details: Json | null
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_id: string | null
         }
         Insert: {
@@ -233,7 +233,7 @@ export type Database = {
           details?: Json | null
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_id?: string | null
         }
         Update: {
@@ -241,7 +241,7 @@ export type Database = {
           details?: Json | null
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_id?: string | null
         }
         Relationships: []
@@ -372,18 +372,9 @@ export type Database = {
       }
     }
     Functions: {
-      cleanup_expired_verification_tokens: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_unverified_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      cleanup_expired_verification_tokens: { Args: never; Returns: number }
+      cleanup_unverified_profiles: { Args: never; Returns: number }
+      get_current_user_role: { Args: never; Returns: string }
       get_profile_minimal_by_email: {
         Args: { p_email: string }
         Returns: {
@@ -398,14 +389,8 @@ export type Database = {
           name: string
         }[]
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      set_admin_role: {
-        Args: { user_email: string }
-        Returns: undefined
-      }
+      is_admin: { Args: never; Returns: boolean }
+      set_admin_role: { Args: { user_email: string }; Returns: undefined }
       verify_profile_secure: {
         Args: { p_email: string; p_token: string }
         Returns: boolean
