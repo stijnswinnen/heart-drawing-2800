@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MapPin, Star, Edit, PlusCircle, XCircle, AlertCircle } from "lucide-react";
+import { MapPin, Star, Edit, PlusCircle, XCircle, AlertCircle, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useLocations } from "@/hooks/useLocations";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
 import { Link } from "react-router-dom";
@@ -26,12 +27,22 @@ export const LocationsSection = () => {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [editedLocation, setEditedLocation] = useState<any>(null);
 
+  const userId = session?.user?.id;
+
   const userLocations = locations.filter(
-    (location) => location.user_id === session?.user?.id && location.status === 'approved'
+    (location) => 
+      (location.user_id === userId || location.heart_user_id === userId) && 
+      location.status === 'approved'
+  );
+
+  const pendingLocations = locations.filter(
+    (location) => 
+      (location.user_id === userId || location.heart_user_id === userId) && 
+      (location.status === 'new' || location.status === 'pending_verification')
   );
 
   const userLikes = locationLikes.filter(
-    (like) => like.user_id === session?.user?.id && like.status === "active"
+    (like) => like.user_id === userId && like.status === "active"
   );
 
   const favoriteLocations = locations.filter((location) =>
@@ -40,7 +51,7 @@ export const LocationsSection = () => {
 
   const rejectedLocations = locations.filter(
     (location) => 
-      location.user_id === session?.user?.id && 
+      (location.user_id === userId || location.heart_user_id === userId) && 
       location.status === "rejected"
   );
 
@@ -111,6 +122,14 @@ export const LocationsSection = () => {
               Favorieten
             </TabsTrigger>
             <TabsTrigger 
+              value="pending"
+              disabled={pendingLocations.length === 0}
+              className={pendingLocations.length === 0 ? "text-muted-foreground/50 cursor-not-allowed" : ""}
+            >
+              <Clock className="mr-2 h-4 w-4" />
+              In afwachting
+            </TabsTrigger>
+            <TabsTrigger 
               value="rejected"
               disabled={rejectedLocations.length === 0}
               className={rejectedLocations.length === 0 ? "text-muted-foreground/50 cursor-not-allowed" : ""}
@@ -163,6 +182,38 @@ export const LocationsSection = () => {
                   </div>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="pending">
+            <div className="space-y-4 mt-4">
+              {pendingLocations.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="mx-auto h-8 w-8 mb-2" />
+                  <p>Je hebt geen locaties in afwachting</p>
+                </div>
+              ) : (
+                pendingLocations.map((location) => (
+                  <Card key={location.id} className="w-full bg-[hsl(var(--primary-light)/0.3)] border-[hsl(var(--primary-light))]">
+                    <div className="flex items-center justify-between p-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CardTitle>{location.name}</CardTitle>
+                          <Badge variant="secondary" className="bg-[#F29BA2] text-white">
+                            <Clock className="mr-1 h-3 w-3" />
+                            In afwachting
+                          </Badge>
+                        </div>
+                        <p className="text-muted-foreground">
+                          {location.description?.length > 200 
+                            ? location.description.substring(0, 200) + '...' 
+                            : location.description}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
