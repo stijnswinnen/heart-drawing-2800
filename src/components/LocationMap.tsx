@@ -26,7 +26,7 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
     if (!mapContainer.current) return;
 
     // Initialize map
-    mapboxgl.accessToken = 'pk.eyJ1IjoiMjgwMGxvdmUiLCJhIjoiY201aWcyNDJpMHJpMTJrczZ6bjB5Z2toZiJ9.N8jmpZW9QoVFiWa2VFIJFg';
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
     
     const newMap = new mapboxgl.Map({
       container: mapContainer.current,
