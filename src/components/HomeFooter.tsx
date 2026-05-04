@@ -19,17 +19,40 @@ export const HomeFooter = () => {
   }, []);
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/85 backdrop-blur-md">
-      <div className="max-w-[1200px] mx-auto px-7 py-4 flex items-center justify-between gap-6 text-[13px] text-muted-foreground font-['Inter']">
+    <footer
+      className="fixed bottom-0 left-0 right-0 z-40"
+      style={{
+        background: "rgba(251,250,247,0.85)",
+        backdropFilter: "saturate(140%) blur(10px)",
+        WebkitBackdropFilter: "saturate(140%) blur(10px)",
+        borderTop: "1px solid var(--line)",
+        padding: "28px",
+      }}
+    >
+      <div
+        className="max-w-[1200px] mx-auto flex items-center justify-between gap-6 font-sans"
+        style={{ color: "var(--ink-muted)", fontSize: 13 }}
+      >
         <div className="flex gap-6">
           <span>
-            <strong className="text-foreground font-semibold">{hearts ?? "—"}</strong> hartjes getekend
+            <strong className="font-semibold" style={{ color: "var(--ink)" }}>
+              {hearts ?? "—"}
+            </strong>{" "}
+            hartjes getekend
           </span>
           <span>
-            <strong className="text-foreground font-semibold">{locs ?? "—"}</strong> plekjes gedeeld
+            <strong className="font-semibold" style={{ color: "var(--ink)" }}>
+              {locs ?? "—"}
+            </strong>{" "}
+            plekjes gedeeld
           </span>
         </div>
-        <Link to="/privacy" className="hover:text-foreground transition-colors">
+        <Link
+          to="/privacy"
+          className="transition-colors"
+          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ink-muted)")}
+        >
           Privacy Policy →
         </Link>
       </div>
