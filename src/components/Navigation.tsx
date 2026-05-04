@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,155 +17,150 @@ import { cleanupAuthState } from "@/utils/authCleanup";
 
 export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState<any>(null);
-  
+
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      setSession(currentSession);
-    };
-
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => subscription.unsubscribe();
   }, []);
-  
+
   if (location.pathname === "/" && isDrawing) {
     return null;
   }
-  
+
   const links = [
     { path: "/", label: "Teken een hart" },
     { path: "/mijn-favoriete-plek", label: "Deel jouw plek" },
     { path: "/hearts", label: "Hartjes" },
-    { path: "/over", label: "Over 2800.love" },
+    { path: "/over", label: "Over" },
   ];
 
   const handleLogout = async () => {
     try {
-      // Clean up auth state first
       cleanupAuthState();
-      
-      // Attempt global sign out
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (error: any) {
-        // Handle session_not_found as successful logout since user is effectively logged out
         if (!error?.message?.includes('session_not_found')) {
           console.error('Logout error:', error);
-          // Don't show error for session_not_found since user is already logged out
         }
       }
-      
-      // Reset session state
       setSession(null);
-      
-      // Force page refresh for clean state and show success message
       toast.success('Je bent succesvol uitgelogd');
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
+      setTimeout(() => { window.location.href = '/'; }, 100);
     } catch (error) {
-      console.error('Unexpected error during logout:', error);
-      // Even if there's an error, ensure user is logged out locally
       setSession(null);
       cleanupAuthState();
       window.location.href = '/';
     }
   };
 
-  const NavLinks = () => (
-    <div className="flex flex-col md:flex-row items-center w-full relative h-full">
-      <ul className="flex flex-col md:flex-row justify-center items-center font-['Inter'] w-full h-full">
-        {links.map((link) => (
-          <li key={link.path} className="h-full">
-            <Link
-              to={link.path}
-              className={`px-6 h-full flex items-center transition-all duration-300 ${
-                location.pathname === link.path 
-                  ? "bg-white" 
-                  : "text-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-4 md:mt-0 md:absolute md:right-4 flex gap-2">
-        {session ? (
-          <>
-            <Button 
-              variant="outline" 
-              size="sm"
-              asChild
-            >
-              <Link to="/profile">
-                <User className="h-4 w-4 mr-2" />
-                Mijn profiel
-              </Link>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleLogout}
-            >
-              Uitloggen
-            </Button>
-          </>
-        ) : (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowAuth(true)}
+  const Brand = () => (
+    <Link to="/" className="inline-flex items-center gap-2 font-semibold tracking-tight text-[15px] text-foreground">
+      <span className="w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
+      2800<span className="opacity-50">.love</span>
+    </Link>
+  );
+
+  const DesktopLinks = () => (
+    <nav className="flex gap-7 ml-2">
+      {links.map((link) => {
+        const active = location.pathname === link.path;
+        return (
+          <Link
+            key={link.path}
+            to={link.path}
+            className={`text-sm py-1.5 border-b-[1.5px] transition-colors ${
+              active
+                ? "text-foreground border-foreground"
+                : "text-muted-foreground border-transparent hover:text-foreground"
+            }`}
           >
-            Inloggen
+            {link.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
+  const Actions = () => (
+    <div className="flex items-center gap-2">
+      {session ? (
+        <>
+          <Button variant="ghost" size="sm" asChild className="rounded-full">
+            <Link to="/profile">
+              <User className="h-4 w-4 mr-2" />
+              Mijn profiel
+            </Link>
           </Button>
-        )}
-      </div>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full">
+            Uitloggen
+          </Button>
+        </>
+      ) : (
+        <Button variant="outline" size="sm" onClick={() => setShowAuth(true)} className="rounded-full">
+          Inloggen
+        </Button>
+      )}
     </div>
   );
 
   if (isMobile) {
     return (
       <>
-        <div className="h-16 bg-[#F26D85]/10 backdrop-blur-sm relative" />
-        <div className="absolute top-4 right-4 z-50">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="bg-white/90 hover:bg-white">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="!bg-white">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <nav className="mt-8">
-                <NavLinks />
-              </nav>
-            </SheetContent>
-          </Sheet>
-          {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
-        </div>
+        <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border">
+          <div className="h-16 px-5 flex items-center justify-between max-w-[1200px] mx-auto">
+            <Brand />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="!bg-background">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-8 flex flex-col gap-1 font-['Inter']">
+                  {links.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`px-3 py-2 rounded-md text-sm ${
+                        location.pathname === link.path
+                          ? "bg-accent text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="mt-6">
+                    <Actions />
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </header>
+        {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
       </>
     );
   }
 
   return (
     <>
-      <nav className="w-full bg-[#F26D85]/10 backdrop-blur-sm h-16 px-4">
-        <NavLinks />
-      </nav>
+      <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border">
+        <div className="max-w-[1200px] mx-auto h-16 px-7 flex items-center gap-8">
+          <Brand />
+          <DesktopLinks />
+          <div className="flex-1" />
+          <Actions />
+        </div>
+      </header>
       {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}
     </>
   );
