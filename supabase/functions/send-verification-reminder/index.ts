@@ -130,12 +130,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-verification-reminder function:", error);
+    console.error("Error in send-verification-reminder function:", error?.message);
     return new Response(
-      JSON.stringify({ 
-        error: error.message || "Internal server error",
-        details: error.stack
-      }),
+      JSON.stringify({ error: "Internal server error" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

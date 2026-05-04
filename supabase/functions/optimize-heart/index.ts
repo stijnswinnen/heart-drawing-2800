@@ -168,15 +168,12 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error processing image:', error)
+    console.error('Error processing image:', (error as Error)?.message)
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Unknown error occurred',
-        details: error.stack
-      }),
-      { 
+      JSON.stringify({ error: 'Internal server error' }),
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status: 500
       }
     )
   }
