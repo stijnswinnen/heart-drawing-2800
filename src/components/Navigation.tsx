@@ -59,24 +59,27 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   };
 
   const Brand = () => (
-    <Link to="/" className="inline-flex items-center gap-2 font-semibold tracking-tight text-[15px] text-foreground">
-      <span className="w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
-      2800<span className="opacity-50">.love</span>
+    <Link
+      to="/"
+      className="inline-flex items-center gap-2 font-sans font-semibold tracking-[-0.01em] text-[15px] text-ink"
+    >
+      <span className="w-2 h-2 rounded-full bg-pink-500" aria-hidden="true" />
+      <span>2800<span className="opacity-50">.love</span></span>
     </Link>
   );
 
   const DesktopLinks = () => (
-    <nav className="flex gap-7 ml-2">
+    <nav className="flex gap-7 ml-2 font-sans">
       {links.map((link) => {
         const active = location.pathname === link.path;
         return (
           <Link
             key={link.path}
             to={link.path}
-            className={`text-sm py-1.5 border-b-[1.5px] transition-colors ${
+            className={`text-[14px] font-normal py-1.5 border-b-[1.5px] transition-colors ${
               active
-                ? "text-foreground border-foreground"
-                : "text-muted-foreground border-transparent hover:text-foreground"
+                ? "text-ink border-ink"
+                : "text-ink-muted border-transparent hover:text-ink"
             }`}
           >
             {link.label}
@@ -86,24 +89,27 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
     </nav>
   );
 
+  const ghostBtn =
+    "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-ink bg-transparent border border-transparent hover:bg-pink-50 transition-colors";
+  const outlineBtn =
+    "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-ink bg-surface border border-line-strong hover:border-ink-2 transition-colors";
+
   const Actions = () => (
     <div className="flex items-center gap-2">
       {session ? (
         <>
-          <Button variant="ghost" size="sm" asChild className="rounded-full">
-            <Link to="/profile">
-              <User className="h-4 w-4 mr-2" />
-              Mijn profiel
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleLogout} className="rounded-full">
+          <Link to="/profile" className={ghostBtn}>
+            <User className="h-4 w-4" />
+            Mijn profiel
+          </Link>
+          <button onClick={handleLogout} className={outlineBtn}>
             Uitloggen
-          </Button>
+          </button>
         </>
       ) : (
-        <Button variant="outline" size="sm" onClick={() => setShowAuth(true)} className="rounded-full">
+        <button onClick={() => setShowAuth(true)} className={outlineBtn}>
           Inloggen
-        </Button>
+        </button>
       )}
     </div>
   );
@@ -111,7 +117,14 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   if (isMobile) {
     return (
       <>
-        <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border">
+        <header
+          className="sticky top-0 z-50 border-b border-line"
+          style={{
+            background: "rgba(251,250,247,0.85)",
+            backdropFilter: "saturate(140%) blur(10px)",
+            WebkitBackdropFilter: "saturate(140%) blur(10px)",
+          }}
+        >
           <div className="h-16 px-5 flex items-center justify-between max-w-[1200px] mx-auto">
             <Brand />
             <Sheet>
@@ -124,15 +137,15 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="mt-8 flex flex-col gap-1 font-['Inter']">
+                <nav className="mt-8 flex flex-col gap-1 font-sans">
                   {links.map((link) => (
                     <Link
                       key={link.path}
                       to={link.path}
                       className={`px-3 py-2 rounded-md text-sm ${
                         location.pathname === link.path
-                          ? "bg-accent text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "bg-pink-50 text-ink"
+                          : "text-ink-muted hover:text-ink"
                       }`}
                     >
                       {link.label}
@@ -153,7 +166,14 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border">
+      <header
+        className="sticky top-0 z-50 border-b border-line"
+        style={{
+          background: "rgba(251,250,247,0.85)",
+          backdropFilter: "saturate(140%) blur(10px)",
+          WebkitBackdropFilter: "saturate(140%) blur(10px)",
+        }}
+      >
         <div className="max-w-[1200px] mx-auto h-16 px-7 flex items-center gap-8">
           <Brand />
           <DesktopLinks />
