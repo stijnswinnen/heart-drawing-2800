@@ -40,6 +40,7 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
           />
         </div>
       )}
+      </div>
     </div>
   );
 };
