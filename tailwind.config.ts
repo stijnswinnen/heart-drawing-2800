@@ -25,15 +25,16 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#F2DCE2",
+          DEFAULT: "#D5677B",
           light: "#F29BA2",
-          dark: "#F26D85",
-          foreground: "#333333",
+          dark: "#D5677B",
+          soft: "#F2DCE2",
+          foreground: "#FFFFFF",
         },
         secondary: {
           DEFAULT: "#7EA672",
           dark: "#734439",
-          foreground: "#333333",
+          foreground: "#FFFFFF",
         },
       },
       transitionDuration: {
@@ -41,8 +42,9 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        montserrat: ["Montserrat Alternates", "sans-serif"],
-        barlow: ["Barlow Condensed", "sans-serif"],
+        serif: ["Fraunces", "serif"],
+        montserrat: ["Fraunces", "serif"],
+        barlow: ["Inter", "sans-serif"],
       },
       cursor: {
         pin: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z\"></path><circle cx=\"12\" cy=\"10\" r=\"3\"></circle></svg>'), pointer",
