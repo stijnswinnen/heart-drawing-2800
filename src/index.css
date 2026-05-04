@@ -91,12 +91,42 @@
 }
 
 @layer base {
+  :root {
+    /* ---------- Design tokens ---------- */
+    --bg:           #FBFAF7;
+    --surface:      #FFFFFF;
+    --ink:          #15110E;
+    --ink-2:        #2A2520;
+    --ink-muted:    #7A726B; /* shadcn --muted is preserved separately above */
+    --line:         #EBE5DE;
+    --line-strong:  #DCD4CB;
+    --pink-50:      #FBEEF1;
+    --pink-100:     #F6DCE2;
+    --pink-300:     #E8A9B6;
+    --pink-500:     #D5677B;
+    --pink-600:     #BD506A;
+    --green-50:     #ECF2EC;
+    --green-700:    #3F6B47;
+
+    --radius-sm:    8px;
+    --radius-md:    14px;
+    --radius-lg:    20px;
+
+    --shadow-soft:  0 1px 0 rgba(20,16,12,.04), 0 8px 24px -16px rgba(20,16,12,.10);
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {

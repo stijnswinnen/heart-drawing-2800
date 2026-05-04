@@ -36,12 +36,43 @@ export default {
           dark: "#734439",
           foreground: "#FFFFFF",
         },
+        // ---------- Design tokens ----------
+        bg: "var(--bg)",
+        surface: "var(--surface)",
+        ink: {
+          DEFAULT: "var(--ink)",
+          2: "var(--ink-2)",
+          muted: "var(--ink-muted)",
+        },
+        line: {
+          DEFAULT: "var(--line)",
+          strong: "var(--line-strong)",
+        },
+        pink: {
+          50: "var(--pink-50)",
+          100: "var(--pink-100)",
+          300: "var(--pink-300)",
+          500: "var(--pink-500)",
+          600: "var(--pink-600)",
+        },
+        green: {
+          50: "var(--green-50)",
+          700: "var(--green-700)",
+        },
+      },
+      borderRadius: {
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+      },
+      boxShadow: {
+        soft: "var(--shadow-soft)",
       },
       transitionDuration: {
         '2000': '2000ms',
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
         serif: ["Fraunces", "serif"],
         montserrat: ["Fraunces", "serif"],
         barlow: ["Inter", "sans-serif"],
