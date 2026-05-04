@@ -7,11 +7,18 @@ interface DrawingTitleProps {
 
 export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => {
   return (
-    <div 
-      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col md:flex-row items-center gap-4 transition-all duration-700 ${
+    <div
+      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 transition-all duration-700 ${
         isDrawing ? 'md:translate-x-[-150%] md:ml-8 md:top-1/2 top-8 -translate-y-0 mt-4' : ''
       }`}
     >
+      {!isDrawing && (
+        <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent text-primary text-[11px] font-medium tracking-wider uppercase font-['Inter']">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-hidden="true" />
+          Mechelen, een stad vol verhalen
+        </span>
+      )}
+      <div className="flex flex-col md:flex-row items-center gap-4">
       <h1 
         className={`text-[clamp(100px,20vw,200px)] font-serif font-semibold text-foreground transition-all duration-700 ${
           isDrawing ? 'opacity-20 md:opacity-20' : 'opacity-100'
@@ -33,6 +40,7 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
           />
         </div>
       )}
+      </div>
     </div>
   );
 };

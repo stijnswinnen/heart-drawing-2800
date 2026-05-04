@@ -7,6 +7,7 @@ import { LockButton } from "@/components/LockButton";
 import { DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
 import { Navigation } from "@/components/Navigation";
+import { HomeFooter } from "@/components/HomeFooter";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -78,6 +79,7 @@ export default function Index() {
           setIsDrawing={setIsDrawing}
           setHasDrawn={setHasDrawn}
         />
+        {!isDrawing && <HomeFooter />}
       </div>
     </DrawingProvider>
   );
