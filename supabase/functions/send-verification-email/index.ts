@@ -45,24 +45,23 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Profile not found");
     }
 
-    // Generate new verification token if needed
-    const { data: updatedProfile, error: updateError } = await supabase
+    // Generate new verification token
+    const newToken = crypto.randomUUID();
+    const { error: updateError } = await supabase
       .from("profiles")
       .update({
-        verification_token: crypto.randomUUID(),
+        verification_token: newToken,
         verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
         last_verification_email_sent_at: new Date().toISOString()
       })
-      .eq("email", email)
-      .select()
-      .single();
+      .eq("email", email);
 
     if (updateError) {
-      console.error("Error updating profile with verification token:", updateError);
+      console.error("Error updating profile with verification token");
       throw new Error("Failed to generate verification token");
     }
 
-    const verificationUrl = `${req.headers.get("origin")}/verify?token=${updatedProfile.verification_token}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = `${req.headers.get("origin")}/verify?token=${newToken}&email=${encodeURIComponent(email)}`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -115,12 +114,9 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200,
     });
   } catch (error: any) {
-    console.error("Error in send-verification-email function:", error);
+    console.error("Error in send-verification-email function:", error?.message);
     return new Response(
-      JSON.stringify({ 
-        error: error.message || "Internal server error",
-        details: error.stack
-      }),
+      JSON.stringify({ error: "Internal server error" }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
