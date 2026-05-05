@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MapPin, Star, Edit, PlusCircle, XCircle, AlertCircle, Clock } from "lucide-react";
+import { slugify } from "@/utils/slug";
 import { Badge } from "@/components/ui/badge";
 import { useLocations } from "@/hooks/useLocations";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
