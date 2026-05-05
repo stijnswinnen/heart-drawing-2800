@@ -253,6 +253,18 @@ const AuthPage = () => {
               />
             )}
 
+            {view === 'sign_in' && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => setView('forgotten_password')}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                >
+                  Wachtwoord vergeten?
+                </button>
+              </div>
+            )}
+
             {/* Alternative Login Options */}
             <div className="mt-6 pt-6 border-t">
               <div className="flex flex-col gap-3">
