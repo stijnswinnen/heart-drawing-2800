@@ -15,6 +15,33 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const [view, setView] = useState<'sign_in' | 'sign_up' | 'forgotten_password' | 'magic_link'>('sign_in');
   const [email, setEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      toast.error('Voer een e-mailadres in');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: resetEmail,
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
+      });
+      if (error) throw error;
+      toast.success('Als er een account bestaat, ontvang je zo dadelijk een e-mail.');
+      setResetEmail('');
+      setView('sign_in');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      toast.error('Er ging iets mis. Probeer het later opnieuw.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (session) {
