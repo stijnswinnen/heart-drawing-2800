@@ -94,7 +94,7 @@ export const DrawingTitle = ({ isDrawing, onHeartClick }: DrawingTitleProps) => 
               padding: "0 26px",
               fontSize: 15,
               background: "var(--pink-500)",
-              color: "#fff",
+              color: "var(--surface)",
               border: "1px solid var(--pink-500)",
             }}
             onMouseEnter={(e) => {

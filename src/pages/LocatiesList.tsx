@@ -62,7 +62,7 @@ const LocatiesList = () => {
           <div className="order-1 min-[880px]:order-2">
             <div className="min-[880px]:sticky min-[880px]:top-[88px]">
               <div
-                className="rounded-[20px] overflow-hidden bg-white border border-line"
+                className="rounded-[20px] overflow-hidden bg-surface border border-line"
                 style={{ boxShadow: "var(--shadow-soft)" }}
               >
                 <div className="aspect-[4/5] w-full">
@@ -128,7 +128,7 @@ const LocatiesList = () => {
                     <Link
                       key={loc.id}
                       to={`/locaties?location=${loc.id}`}
-                      className="block bg-white border border-line rounded-[14px] p-[22px] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-ink-2"
+                      className="block bg-surface border border-line rounded-[14px] p-[22px] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-ink-2"
                     >
                       {loc.category && (
                         <span

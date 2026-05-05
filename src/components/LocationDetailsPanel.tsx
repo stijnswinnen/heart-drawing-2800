@@ -193,16 +193,16 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
       <div className="flex flex-wrap gap-3" style={{ marginTop: "40px" }}>
         <button
           onClick={handleLike}
-          className="inline-flex items-center rounded-full bg-pink-500 text-white hover:bg-pink-600 transition-colors"
-          style={{ height: "44px", padding: "0 22px", fontSize: "14px", fontWeight: 500, gap: "16px" }}
+          className="inline-flex items-center rounded-full bg-pink-500 text-surface hover:bg-pink-600 transition-colors"
+          style={{ height: "52px", padding: "0 26px", fontSize: "15px", fontWeight: 500, gap: "16px" }}
         >
           <Heart className="w-4 h-4" fill="currentColor" />
           Voeg toe aan favorieten
         </button>
         <button
           onClick={handleShare}
-          className="inline-flex items-center rounded-full bg-white border border-line-strong text-ink hover:bg-pink-50 transition-colors"
-          style={{ height: "44px", padding: "0 22px", fontSize: "14px", fontWeight: 500, gap: "16px" }}
+          className="inline-flex items-center rounded-full bg-surface border border-line-strong text-ink hover:border-ink-2 transition-colors"
+          style={{ height: "52px", padding: "0 26px", fontSize: "15px", fontWeight: 500, gap: "16px" }}
         >
           <Share2 className="w-4 h-4" />
           Deel deze plek
