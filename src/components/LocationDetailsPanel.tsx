@@ -93,7 +93,7 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/locaties?location=${location.id}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}`;
     
     try {
       await navigator.clipboard.writeText(shareUrl);
