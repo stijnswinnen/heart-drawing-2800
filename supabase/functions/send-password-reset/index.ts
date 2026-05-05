@@ -9,24 +9,97 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const supabase = createClient(
-  SUPABASE_URL!,
-  SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+const GENERIC_RESPONSE = {
+  success: true,
+  message:
+    "Als er een account bestaat met dit e-mailadres, ontvang je zo dadelijk een e-mail met instructies.",
+};
+
+const isValidEmail = (email: unknown): email is string =>
+  typeof email === "string" &&
+  email.length <= 254 &&
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const { email, resetLink } = await req.json();
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
-    if (!email || !resetLink) {
-      throw new Error("Email and reset link are required");
+  const respondGeneric = () =>
+    new Response(JSON.stringify(GENERIC_RESPONSE), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  try {
+    const body = await req.json().catch(() => ({}));
+    const { email, redirectTo } = body ?? {};
+
+    if (!isValidEmail(email)) {
+      // Return generic to avoid enumeration / probing
+      return respondGeneric();
     }
+
+    const origin =
+      (typeof redirectTo === "string" && redirectTo.startsWith("http")
+        ? new URL(redirectTo).origin
+        : req.headers.get("origin")) || "https://2800.love";
+    const resetRedirect = `${origin}/reset-password`;
+
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      options: { redirectTo: resetRedirect },
+    });
+
+    if (error || !data?.properties?.action_link) {
+      console.log("generateLink result", {
+        email,
+        error: error?.message,
+        hasLink: !!data?.properties?.action_link,
+      });
+      // Still return generic — typical reason: user does not exist
+      return respondGeneric();
+    }
+
+    const actionLink = data.properties.action_link;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #111;">
+        <h1 style="font-size: 22px; margin: 0 0 16px;">Reset je wachtwoord</h1>
+        <p style="font-size: 15px; line-height: 1.5;">
+          Je ontving deze e-mail omdat er een wachtwoord reset werd aangevraagd voor je 2800.love account.
+        </p>
+        <p style="margin: 24px 0;">
+          <a href="${actionLink}"
+             style="background: #F26D85; color: #ffffff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+            Reset wachtwoord
+          </a>
+        </p>
+        <p style="font-size: 13px; color: #555; line-height: 1.5;">
+          Werkt de knop niet? Kopieer dan deze link in je browser:<br/>
+          <a href="${actionLink}" style="color: #F26D85; word-break: break-all;">${actionLink}</a>
+        </p>
+        <p style="font-size: 13px; color: #555; line-height: 1.5; margin-top: 24px;">
+          Deze link is 1 uur geldig. Heb je geen reset aangevraagd? Dan kan je deze e-mail negeren.
+        </p>
+        <p style="font-size: 12px; color: #999; margin-top: 32px;">— 2800.love</p>
+      </div>
+    `;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -37,37 +110,21 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "2800.love <noreply@2800.love>",
         to: [email],
-        subject: "Reset je wachtwoord - Mechelen Hartverwarmend",
-        html: `
-          <div>
-            <h1>Reset je wachtwoord</h1>
-            <p>Klik op onderstaande link om je wachtwoord te resetten:</p>
-            <a href="${resetLink}">Reset wachtwoord</a>
-            <p>Deze link is 24 uur geldig.</p>
-            <p>Als je geen wachtwoord reset hebt aangevraagd, kun je deze e-mail negeren.</p>
-          </div>
-        `,
+        subject: "Reset je wachtwoord · 2800.love",
+        html,
       }),
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error);
+      const errText = await res.text();
+      console.error("Resend error", res.status, errText);
     }
 
-    const data = await res.json();
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
-    );
+    return respondGeneric();
+  } catch (err) {
+    console.error("send-password-reset error", err);
+    // Always generic to avoid info leak
+    return respondGeneric();
   }
 };
 
