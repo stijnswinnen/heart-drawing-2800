@@ -6,6 +6,7 @@ import { LocationsSection } from "@/components/profile/LocationsSection";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { Navigation } from "@/components/Navigation";
 import { HomeFooter } from "@/components/HomeFooter";
+import { Seo } from "@/components/Seo";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
@@ -56,6 +57,12 @@ const Profile = () => {
 
   return (
     <>
+      <Seo
+        title="Mijn profiel · 2800.love"
+        description="Beheer jouw hart, gedeelde plekken en favorieten op 2800.love."
+        path="/profile"
+        noindex
+      />
       <Navigation />
       <main className="min-h-screen bg-bg">
         <div className="mx-auto w-full max-w-[980px] px-7 pt-14 pb-24">

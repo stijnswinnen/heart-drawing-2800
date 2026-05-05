@@ -6,6 +6,7 @@ import { useLocations } from "@/hooks/useLocations";
 import { buildSlugMap } from "@/utils/slug";
 import { LocationCard } from "@/components/LocationCard";
 import { OverviewMap } from "@/components/OverviewMap";
+import { Seo } from "@/components/Seo";
 
 const formatDutchDate = (iso: string | null | undefined) => {
   if (!iso) return "";
@@ -80,6 +81,11 @@ const LocatiesOverview = () => {
 
   return (
     <div className="min-h-screen bg-bg">
+      <Seo
+        title="Mooie plekjes in Mechelen · 2800.love"
+        description="Ontdek de favoriete plekjes van Mechelaars: van rustige natuurplekken tot bruisende horeca. Een groeiende kaart van 2800 op zijn mooist."
+        path="/locaties"
+      />
       <Navigation />
       <main className="max-w-[1200px] mx-auto" style={{ padding: "56px 28px 96px" }}>
         {/* Header */}

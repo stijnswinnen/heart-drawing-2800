@@ -1,6 +1,13 @@
+import { Seo } from "@/components/Seo";
+
 const Privacy = () => {
   return (
     <div className="min-h-screen bg-background py-8 px-4 md:px-8">
+      <Seo
+        title="Privacybeleid · 2800.love"
+        description="Hoe 2800.love omgaat met je persoonsgegevens: wat we verzamelen, waarom, en welke rechten je hebt onder de AVG."
+        path="/privacy"
+      />
       <div className="max-w-4xl mx-auto prose prose-sm md:prose-base">
         <h1 className="text-2xl md:text-3xl font-bold mb-6">Privacy Policy voor 2800.love</h1>
         
