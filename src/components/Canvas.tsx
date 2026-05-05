@@ -31,6 +31,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     canvas.freeDrawingBrush.color = penColor || "#000000";
 
     setFabricCanvas(canvas);
+    canvas.requestRenderAll();
     toast("Teken jouw hart! Wees creatief ❤️");
 
     const handleResize = () => {
@@ -54,13 +55,23 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     fabricCanvas.freeDrawingBrush.color = penColor || "#000000";
   }, [fabricCanvas, penSize, penColor]);
 
+  const onDrawingCompleteRef = useRef(onDrawingComplete);
+  useEffect(() => {
+    onDrawingCompleteRef.current = onDrawingComplete;
+  }, [onDrawingComplete]);
+
   useEffect(() => {
     if (!fabricCanvas) return;
 
-    fabricCanvas.on("path:created", () => {
-      onDrawingComplete();
-    });
-  }, [fabricCanvas, onDrawingComplete]);
+    const handler = () => {
+      fabricCanvas.requestRenderAll();
+      onDrawingCompleteRef.current();
+    };
+    fabricCanvas.on("path:created", handler);
+    return () => {
+      fabricCanvas.off("path:created", handler);
+    };
+  }, [fabricCanvas]);
 
   return (
     <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
