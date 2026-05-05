@@ -36,7 +36,8 @@ const App = () => (
             <Route path="/over" element={<Over />} />
             <Route path="/mijn-favoriete-plek" element={<FavoritePlek />} />
             
-            <Route path="/locaties" element={<LocatiesList />} />
+            <Route path="/locaties" element={<LocatiesOverview />} />
+            <Route path="/locaties/:slug" element={<LocatieDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
