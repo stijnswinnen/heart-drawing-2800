@@ -121,7 +121,7 @@ export const LocationsMap = ({ selectedLocationId, onLocationSelect }: Locations
   }, [locations, selectedLocationId, onLocationSelect, approvedHearts]);
 
   return (
-    <div className="w-full h-[400px] md:h-[calc(100vh-4rem)] rounded-lg overflow-hidden">
+    <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
     </div>
   );
