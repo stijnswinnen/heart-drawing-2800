@@ -12,7 +12,8 @@ import Hearts from "./pages/Hearts";
 import Over from "./pages/Over";
 import FavoritePlek from "./pages/FavoritePlek";
 
-import LocatiesList from "./pages/LocatiesList";
+import LocatiesOverview from "./pages/LocatiesOverview";
+import LocatieDetail from "./pages/LocatieDetail";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import Auth from "./pages/Auth";
