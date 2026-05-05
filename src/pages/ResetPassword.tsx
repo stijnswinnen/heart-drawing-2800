@@ -19,21 +19,6 @@ const ResetPassword = () => {
     let mounted = true;
 
     const accept = () => {
-      if (resolved) return;
-      resolved = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      setValidatingToken(false);
-    };
-
-    const reject = () => {
-      if (resolved) return;
-      resolved = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      toast.error("Ongeldige of verlopen reset link");
-      navigate("/");
-    };
-
-    const accept = () => {
       if (!mounted || resolved) return;
       resolved = true;
       if (timeoutId) clearTimeout(timeoutId);
