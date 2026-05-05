@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocations } from "@/hooks/useLocations";
 import { LocationDetailsPanel } from "@/components/LocationDetailsPanel";
 import { ArrowLeft } from "lucide-react";
+import { LocationCard } from "@/components/LocationCard";
 import { buildSlugMap } from "@/utils/slug";
 
 const LocatieDetail = () => {
@@ -119,48 +120,13 @@ const LocatieDetail = () => {
               {locations
                 .filter((l) => l.id !== selectedLocation.id)
                 .slice(0, 3)
-                .map((loc) => {
-                  const cat = (loc.category || "").toLowerCase();
-                  const tagStyle =
-                    cat === "natuur"
-                      ? { background: "var(--green-50)", color: "var(--green-700)" }
-                      : cat === "horeca"
-                      ? { background: "var(--pink-50)", color: "var(--pink-600)" }
-                      : { background: "var(--line)", color: "var(--ink-muted)" };
-                  const desc =
-                    loc.description?.split(/(?<=[.!?])\s+/)[0] || "";
-                  const locSlug = idToSlug.get(loc.id) || "";
-                  return (
-                    <Link
-                      key={loc.id}
-                      to={`/locaties/${locSlug}`}
-                      className="block bg-surface border border-line rounded-[14px] p-[22px] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-ink-2"
-                    >
-                      {loc.category && (
-                        <span
-                          className="inline-block uppercase text-[12px] font-medium tracking-wide rounded-full mb-3"
-                          style={{ ...tagStyle, padding: "5px 11px" }}
-                        >
-                          {loc.category}
-                        </span>
-                      )}
-                      <h3
-                        className="font-fraunces font-normal text-ink mb-2"
-                        style={{ fontSize: "22px", lineHeight: 1.15 }}
-                      >
-                        {loc.name}
-                      </h3>
-                      {desc && (
-                        <p
-                          className="text-ink-muted"
-                          style={{ fontSize: "14px", lineHeight: 1.55 }}
-                        >
-                          {desc}
-                        </p>
-                      )}
-                    </Link>
-                  );
-                })}
+                .map((loc) => (
+                  <LocationCard
+                    key={loc.id}
+                    location={loc}
+                    slug={idToSlug.get(loc.id) || ""}
+                  />
+                ))}
             </div>
           </section>
         )}
