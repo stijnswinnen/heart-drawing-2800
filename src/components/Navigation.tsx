@@ -27,7 +27,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (location.pathname === "/" && isDrawing) {
+  if (isDrawing) {
     return null;
   }
 
