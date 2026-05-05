@@ -54,7 +54,12 @@ async function fetchLocations(): Promise<
       console.warn(`[sitemap] Failed to fetch locations: ${res.status}`);
       return [];
     }
-    return await res.json();
+    return (await res.json()) as {
+      id: string;
+      name: string;
+      updated_at: string | null;
+      created_at: string | null;
+    }[];
   } catch (e) {
     console.warn("[sitemap] Error fetching locations:", e);
     return [];
