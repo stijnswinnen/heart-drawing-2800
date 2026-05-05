@@ -93,10 +93,10 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
   }, [fabricCanvas]);
 
   return (
-    <div ref={wrapperRef} className="relative w-full">
+    <div ref={wrapperRef} className="relative w-full bg-white">
       <canvas
         ref={canvasRef}
-        className="cursor-crosshair border border-dashed border-gray-300 bg-white"
+        className="cursor-crosshair border border-dashed border-gray-300"
       />
     </div>
   );
