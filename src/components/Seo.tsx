@@ -2,6 +2,19 @@ import { Helmet } from "react-helmet-async";
 
 const SITE = "https://2800.love";
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "2800.love",
+  url: "https://2800.love",
+  inLanguage: "nl-BE",
+  publisher: {
+    "@type": "Person",
+    name: "Stijn Swinnen",
+    url: "https://2800.love/over",
+  },
+};
+
 interface SeoProps {
   title: string;
   description?: string;
@@ -9,6 +22,7 @@ interface SeoProps {
   ogType?: string;
   ogImage?: string;
   noindex?: boolean;
+  jsonLd?: unknown[];
 }
 
 const toAbsolute = (url: string) =>
@@ -21,9 +35,11 @@ export const Seo = ({
   ogType = "website",
   ogImage = "/og/default.png",
   noindex = false,
+  jsonLd = [],
 }: SeoProps) => {
   const canonical = `${SITE}${path.startsWith("/") ? path : `/${path}`}`;
   const image = toAbsolute(ogImage);
+  const blocks = [websiteJsonLd, ...jsonLd];
 
   return (
     <Helmet>
@@ -41,6 +57,11 @@ export const Seo = ({
       {description && <meta name="twitter:description" content={description} />}
       <meta name="twitter:image" content={image} />
       {noindex && <meta name="robots" content="noindex, nofollow" />}
+      {blocks.map((block, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(block)}
+        </script>
+      ))}
     </Helmet>
   );
 };
