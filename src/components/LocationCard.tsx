@@ -69,7 +69,7 @@ export const LocationCard = ({ location, slug }: LocationCardProps) => {
       {metaParts.length > 0 && (
         <p
           className="mt-3"
-          style={{ fontSize: "12.5px", color: "var(--muted)" }}
+          style={{ fontSize: "12.5px", color: "var(--ink-muted)" }}
         >
           {metaParts.join(" · ")}
         </p>
