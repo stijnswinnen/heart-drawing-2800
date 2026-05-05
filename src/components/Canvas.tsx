@@ -21,7 +21,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     const canvas = new FabricCanvas(canvasRef.current, {
       width: isMobile ? window.innerWidth : window.innerWidth * 0.6,
       height: window.innerHeight * 0.7,
-      backgroundColor: undefined,
+      backgroundColor: "#FFFFFF",
       isDrawingMode: true,
     });
 
