@@ -10,6 +10,24 @@ const Over = () => {
         title="Over 2800.love · een visuele ode aan Mechelen"
         description="2800.love is een onafhankelijk project van Mechels fotograaf Stijn Swinnen: een groeiende, visuele ode aan de stad, hart per hart, plek per plek."
         path="/over"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: "Stijn Swinnen",
+            jobTitle: "Fotograaf",
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: "Mechelen",
+              addressCountry: "BE",
+            },
+            founder: {
+              "@type": "CreativeWork",
+              name: "2800.love",
+              url: "https://2800.love",
+            },
+          },
+        ]}
       />
       <Navigation />
       <main className="mx-auto w-full max-w-[720px] px-7 pt-16 pb-24">
