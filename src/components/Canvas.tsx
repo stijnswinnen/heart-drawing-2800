@@ -12,14 +12,18 @@ interface CanvasProps {
 
 export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const computeWidth = () =>
-      window.innerWidth < 768 ? window.innerWidth : window.innerWidth * 0.6;
+    const computeWidth = () => {
+      const parentW = wrapperRef.current?.clientWidth ?? 0;
+      if (window.innerWidth < 768) return window.innerWidth;
+      return parentW > 0 ? parentW : window.innerWidth * 0.6;
+    };
     const computeHeight = () => window.innerHeight * 0.7;
 
     const canvas = new FabricCanvas(canvasRef.current, {
@@ -55,7 +59,10 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
   // Re-fit the canvas when the mobile breakpoint flips, without rebuilding it.
   useEffect(() => {
     if (!fabricCanvas) return;
-    const width = window.innerWidth < 768 ? window.innerWidth : window.innerWidth * 0.6;
+    const parentW = wrapperRef.current?.clientWidth ?? 0;
+    const width = window.innerWidth < 768
+      ? window.innerWidth
+      : (parentW > 0 ? parentW : window.innerWidth * 0.6);
     const height = window.innerHeight * 0.7;
     fabricCanvas.setDimensions({ width, height });
     fabricCanvas.requestRenderAll();
@@ -86,10 +93,10 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
   }, [fabricCanvas]);
 
   return (
-    <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
-      <canvas 
-        ref={canvasRef} 
-        className={`cursor-crosshair border border-dashed border-gray-300 bg-white ${isMobile ? '' : ''}`} 
+    <div ref={wrapperRef} className="relative w-full">
+      <canvas
+        ref={canvasRef}
+        className="cursor-crosshair border border-dashed border-gray-300 bg-white"
       />
     </div>
   );
