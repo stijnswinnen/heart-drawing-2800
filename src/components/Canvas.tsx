@@ -21,7 +21,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     const canvas = new FabricCanvas(canvasRef.current, {
       width: isMobile ? window.innerWidth : window.innerWidth * 0.6,
       height: window.innerHeight * 0.7,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: undefined,
       isDrawingMode: true,
     });
 
@@ -66,7 +66,7 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     <div className={`relative mx-auto md:mr-0 ${isMobile ? 'w-full' : 'w-[60%]'}`}>
       <canvas 
         ref={canvasRef} 
-        className={`cursor-crosshair border border-dashed border-gray-300 ${isMobile ? '' : ''}`} 
+        className={`cursor-crosshair border border-dashed border-gray-300 bg-white ${isMobile ? '' : ''}`} 
       />
     </div>
   );
