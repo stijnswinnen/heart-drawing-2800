@@ -74,16 +74,14 @@ function IndexInner({ canvasMode = false }: IndexProps) {
         <DrawingTitle onHeartClick={enterDrawMode} />
 
         <div className="canvas-stage">
-          <div className="canvas-board">
-            {canvasMode && (
-              <Canvas
-                key={canvasKey}
-                onDrawingComplete={() => setHasDrawn(true)}
-                penSize={penSize}
-                penColor={isEraser ? "#FFFFFF" : penColor}
-              />
-            )}
-          </div>
+          {canvasMode && (
+            <Canvas
+              key={canvasKey}
+              onDrawingComplete={() => setHasDrawn(true)}
+              penSize={penSize}
+              penColor={isEraser ? "#FFFFFF" : penColor}
+            />
+          )}
         </div>
       </div>
 
