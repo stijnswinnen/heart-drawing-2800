@@ -88,6 +88,76 @@ const LocatiesList = () => {
             </div>
           </div>
         </div>
+
+        {/* Related locations */}
+        {selectedLocation && locations.length > 1 && (
+          <section
+            className="border-t border-line"
+            style={{ marginTop: "96px", paddingTop: "48px" }}
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h2
+                className="font-fraunces font-normal text-ink"
+                style={{ fontSize: "28px", lineHeight: 1.1 }}
+              >
+                Andere plekjes in 2800
+              </h2>
+              <Link
+                to="/locaties"
+                className="inline-flex items-center text-[14px] text-ink-muted hover:text-ink hover:bg-pink-50 rounded-full px-3 py-1.5 transition-colors"
+              >
+                Bekijk alle →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
+              {locations
+                .filter((l) => l.id !== selectedLocation.id)
+                .slice(0, 3)
+                .map((loc) => {
+                  const cat = (loc.category || "").toLowerCase();
+                  const tagStyle =
+                    cat === "natuur"
+                      ? { background: "var(--green-50)", color: "var(--green-700)" }
+                      : cat === "horeca"
+                      ? { background: "var(--pink-50)", color: "var(--pink-600)" }
+                      : { background: "var(--line)", color: "var(--ink-muted)" };
+                  const desc =
+                    loc.description?.split(/(?<=[.!?])\s+/)[0] || "";
+                  return (
+                    <Link
+                      key={loc.id}
+                      to={`/locaties?location=${loc.id}`}
+                      className="block bg-white border border-line rounded-[14px] p-[22px] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-ink-2"
+                    >
+                      {loc.category && (
+                        <span
+                          className="inline-block uppercase text-[12px] font-medium tracking-wide rounded-full mb-3"
+                          style={{ ...tagStyle, padding: "5px 11px" }}
+                        >
+                          {loc.category}
+                        </span>
+                      )}
+                      <h3
+                        className="font-fraunces font-normal text-ink mb-2"
+                        style={{ fontSize: "22px", lineHeight: 1.15 }}
+                      >
+                        {loc.name}
+                      </h3>
+                      {desc && (
+                        <p
+                          className="text-ink-muted"
+                          style={{ fontSize: "14px", lineHeight: 1.55 }}
+                        >
+                          {desc}
+                        </p>
+                      )}
+                    </Link>
+                  );
+                })}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
