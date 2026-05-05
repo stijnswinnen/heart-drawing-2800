@@ -5,6 +5,7 @@ import { HeartSection } from "@/components/profile/HeartSection";
 import { LocationsSection } from "@/components/profile/LocationsSection";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { Navigation } from "@/components/Navigation";
+import { HomeFooter } from "@/components/HomeFooter";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
@@ -80,6 +81,7 @@ const Profile = () => {
           `}</style>
         </div>
       </main>
+      <HomeFooter />
     </>
   );
 };
