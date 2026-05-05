@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MapPin, Star, Edit, PlusCircle, XCircle, AlertCircle, Clock } from "lucide-react";
+import { slugify } from "@/utils/slug";
 import { Badge } from "@/components/ui/badge";
 import { useLocations } from "@/hooks/useLocations";
 import { useLocationLikes } from "@/hooks/useLocationLikes";
@@ -175,7 +176,7 @@ export const LocationsSection = () => {
                       </p>
                     </div>
                     <Button variant="outline" asChild className="ml-4">
-                      <Link to={`/locaties?location=${location.id}`}>
+                      <Link to={`/locaties/${slugify(location.name)}`}>
                         Bekijk Details
                       </Link>
                     </Button>

@@ -1,31 +1,36 @@
 import { Navigation } from "@/components/Navigation";
 import { LocationsMap } from "@/components/LocationsMap";
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocations } from "@/hooks/useLocations";
 import { LocationDetailsPanel } from "@/components/LocationDetailsPanel";
 import { ArrowLeft } from "lucide-react";
+import { buildSlugMap } from "@/utils/slug";
 
-const LocatiesList = () => {
-  const [searchParams] = useSearchParams();
+const LocatieDetail = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const locations = useLocations();
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const locationId = searchParams.get('location');
-    if (locationId) {
-      setSelectedLocationId(locationId);
-    } else if (locations.length > 0) {
-      const randomIndex = Math.floor(Math.random() * locations.length);
-      setSelectedLocationId(locations[randomIndex].id);
-    }
-  }, [searchParams, locations]);
+  const slugMap = useMemo(() => buildSlugMap(locations), [locations]);
+  const idToSlug = slugMap;
+  const slugToId = useMemo(() => {
+    const m = new Map<string, string>();
+    slugMap.forEach((s, id) => m.set(s, id));
+    return m;
+  }, [slugMap]);
 
-  const selectedLocation = locations.find(loc => loc.id === selectedLocationId);
+  const selectedLocationId = slug ? slugToId.get(slug) ?? null : null;
+  const selectedLocation = locations.find((loc) => loc.id === selectedLocationId);
 
   const osmUrl = selectedLocation
     ? `https://www.openstreetmap.org/?mlat=${selectedLocation.latitude}&mlon=${selectedLocation.longitude}#map=17/${selectedLocation.latitude}/${selectedLocation.longitude}`
     : "#";
+
+  const handleSelect = (locationId: string) => {
+    const s = idToSlug.get(locationId);
+    if (s) navigate(`/locaties/${s}`);
+  };
 
   return (
     <div className="min-h-screen bg-bg">
@@ -53,7 +58,7 @@ const LocatiesList = () => {
                   image_path: selectedLocation.image_path || null,
                   category: selectedLocation.category || null,
                 }}
-                onClose={() => setSelectedLocationId(null)}
+                onClose={() => navigate("/locaties")}
               />
             )}
           </div>
@@ -68,7 +73,7 @@ const LocatiesList = () => {
                 <div className="aspect-[4/5] w-full">
                   <LocationsMap
                     selectedLocationId={selectedLocationId}
-                    onLocationSelect={setSelectedLocationId}
+                    onLocationSelect={handleSelect}
                   />
                 </div>
               </div>
@@ -124,10 +129,11 @@ const LocatiesList = () => {
                       : { background: "var(--line)", color: "var(--ink-muted)" };
                   const desc =
                     loc.description?.split(/(?<=[.!?])\s+/)[0] || "";
+                  const locSlug = idToSlug.get(loc.id) || "";
                   return (
                     <Link
                       key={loc.id}
-                      to={`/locaties?location=${loc.id}`}
+                      to={`/locaties/${locSlug}`}
                       className="block bg-surface border border-line rounded-[14px] p-[22px] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-ink-2"
                     >
                       {loc.category && (
@@ -163,4 +169,4 @@ const LocatiesList = () => {
   );
 };
 
-export default LocatiesList;
+export default LocatieDetail;

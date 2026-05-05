@@ -12,7 +12,8 @@ import Hearts from "./pages/Hearts";
 import Over from "./pages/Over";
 import FavoritePlek from "./pages/FavoritePlek";
 
-import LocatiesList from "./pages/LocatiesList";
+import LocatiesOverview from "./pages/LocatiesOverview";
+import LocatieDetail from "./pages/LocatieDetail";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import Auth from "./pages/Auth";
@@ -35,7 +36,8 @@ const App = () => (
             <Route path="/over" element={<Over />} />
             <Route path="/mijn-favoriete-plek" element={<FavoritePlek />} />
             
-            <Route path="/locaties" element={<LocatiesList />} />
+            <Route path="/locaties" element={<LocatiesOverview />} />
+            <Route path="/locaties/:slug" element={<LocatieDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
