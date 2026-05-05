@@ -1,46 +1,152 @@
 import { Navigation } from "@/components/Navigation";
 import { LocationForm } from "@/components/LocationForm";
-import { HeartTrail } from "@/components/HeartTrail";
 
 const FavoritePlek = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <HeartTrail />
+    <div className="min-h-screen bg-bg">
       <Navigation />
-      <main className="container relative z-10 max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-4xl leading-relaxed font-barlow font-bold mb-8 text-left text-primary-dark">
-          Deel jouw favoriete plekje<br />in Mechelen! ❤️
+      <main className="mx-auto w-full max-w-[760px] px-7 pt-14 pb-24">
+        {/* Eyebrow */}
+        <span
+          className="inline-flex items-center gap-2 rounded-full font-sans font-medium uppercase mb-7"
+          style={{
+            padding: "6px 14px",
+            background: "var(--pink-50)",
+            color: "var(--pink-600)",
+            fontSize: "12px",
+            letterSpacing: "0.02em",
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="rounded-full"
+            style={{ width: 6, height: 6, background: "var(--pink-500)" }}
+          />
+          Deel jouw plekje
+        </span>
+
+        {/* Heading */}
+        <h1
+          className="m-0 font-serif font-normal text-ink"
+          style={{
+            fontSize: "clamp(40px, 5.5vw, 64px)",
+            lineHeight: 1.05,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          Welke plek in Mechelen<br className="hidden md:inline" />{" "}
+          doet jouw hart sneller kloppen?
         </h1>
-        <div className="space-y-8 text-lg mb-12 md:ml-[40%] font-montserrat">
-          <p>
-            Mechelen, onze stad vol verborgen pareltjes. Weet jij al welk plekje in Mechelen jouw hart sneller doet kloppen? Is het een romantisch bankje aan de Dijle, een gezellig terrasje op de Grote Markt, of misschien wel een geheime stek in het Vrijbroekpark?
-          </p>
-          <div className="md:ml-[-30%] md:mr-[10%] bg-primary-light rounded-[20px] p-6 space-y-2 animate-slide-in-right">
-            <p className="text-[2.5rem] leading-tight font-semibold text-white">
-              Wist je dat...
-            </p>
-            <p className="text-[1.5rem] leading-snug text-white">
-              Jouw verhaal verdient een podium! Deel je favoriete plek en maak kans op een exclusieve mini-fotoreportage op locatie – helemaal gratis.
-            </p>
-            <p className="text-[0.8rem] text-white">
-              (Let op: het aantal plaatsen is beperkt!)
-            </p>
+
+        {/* Lead */}
+        <p
+          className="font-sans"
+          style={{
+            marginTop: 24,
+            fontSize: 17,
+            lineHeight: 1.6,
+            color: "var(--ink-2)",
+            maxWidth: "60ch",
+          }}
+        >
+          Mechelen is een stad vol verborgen pareltjes. Een romantisch bankje aan
+          de Dijle, een gezellig terrasje op de Grote Markt, of misschien een
+          geheime stek in het Vrijbroekpark — vertel het ons.
+        </p>
+
+        {/* Callout */}
+        <aside
+          style={{
+            margin: "56px 0",
+            borderLeft: "3px solid var(--pink-500)",
+            background: "var(--pink-50)",
+            padding: "26px 30px 28px",
+            borderRadius: "0 14px 14px 0",
+          }}
+        >
+          <div
+            className="font-sans"
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              color: "var(--pink-600)",
+              textTransform: "uppercase",
+              marginBottom: 10,
+            }}
+          >
+            Wist je dat…
           </div>
-          <p>
-            Als fotograaf kom ik op diverse plekken in Mechelen en ontmoet ik vele mensen. Een vraag die ik telkens graag stel is wat hun favoriete plek is in of rond de stad. Een plaats waar men graag komt of waar een verhaal aan verbonden is. 
-            Indien haalbaar plannen we dan ook een fotosessie op die plaats.
+          <p
+            className="font-sans m-0"
+            style={{
+              fontSize: 16,
+              lineHeight: 1.6,
+              color: "var(--ink-2)",
+              maxWidth: "56ch",
+            }}
+          >
+            Jouw verhaal verdient een podium. Deel je favoriete plek en maak
+            kans op een exclusieve mini-fotoreportage op locatie — helemaal
+            gratis.
+          </p>
+          <p
+            className="font-sans m-0"
+            style={{
+              fontSize: 13,
+              color: "var(--muted)",
+              marginTop: 10,
+            }}
+          >
+            Het aantal plaatsen is beperkt.
+          </p>
+        </aside>
+
+        {/* Photographer note */}
+        <div
+          className="font-sans"
+          style={{
+            fontSize: 16,
+            lineHeight: 1.7,
+            color: "var(--ink-2)",
+            maxWidth: "60ch",
+          }}
+        >
+          <p style={{ marginTop: 0 }}>
+            Als fotograaf kom ik op diverse plekken in Mechelen en ontmoet ik
+            vele mensen. Een vraag die ik telkens graag stel is wat hun
+            favoriete plek is in of rond de stad. Een plaats waar men graag
+            komt of waar een verhaal aan verbonden is. Indien haalbaar plannen
+            we dan ook een fotosessie op die plaats.
           </p>
           <p>
-            Graag verzamel ik hier al deze fijne plaatsen om ook anderen te inspireren en deze verhalen te kunnen delen.
+            Graag verzamel ik hier al deze fijne plaatsen om ook anderen te
+            inspireren en deze verhalen te kunnen delen.
           </p>
-          <p className="mt-4 font-semibold">
-            Stijn
+          <p
+            className="font-serif italic"
+            style={{
+              marginTop: 8,
+              fontSize: 17,
+              color: "var(--muted)",
+              fontWeight: 400,
+            }}
+          >
+            — Stijn
           </p>
         </div>
+
+        {/* Form */}
+        <div
+          style={{
+            marginTop: 64,
+            paddingTop: 56,
+            borderTop: "1px solid var(--line)",
+          }}
+        >
+          <LocationForm />
+        </div>
       </main>
-      <div className="bg-primary py-8 md:py-12">
-        <LocationForm fullWidthMap />
-      </div>
     </div>
   );
 };
