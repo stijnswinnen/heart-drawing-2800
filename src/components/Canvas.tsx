@@ -59,13 +59,16 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
   // Re-fit the canvas when the mobile breakpoint flips, without rebuilding it.
   useEffect(() => {
     if (!fabricCanvas) return;
+    if (!(fabricCanvas as any).lowerCanvasEl) return;
     const parentW = wrapperRef.current?.clientWidth ?? 0;
     const width = window.innerWidth < 768
       ? window.innerWidth
       : (parentW > 0 ? parentW : window.innerWidth * 0.6);
     const height = window.innerHeight * 0.7;
-    fabricCanvas.setDimensions({ width, height });
-    fabricCanvas.requestRenderAll();
+    try {
+      fabricCanvas.setDimensions({ width, height });
+      fabricCanvas.requestRenderAll();
+    } catch {}
   }, [isMobile, fabricCanvas]);
 
   useEffect(() => {
