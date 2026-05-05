@@ -18,11 +18,16 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    const computeWidth = () =>
+      window.innerWidth < 768 ? window.innerWidth : window.innerWidth * 0.6;
+    const computeHeight = () => window.innerHeight * 0.7;
+
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: isMobile ? window.innerWidth : window.innerWidth * 0.6,
-      height: window.innerHeight * 0.7,
+      width: computeWidth(),
+      height: computeHeight(),
       backgroundColor: "#FFFFFF",
       isDrawingMode: true,
+      enableRetinaScaling: false,
     });
 
     // Create and initialize the brush
@@ -35,10 +40,8 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
     toast("Teken jouw hart! Wees creatief ❤️");
 
     const handleResize = () => {
-      canvas.setDimensions({
-        width: isMobile ? window.innerWidth : window.innerWidth * 0.6,
-        height: window.innerHeight * 0.7,
-      });
+      canvas.setDimensions({ width: computeWidth(), height: computeHeight() });
+      canvas.requestRenderAll();
     };
 
     window.addEventListener('resize', handleResize);
@@ -47,7 +50,16 @@ export const Canvas = ({ onDrawingComplete, penSize, penColor, key }: CanvasProp
       canvas.dispose();
       window.removeEventListener('resize', handleResize);
     };
-  }, [isMobile]);
+  }, []);
+
+  // Re-fit the canvas when the mobile breakpoint flips, without rebuilding it.
+  useEffect(() => {
+    if (!fabricCanvas) return;
+    const width = window.innerWidth < 768 ? window.innerWidth : window.innerWidth * 0.6;
+    const height = window.innerHeight * 0.7;
+    fabricCanvas.setDimensions({ width, height });
+    fabricCanvas.requestRenderAll();
+  }, [isMobile, fabricCanvas]);
 
   useEffect(() => {
     if (!fabricCanvas?.freeDrawingBrush) return;
