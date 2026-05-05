@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { HomeFooter } from "@/components/HomeFooter";
+import { Seo } from "@/components/Seo";
 
 const Over = () => {
   return (
     <div className="min-h-screen bg-bg">
+      <Seo
+        title="Over 2800.love · een visuele ode aan Mechelen"
+        description="2800.love is een onafhankelijk project van Mechels fotograaf Stijn Swinnen: een groeiende, visuele ode aan de stad, hart per hart, plek per plek."
+        path="/over"
+      />
       <Navigation />
       <main className="mx-auto w-full max-w-[720px] px-7 pt-16 pb-24">
         {/* Eyebrow */}

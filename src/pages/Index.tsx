@@ -10,6 +10,7 @@ import { useDrawing, DrawingProvider } from "@/components/DrawingProvider";
 import { DrawingSubmissionHandler } from "@/components/DrawingSubmissionHandler";
 import { Navigation } from "@/components/Navigation";
 import { HomeFooter } from "@/components/HomeFooter";
+import { Seo } from "@/components/Seo";
 import { X } from "lucide-react";
 
 interface IndexProps {
@@ -66,6 +67,19 @@ function IndexInner({ canvasMode = false }: IndexProps) {
 
   return (
     <div>
+      {canvasMode ? (
+        <Seo
+          title="Teken jouw hart voor Mechelen · 2800.love"
+          description="Teken jouw eigen hart voor 2800. Elk hart wordt deel van het steeds veranderende logo van 2800.love en bouwt mee aan een visuele ode aan Mechelen."
+          path="/teken"
+        />
+      ) : (
+        <Seo
+          title="2800.love · Een visuele ode aan Mechelen"
+          description="Teken jouw hart voor Mechelen en ontdek de mooiste plekjes van de stad. Help mee aan een visuele ode aan 2800: een groeiende collectie hartjes."
+          path="/"
+        />
+      )}
       <Navigation isDrawing={canvasMode} />
 
       {showAuth && <AuthDialog onClose={() => setShowAuth(false)} />}

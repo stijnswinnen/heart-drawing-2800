@@ -8,6 +8,7 @@ import { LocationDetailsPanel } from "@/components/LocationDetailsPanel";
 import { ArrowLeft } from "lucide-react";
 import { LocationCard } from "@/components/LocationCard";
 import { buildSlugMap } from "@/utils/slug";
+import { Seo } from "@/components/Seo";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -34,8 +35,45 @@ const LocatieDetail = () => {
     if (s) navigate(`/locaties/${s}`);
   };
 
+  // Build SEO description
+  let seoTitle = "Plekje in Mechelen · 2800.love";
+  let seoDescription: string | undefined;
+  if (selectedLocation) {
+    const category = (selectedLocation.category || "plek").toLowerCase();
+    const sharedBy = (selectedLocation as any).sharedBy as string | undefined;
+    const rawShort =
+      ((selectedLocation as any).shortDescription as string | undefined) ||
+      (selectedLocation.description
+        ? selectedLocation.description.split(/(?<=[.!?])\s/)[0]
+        : "");
+    const truncate = (s: string, max: number) => {
+      if (s.length <= max) return s;
+      const cut = s.slice(0, max);
+      const i = cut.lastIndexOf(" ");
+      return (i > 0 ? cut.slice(0, i) : cut).replace(/[.,;:!?]+$/, "") + "…";
+    };
+    let shortDesc = truncate(rawShort || "", 95);
+    const buildDesc = (sd: string) =>
+      sharedBy
+        ? `${sharedBy} deelt ${selectedLocation.name}, een ${category} in Mechelen. ${sd}`
+        : `${selectedLocation.name}, een ${category} in Mechelen. ${sd}`;
+    let desc = buildDesc(shortDesc);
+    while (desc.length > 160 && shortDesc.length > 20) {
+      shortDesc = truncate(shortDesc.replace(/…$/, ""), shortDesc.length - 10);
+      desc = buildDesc(shortDesc);
+    }
+    seoTitle = `${selectedLocation.name}, een lievelingsplek in Mechelen · 2800.love`;
+    seoDescription = desc;
+  }
+
   return (
     <div className="min-h-screen bg-bg">
+      <Seo
+        title={seoTitle}
+        description={seoDescription}
+        path={`/locaties/${slug ?? ""}`}
+        ogType="article"
+      />
       <Navigation />
       <main className="max-w-[1200px] mx-auto px-7 pt-14 pb-24">
         <Link

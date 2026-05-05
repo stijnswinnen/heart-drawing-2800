@@ -1,10 +1,16 @@
 import { Navigation } from "@/components/Navigation";
 import { HomeFooter } from "@/components/HomeFooter";
 import { LocationForm } from "@/components/LocationForm";
+import { Seo } from "@/components/Seo";
 
 const FavoritePlek = () => {
   return (
     <div className="min-h-screen bg-bg">
+      <Seo
+        title="Deel jouw favoriete plek in Mechelen · 2800.love"
+        description="Welke plek in Mechelen doet jouw hart sneller kloppen? Deel jouw favoriete plek en maak kans op een gratis mini-fotoreportage op locatie."
+        path="/mijn-favoriete-plek"
+      />
       <Navigation />
       <main className="mx-auto w-full max-w-[760px] px-7 pt-14 pb-24">
         {/* Eyebrow */}

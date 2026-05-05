@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Seo } from "@/components/Seo";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -69,6 +70,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/10 to-white p-4">
+      <Seo title="Wachtwoord vergeten · 2800.love" path="/reset-password" noindex />
       <div className="w-full max-w-md space-y-8 bg-white p-6 rounded-lg shadow-lg">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Reset je wachtwoord</h1>

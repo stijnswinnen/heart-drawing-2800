@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Heart, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cleanupAuthState } from "@/utils/authCleanup";
+import { Seo } from "@/components/Seo";
 
 const AuthPage = () => {
   const session = useSession();
@@ -78,8 +79,16 @@ const AuthPage = () => {
     );
   }
 
+  const seoTitle =
+    view === "sign_up"
+      ? "Registreren · 2800.love"
+      : view === "forgotten_password"
+      ? "Wachtwoord vergeten · 2800.love"
+      : "Inloggen · 2800.love";
+
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={seoTitle} path="/auth" noindex />
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
