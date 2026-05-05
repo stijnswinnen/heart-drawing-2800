@@ -76,7 +76,12 @@ const handler = async (req: Request): Promise<Response> => {
       return respondGeneric();
     }
 
+    const tokenHash = data.properties.hashed_token;
     const actionLink = data.properties.action_link;
+    const resetLink =
+      typeof tokenHash === "string" && tokenHash.length > 0
+        ? `${resetRedirect}?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`
+        : actionLink;
 
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #111;">
@@ -85,14 +90,14 @@ const handler = async (req: Request): Promise<Response> => {
           Je ontving deze e-mail omdat er een wachtwoord reset werd aangevraagd voor je 2800.love account.
         </p>
         <p style="margin: 24px 0;">
-          <a href="${actionLink}"
+          <a href="${resetLink}"
              style="background: #F26D85; color: #ffffff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
             Reset wachtwoord
           </a>
         </p>
         <p style="font-size: 13px; color: #555; line-height: 1.5;">
           Werkt de knop niet? Kopieer dan deze link in je browser:<br/>
-          <a href="${actionLink}" style="color: #F26D85; word-break: break-all;">${actionLink}</a>
+          <a href="${resetLink}" style="color: #F26D85; word-break: break-all;">${resetLink}</a>
         </p>
         <p style="font-size: 13px; color: #555; line-height: 1.5; margin-top: 24px;">
           Deze link is 1 uur geldig. Heb je geen reset aangevraagd? Dan kan je deze e-mail negeren.
