@@ -90,7 +90,7 @@ export const useLocationLikes = () => {
   // Subscribe to real-time updates
   useEffect(() => {
     const channel = supabase
-      .channel('location-likes')
+      .channel(`location-likes-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
