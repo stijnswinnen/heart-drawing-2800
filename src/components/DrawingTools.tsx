@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Eraser, Pen } from "lucide-react";
+import { Eraser } from "lucide-react";
 
 interface DrawingToolsProps {
   penSize: number;
@@ -10,6 +9,14 @@ interface DrawingToolsProps {
   setIsEraser: (isEraser: boolean) => void;
 }
 
+const PenIcon = ({ stroke }: { stroke: number }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 19l7-7 3 3-7 7-3-3z" />
+    <path d="M18 13l-6-6" />
+    <path d="M2 22l3-1 1-3" />
+  </svg>
+);
+
 export const DrawingTools = ({
   penSize,
   setPenSize,
@@ -18,48 +25,54 @@ export const DrawingTools = ({
   isEraser,
   setIsEraser,
 }: DrawingToolsProps) => {
-  const penSizes = [1, 5, 10];
+  const pens: { size: number; stroke: number }[] = [
+    { size: 1, stroke: 1.5 },
+    { size: 5, stroke: 2.25 },
+    { size: 10, stroke: 3.25 },
+  ];
 
   return (
-    <div className="fixed md:bottom-8 bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-white rounded-lg shadow-lg animate-[fade-in_0.5s_ease-out]">
-      <div className="flex gap-2">
-        {penSizes.map((size) => (
-          <Button
-            key={size}
-            variant={penSize === size ? "default" : "outline"}
-            size="icon"
+    <div className="tools-pill canvas-mode-only-static">
+      {pens.map((p) => {
+        const active = !isEraser && penSize === p.size;
+        return (
+          <button
+            key={p.size}
+            type="button"
+            className={`tool ${active ? "active" : ""}`}
+            aria-label={`Penseel ${p.size}`}
             onClick={() => {
-              setPenSize(size);
+              setPenSize(p.size);
               setIsEraser(false);
             }}
-            className="w-10 h-10"
           >
-            <Pen className={`w-${size < 5 ? '2' : size < 8 ? '4' : '6'} h-${size < 5 ? '2' : size < 8 ? '4' : '6'}`} />
-          </Button>
-        ))}
-      </div>
+            <PenIcon stroke={p.stroke} />
+          </button>
+        );
+      })}
 
-      <div className="w-px h-8 bg-gray-200" />
+      <span className="divider" />
 
-      <Button
-        variant={isEraser ? "default" : "outline"}
-        size="icon"
+      <button
+        type="button"
+        className={`tool ${isEraser ? "active" : ""}`}
+        aria-label="Gum"
         onClick={() => setIsEraser(!isEraser)}
-        className="w-10 h-10"
       >
         <Eraser className="w-4 h-4" />
-      </Button>
+      </button>
 
-      <div className="w-px h-8 bg-gray-200" />
+      <span className="divider" />
 
       <input
         type="color"
         value={penColor}
+        aria-label="Kleur"
         onChange={(e) => {
           setPenColor(e.target.value);
           setIsEraser(false);
         }}
-        className="w-10 h-10 rounded cursor-pointer"
+        className="swatch active"
       />
     </div>
   );
