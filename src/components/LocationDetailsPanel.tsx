@@ -104,56 +104,126 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
     }
   };
 
+  // Category color mapping per design spec
+  const cat = location.category?.toLowerCase() || "";
+  const categoryStyles =
+    cat === "natuur"
+      ? { bg: "hsl(var(--green-50))", color: "hsl(var(--green-700))" }
+      : cat === "horeca"
+      ? { bg: "hsl(var(--pink-50))", color: "hsl(var(--pink-600))" }
+      : { bg: "hsl(var(--line) / 0.6)", color: "hsl(var(--ink-muted))" };
+
+  const metaCells: { label: string; value: string }[] = [];
+  if (!isLoading && profile?.name) {
+    metaCells.push({ label: "Gedeeld door", value: profile.name });
+  }
+  if (location.category) {
+    metaCells.push({ label: "Categorie", value: location.category });
+  }
+
   return (
-    <div className="space-y-4">
+    <div>
+      {location.category && (
+        <span
+          className="inline-block uppercase text-[12px] font-medium tracking-wide rounded-full"
+          style={{
+            backgroundColor: categoryStyles.bg,
+            color: categoryStyles.color,
+            padding: "5px 11px",
+          }}
+        >
+          {location.category}
+        </span>
+      )}
+
+      <h1
+        className="font-fraunces font-normal text-ink"
+        style={{
+          fontSize: "clamp(44px, 6vw, 72px)",
+          lineHeight: 1.02,
+          letterSpacing: "-0.02em",
+          marginTop: "18px",
+          marginBottom: "32px",
+        }}
+      >
+        {location.name}
+      </h1>
+
       {location.image_path && (
-        <div className="w-full">
-          <img 
-            src={location.image_path} 
+        <div className="mb-6">
+          <img
+            src={location.image_path}
             alt={location.name}
-            className="w-full h-48 object-cover rounded-lg"
+            className="w-full h-auto rounded-[14px] object-cover"
           />
         </div>
       )}
-      
-      {location.category && categoryData && (
-        <div className="flex justify-end">
-          <span 
-            className="inline-block text-white text-xs font-semibold px-3 py-1 rounded-lg uppercase"
-            style={{ backgroundColor: categoryData.color }}
-          >
-            {location.category}
-          </span>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-5xl font-semibold uppercase leading-[60px]">{location.name}</h2>
-        {!isLoading && profile && (
-          <p className="text-sm text-gray-600 uppercase">Gedeeld door {profile.name}</p>
-        )}
-      </div>
 
       {location.description && (
-        <p className="text-gray-700">{location.description}</p>
+        <p
+          className="text-ink-2"
+          style={{ fontSize: "16.5px", lineHeight: 1.7, maxWidth: "56ch", marginBottom: "18px" }}
+        >
+          {location.description}
+        </p>
       )}
 
       {location.recommendation && (
-        <div className="mt-4">
-          <h3 className="text-lg font-medium mb-2">Waarom moet je deze plek zeker bezoeken?</h3>
-          <p className="text-gray-700">{location.recommendation}</p>
-        </div>
+        <>
+          <h3
+            className="font-semibold text-ink-muted uppercase"
+            style={{
+              fontSize: "13px",
+              letterSpacing: "0.08em",
+              marginTop: "44px",
+              marginBottom: "16px",
+            }}
+          >
+            Waarom moet je deze plek zeker bezoeken?
+          </h3>
+          <p
+            className="text-ink-2"
+            style={{ fontSize: "16.5px", lineHeight: 1.7, maxWidth: "56ch", marginBottom: "18px" }}
+          >
+            {location.recommendation}
+          </p>
+        </>
       )}
 
-      <div className="flex flex-col md:flex-row justify-end gap-2">
-        <Button onClick={handleShare} variant="outline" className="w-full md:w-auto">
-          <Share2 className="w-4 h-4 mr-2" />
-          Deel deze locatie
-        </Button>
-        <Button onClick={handleLike} variant="default" className="w-full md:w-auto">
+      <div className="flex flex-wrap gap-3" style={{ marginTop: "40px" }}>
+        <button
+          onClick={handleLike}
+          className="inline-flex items-center rounded-full bg-pink-500 text-white hover:bg-pink-600 transition-colors"
+          style={{ height: "44px", padding: "0 22px", fontSize: "14px", fontWeight: 500, gap: "16px" }}
+        >
+          <Heart className="w-4 h-4" fill="currentColor" />
           Voeg toe aan favorieten
-        </Button>
+        </button>
+        <button
+          onClick={handleShare}
+          className="inline-flex items-center rounded-full bg-white border border-line-strong text-ink hover:bg-pink-50 transition-colors"
+          style={{ height: "44px", padding: "0 22px", fontSize: "14px", fontWeight: 500, gap: "16px" }}
+        >
+          <Share2 className="w-4 h-4" />
+          Deel deze plek
+        </button>
       </div>
+
+      {metaCells.length > 0 && (
+        <div
+          className="grid grid-cols-2 border-t border-line"
+          style={{ marginTop: "40px", paddingTop: "28px", rowGap: "18px", columnGap: "32px" }}
+        >
+          {metaCells.map((cell) => (
+            <div key={cell.label}>
+              <div className="text-ink-muted" style={{ fontSize: "13px" }}>{cell.label}</div>
+              <div className="text-ink" style={{ fontSize: "14px", fontWeight: 500, marginTop: "4px" }}>
+                {cell.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
