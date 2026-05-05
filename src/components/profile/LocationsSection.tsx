@@ -175,7 +175,7 @@ export const LocationsSection = () => {
                       </p>
                     </div>
                     <Button variant="outline" asChild className="ml-4">
-                      <Link to={`/locaties?location=${location.id}`}>
+                      <Link to={`/locaties/${slugify(location.name)}`}>
                         Bekijk Details
                       </Link>
                     </Button>
