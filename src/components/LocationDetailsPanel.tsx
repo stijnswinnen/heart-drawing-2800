@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
-import { Share2 } from "lucide-react";
+import { Heart, Share2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
