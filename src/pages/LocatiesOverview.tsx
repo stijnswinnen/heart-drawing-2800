@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
+import { HomeFooter } from "@/components/HomeFooter";
 import { useLocations } from "@/hooks/useLocations";
 import { buildSlugMap } from "@/utils/slug";
 import { LocationCard } from "@/components/LocationCard";
@@ -221,6 +222,7 @@ const LocatiesOverview = () => {
           </Link>
         </div>
       </main>
+      <HomeFooter />
     </div>
   );
 };

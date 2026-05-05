@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { HomeFooter } from "@/components/HomeFooter";
 import { LocationsMap } from "@/components/LocationsMap";
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -131,6 +132,7 @@ const LocatieDetail = () => {
           </section>
         )}
       </main>
+      <HomeFooter />
     </div>
   );
 };

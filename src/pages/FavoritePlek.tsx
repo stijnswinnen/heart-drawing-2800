@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { HomeFooter } from "@/components/HomeFooter";
 import { LocationForm } from "@/components/LocationForm";
 
 const FavoritePlek = () => {
@@ -147,6 +148,7 @@ const FavoritePlek = () => {
           <LocationForm />
         </div>
       </main>
+      <HomeFooter />
     </div>
   );
 };
