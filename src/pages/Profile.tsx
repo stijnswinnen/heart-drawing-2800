@@ -56,20 +56,30 @@ const Profile = () => {
   return (
     <>
       <Navigation />
-      <div className="min-h-screen bg-gradient-to-b from-primary/10 to-white">
-        <div className="container mx-auto p-6 space-y-8 animate-fade-in">
+      <main className="min-h-screen bg-bg">
+        <div className="mx-auto w-full max-w-[980px] px-7 pt-14 pb-24">
           <ProfileHeader />
-          <div className="grid grid-cols-8 gap-8">
-            <div className="col-span-3">
-              <HeartSection />
-            </div>
-            <div className="col-span-5">
-              <LocationsSection />
-            </div>
+          <div
+            className="profile-grid"
+            style={{
+              marginTop: 56,
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 280px) 1fr",
+              gap: 56,
+              alignItems: "start",
+            }}
+          >
+            <HeartSection />
+            <LocationsSection />
           </div>
           <PersonalInfoSection />
+          <style>{`
+            @media (max-width: 880px) {
+              .profile-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+            }
+          `}</style>
         </div>
-      </div>
+      </main>
     </>
   );
 };
