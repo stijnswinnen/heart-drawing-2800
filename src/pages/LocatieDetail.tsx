@@ -66,6 +66,49 @@ const LocatieDetail = () => {
     seoDescription = desc;
   }
 
+  const plainDesc = (selectedLocation?.description || "").replace(/<[^>]*>/g, "").trim();
+  const placeJsonLd = selectedLocation
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Place",
+        name: selectedLocation.name,
+        description: plainDesc,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Mechelen",
+          postalCode: "2800",
+          addressCountry: "BE",
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: String(selectedLocation.latitude),
+          longitude: String(selectedLocation.longitude),
+        },
+        url: `https://2800.love/locaties/${slug}`,
+      }
+    : null;
+  const breadcrumbJsonLd = selectedLocation
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Plekjes",
+            item: "https://2800.love/locaties",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: selectedLocation.name,
+            item: `https://2800.love/locaties/${slug}`,
+          },
+        ],
+      }
+    : null;
+  const jsonLd = [placeJsonLd, breadcrumbJsonLd].filter(Boolean) as unknown[];
+
   return (
     <div className="min-h-screen bg-bg">
       <Seo
@@ -73,6 +116,7 @@ const LocatieDetail = () => {
         description={seoDescription}
         path={`/locaties/${slug ?? ""}`}
         ogType="article"
+        jsonLd={jsonLd}
       />
       <Navigation />
       <main className="max-w-[1200px] mx-auto px-7 pt-14 pb-24">
