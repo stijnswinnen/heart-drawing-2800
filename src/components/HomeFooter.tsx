@@ -34,18 +34,28 @@ export const HomeFooter = () => {
         style={{ color: "var(--ink-muted)", fontSize: 13 }}
       >
         <div className="flex gap-6">
-          <span>
+          <Link
+            to="/hearts"
+            className="transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ink-muted)")}
+          >
             <strong className="font-semibold" style={{ color: "var(--ink)" }}>
               {hearts ?? "—"}
             </strong>{" "}
             hartjes getekend
-          </span>
-          <span>
+          </Link>
+          <Link
+            to="/locaties"
+            className="transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ink-muted)")}
+          >
             <strong className="font-semibold" style={{ color: "var(--ink)" }}>
               {locs ?? "—"}
             </strong>{" "}
             plekjes gedeeld
-          </span>
+          </Link>
         </div>
         <Link
           to="/privacy"
