@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
+import { HomeFooter } from "@/components/HomeFooter";
 
 const Over = () => {
   return (
@@ -290,6 +291,7 @@ const Over = () => {
           }
         `}</style>
       </main>
+      <HomeFooter />
     </div>
   );
 };
