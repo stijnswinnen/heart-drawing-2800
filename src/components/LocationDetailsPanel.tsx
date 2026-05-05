@@ -108,10 +108,10 @@ export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanel
   const cat = location.category?.toLowerCase() || "";
   const categoryStyles =
     cat === "natuur"
-      ? { bg: "hsl(var(--green-50))", color: "hsl(var(--green-700))" }
+      ? { bg: "var(--green-50)", color: "var(--green-700)" }
       : cat === "horeca"
-      ? { bg: "hsl(var(--pink-50))", color: "hsl(var(--pink-600))" }
-      : { bg: "hsl(var(--line) / 0.6)", color: "hsl(var(--ink-muted))" };
+      ? { bg: "var(--pink-50)", color: "var(--pink-600)" }
+      : { bg: "var(--line)", color: "var(--ink-muted)" };
 
   const metaCells: { label: string; value: string }[] = [];
   if (!isLoading && profile?.name) {
