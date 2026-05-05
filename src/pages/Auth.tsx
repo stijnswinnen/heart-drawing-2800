@@ -15,6 +15,33 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const [view, setView] = useState<'sign_in' | 'sign_up' | 'forgotten_password' | 'magic_link'>('sign_in');
   const [email, setEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      toast.error('Voer een e-mailadres in');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: resetEmail,
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
+      });
+      if (error) throw error;
+      toast.success('Als er een account bestaat, ontvang je zo dadelijk een e-mail.');
+      setResetEmail('');
+      setView('sign_in');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      toast.error('Er ging iets mis. Probeer het later opnieuw.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (session) {
@@ -151,6 +178,35 @@ const AuthPage = () => {
                   </button>
                 </div>
               </div>
+            ) : view === 'forgotten_password' ? (
+              <form
+                onSubmit={(e) => { e.preventDefault(); handlePasswordReset(); }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium mb-2">E-mailadres</label>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="je@email.com"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={resetLoading}>
+                  {resetLoading ? 'Link wordt verstuurd...' : 'Stuur wachtwoord reset link'}
+                </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setView('sign_in')}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Terug naar inloggen
+                  </button>
+                </div>
+              </form>
             ) : (
               <Auth
                 supabaseClient={supabase}
@@ -166,7 +222,7 @@ const AuthPage = () => {
                   }
                 }}
                 providers={[]}
-                showLinks={true}
+                showLinks={false}
                 view={view}
                 redirectTo={`${window.location.origin}/admin`}
                 localization={{
@@ -195,6 +251,18 @@ const AuthPage = () => {
                   },
                 }}
               />
+            )}
+
+            {view === 'sign_in' && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => setView('forgotten_password')}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                >
+                  Wachtwoord vergeten?
+                </button>
+              </div>
             )}
 
             {/* Alternative Login Options */}
