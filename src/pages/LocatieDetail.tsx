@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocations } from "@/hooks/useLocations";
 import { LocationDetailsPanel } from "@/components/LocationDetailsPanel";
 import { ArrowLeft } from "lucide-react";
+import { LocationCard } from "@/components/LocationCard";
 import { buildSlugMap } from "@/utils/slug";
 
 const LocatieDetail = () => {
