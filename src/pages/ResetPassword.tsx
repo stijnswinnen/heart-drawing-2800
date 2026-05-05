@@ -16,6 +16,7 @@ const ResetPassword = () => {
   useEffect(() => {
     let resolved = false;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let mounted = true;
 
     const accept = () => {
       if (resolved) return;
@@ -32,11 +33,49 @@ const ResetPassword = () => {
       navigate("/");
     };
 
+    const accept = () => {
+      if (!mounted || resolved) return;
+      resolved = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      setValidatingToken(false);
+    };
+
+    const reject = () => {
+      if (!mounted || resolved) return;
+      resolved = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      toast.error("Ongeldige of verlopen reset link");
+      navigate("/");
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION"))) {
         accept();
       }
     });
+
+    const url = new URL(window.location.href);
+    const tokenHash = url.searchParams.get("token_hash");
+    const type = url.searchParams.get("type");
+
+    if (tokenHash && type === "recovery") {
+      supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Recovery token exchange error:", error);
+            reject();
+            return;
+          }
+          url.searchParams.delete("token_hash");
+          url.searchParams.delete("type");
+          window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+          accept();
+        })
+        .catch((error) => {
+          console.error("Recovery token verification failed:", error);
+          reject();
+        });
+    }
 
     // Fallback: hash may already have been processed before subscription
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -49,6 +88,7 @@ const ResetPassword = () => {
     }, 3000);
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
       if (timeoutId) clearTimeout(timeoutId);
     };
