@@ -14,27 +14,44 @@ const ResetPassword = () => {
   const [validatingToken, setValidatingToken] = useState(true);
 
   useEffect(() => {
-    const validateSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
-        
-        if (!session) {
-          toast.error("Ongeldige of verlopen reset link");
-          navigate("/");
-          return;
-        }
-        
-        setValidatingToken(false);
-      } catch (error) {
-        console.error('Error validating session:', error);
-        toast.error("Er is een fout opgetreden bij het valideren van je reset link");
-        navigate("/");
-      }
+    let resolved = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const accept = () => {
+      if (resolved) return;
+      resolved = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      setValidatingToken(false);
     };
 
-    validateSession();
+    const reject = () => {
+      if (resolved) return;
+      resolved = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      toast.error("Ongeldige of verlopen reset link");
+      navigate("/");
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION"))) {
+        accept();
+      }
+    });
+
+    // Fallback: hash may already have been processed before subscription
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) accept();
+    });
+
+    // Grace period to allow detectSessionInUrl to parse the recovery hash
+    timeoutId = setTimeout(() => {
+      reject();
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
