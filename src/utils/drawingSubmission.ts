@@ -91,9 +91,23 @@ export const submitDrawing = async (
     }
   }
 
-  console.log('Converting canvas to blob...');
+  console.log('Converting canvas to transparent blob...');
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height;
+  const exportCtx = exportCanvas.getContext('2d');
+  if (!exportCtx) throw new Error('Could not get export canvas context');
+  exportCtx.drawImage(canvas, 0, 0);
+  const exportImageData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
+  const pixels = exportImageData.data;
+  for (let i = 0; i < pixels.length; i += 4) {
+    if (pixels[i] === 255 && pixels[i + 1] === 255 && pixels[i + 2] === 255) {
+      pixels[i + 3] = 0;
+    }
+  }
+  exportCtx.putImageData(exportImageData, 0, 0);
   const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((b) => {
+    exportCanvas.toBlob((b) => {
       if (b) resolve(b);
       else reject(new Error('Failed to convert canvas to blob'));
     }, 'image/png');
