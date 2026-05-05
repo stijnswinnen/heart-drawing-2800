@@ -222,7 +222,7 @@ const AuthPage = () => {
                   }
                 }}
                 providers={[]}
-                showLinks={true}
+                showLinks={false}
                 view={view}
                 redirectTo={`${window.location.origin}/admin`}
                 localization={{
