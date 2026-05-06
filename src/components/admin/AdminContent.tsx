@@ -7,6 +7,7 @@ import { LocationEditDialog } from "./LocationEditDialog";
 import { VideoGrid } from "./VideoGrid";
 import { CategoriesGrid } from "./CategoriesGrid";
 import { UsersGrid } from "./UsersGrid";
+import { SectionHeader } from "./SectionHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -229,26 +230,64 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
     return location.status === selectedStatus;
   }) || null;
 
+  const locationCounts = {
+    new: locations?.filter(l => l.status === "new").length || 0,
+    approved: locations?.filter(l => l.status === "approved").length || 0,
+    pending_verification: locations?.filter(l => l.status === "pending_verification").length || 0,
+    rejected: locations?.filter(l => l.status === "rejected").length || 0,
+  };
+
+  const renderLocationsHeader = () => {
+    const map = {
+      new: {
+        eyebrow: "Moderatie",
+        title: locationCounts.new === 0 ? "Geen plekken in afwachting." : "Plekken in afwachting.",
+        description: "Beoordeel nieuw ingediende plekken.",
+      },
+      approved: {
+        eyebrow: "Goedgekeurd",
+        title: `${locationCounts.approved} ${locationCounts.approved === 1 ? "plekje" : "plekjes"} online.`,
+        description: "Plekken die zichtbaar zijn op de kaart.",
+      },
+      pending_verification: {
+        eyebrow: "Pending verification",
+        title:
+          locationCounts.pending_verification === 0
+            ? "Geen plekken in afwachting."
+            : `${locationCounts.pending_verification} plekken wachten op verificatie.`,
+        description: "Plekken die nog wachten op een geverifieerd e-mailadres.",
+      },
+      rejected: {
+        eyebrow: "Afgewezen",
+        title: `${locationCounts.rejected} afgewezen ${locationCounts.rejected === 1 ? "plek" : "plekken"}.`,
+        description: "Plekken die niet zijn goedgekeurd.",
+      },
+    } as const;
+    const h = map[selectedStatus];
+    return <SectionHeader eyebrow={h.eyebrow} title={h.title} description={h.description} />;
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        <AdminSidebar
-          selectedStatus={selectedStatus}
-          selectedSection={selectedSection}
-          setSelectedStatus={setSelectedStatus}
-          setSelectedSection={setSelectedSection}
-          drawings={drawings}
-          locations={locations}
-        />
-        <main className="flex-1">
-          {selectedSection === "hearts" ? (
-            <DrawingGrid
-              drawings={filteredDrawings}
-              selectedStatus={selectedStatus === "rejected" ? "new" : selectedStatus}
-              onApprove={handleApproveDrawing}
-              onDecline={handleDeclineDrawing}
-            />
-          ) : selectedSection === "locations" ? (
+    <div className="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-[240px_1fr]">
+      <AdminSidebar
+        selectedStatus={selectedStatus}
+        selectedSection={selectedSection}
+        setSelectedStatus={setSelectedStatus}
+        setSelectedSection={setSelectedSection}
+        drawings={drawings}
+        locations={locations}
+      />
+      <main className="px-7 py-10 min-w-0">
+        {selectedSection === "hearts" ? (
+          <DrawingGrid
+            drawings={filteredDrawings}
+            selectedStatus={selectedStatus === "rejected" ? "new" : selectedStatus}
+            onApprove={handleApproveDrawing}
+            onDecline={handleDeclineDrawing}
+          />
+        ) : selectedSection === "locations" ? (
+          <>
+            {renderLocationsHeader()}
             <LocationsGrid
               locations={filteredLocations}
               selectedStatus={selectedStatus}
@@ -257,15 +296,16 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
               onDelete={handleDeleteLocation}
               onEdit={handleEditLocation}
             />
-          ) : selectedSection === "categories" ? (
-            <CategoriesGrid />
-          ) : selectedSection === "users" ? (
-            <UsersGrid />
-          ) : (
-            <VideoGrid />
-          )}
-        </main>
-      </div>
+          </>
+        ) : selectedSection === "categories" ? (
+          <CategoriesGrid />
+        ) : selectedSection === "users" ? (
+          <UsersGrid />
+        ) : (
+          <VideoGrid />
+        )}
+      </main>
+    </div>
 
       <LocationEditDialog
         location={editingLocation}
