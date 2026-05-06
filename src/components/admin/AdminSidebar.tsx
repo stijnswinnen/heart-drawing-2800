@@ -1,239 +1,182 @@
 import { Heart, MapPin, VideoIcon, Tag, Users } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
+type AdminStatus = "new" | "approved" | "pending_verification" | "rejected";
+type AdminSection = "hearts" | "locations" | "videos" | "categories" | "users";
+
 interface AdminSidebarProps {
-  selectedStatus: "new" | "approved" | "pending_verification" | "rejected";
-  selectedSection: "hearts" | "locations" | "videos" | "categories" | "users";
-  setSelectedStatus: (status: "new" | "approved" | "pending_verification" | "rejected") => void;
-  setSelectedSection: (section: "hearts" | "locations" | "videos" | "categories" | "users") => void;
+  selectedStatus: AdminStatus;
+  selectedSection: AdminSection;
+  setSelectedStatus: (status: AdminStatus) => void;
+  setSelectedSection: (section: AdminSection) => void;
   drawings: Tables<"drawings">[] | null;
   locations: Tables<"locations">[] | null;
 }
 
-export const AdminSidebar = ({ 
-  selectedStatus, 
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  count?: number;
+  active: boolean;
+  onClick: () => void;
+}
+
+const NavItem = ({ icon, label, count, active, onClick }: NavItemProps) => (
+  <button
+    data-admin-nav
+    data-active={active ? "true" : "false"}
+    onClick={onClick}
+    className={`w-full flex items-center gap-2 px-3 py-[9px] rounded-full text-[14px] font-sans transition-colors ${
+      active
+        ? "bg-ink text-white"
+        : "bg-transparent text-ink-2 hover:bg-bg hover:text-ink"
+    }`}
+  >
+    <span className="w-4 h-4 inline-flex items-center justify-center shrink-0">
+      {icon}
+    </span>
+    <span className="flex-1 text-left">{label}</span>
+    {typeof count === "number" && (
+      <span
+        className={`text-[12px] tabular-nums ${
+          active ? "text-white/65" : "text-ink-muted"
+        }`}
+      >
+        {count}
+      </span>
+    )}
+  </button>
+);
+
+const GroupLabel = ({ children }: { children: React.ReactNode }) => (
+  <div className="font-serif font-medium text-[15px] text-ink px-3 mb-1.5">
+    {children}
+  </div>
+);
+
+export const AdminSidebar = ({
+  selectedStatus,
   selectedSection,
-  setSelectedStatus, 
+  setSelectedStatus,
   setSelectedSection,
   drawings,
-  locations 
+  locations,
 }: AdminSidebarProps) => {
-  const newDrawingsCount = drawings?.filter(drawing => drawing.status === "new").length || 0;
-  const approvedDrawingsCount = drawings?.filter(drawing => drawing.status === "approved").length || 0;
-  const newLocationsCount = locations?.filter(location => location.status === "new").length || 0;
-  const approvedLocationsCount = locations?.filter(location => location.status === "approved").length || 0;
-  const pendingLocationsCount = locations?.filter(location => location.status === "pending_verification").length || 0;
-  const rejectedLocationsCount = locations?.filter(location => location.status === "rejected").length || 0;
+  const newDrawings = drawings?.filter(d => d.status === "new").length || 0;
+  const approvedDrawings = drawings?.filter(d => d.status === "approved").length || 0;
+  const newLocations = locations?.filter(l => l.status === "new").length || 0;
+  const approvedLocations = locations?.filter(l => l.status === "approved").length || 0;
+  const pendingLocations = locations?.filter(l => l.status === "pending_verification").length || 0;
+  const rejectedLocations = locations?.filter(l => l.status === "rejected").length || 0;
+
+  const isHearts = (s: AdminStatus) =>
+    selectedSection === "hearts" && selectedStatus === s;
+  const isLocations = (s: AdminStatus) =>
+    selectedSection === "locations" && selectedStatus === s;
 
   return (
-    <aside className="w-64 flex-shrink-0">
-      <div className="space-y-6">
+    <aside className="lg:sticky lg:top-16 lg:self-start lg:h-[calc(100vh-64px)] lg:overflow-y-auto px-4 py-8 border-b lg:border-b-0 lg:border-r border-line">
+      <div className="space-y-7">
         <div>
-          <h2 className="font-medium mb-4">Hearts</h2>
-          <nav className="space-y-2">
-            <button
+          <GroupLabel>Hartjes</GroupLabel>
+          <div className="space-y-1">
+            <NavItem
+              icon={<Heart className="w-4 h-4" strokeWidth={1.75} />}
+              label="New"
+              count={newDrawings}
+              active={isHearts("new")}
               onClick={() => {
                 setSelectedSection("hearts");
                 setSelectedStatus("new");
               }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "hearts" && selectedStatus === "new"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Heart
-                  className={selectedSection === "hearts" && selectedStatus === "new" ? "text-red-500" : ""}
-                  size={20}
-                />
-                <span>New</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {newDrawingsCount} hearts
-              </span>
-            </button>
-            <button
+            />
+            <NavItem
+              icon={<Heart className="w-4 h-4" strokeWidth={1.75} />}
+              label="Approved"
+              count={approvedDrawings}
+              active={isHearts("approved")}
               onClick={() => {
                 setSelectedSection("hearts");
                 setSelectedStatus("approved");
               }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "hearts" && selectedStatus === "approved"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Heart
-                  className={selectedSection === "hearts" && selectedStatus === "approved" ? "text-green-500" : ""}
-                  size={20}
-                />
-                <span>Approved</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {approvedDrawingsCount} hearts
-              </span>
-            </button>
-          </nav>
+            />
+          </div>
         </div>
 
         <div>
-          <h2 className="font-medium mb-4">Locations</h2>
-          <nav className="space-y-2">
-            <button
+          <GroupLabel>Plekken</GroupLabel>
+          <div className="space-y-1">
+            <NavItem
+              icon={<MapPin className="w-4 h-4" strokeWidth={1.75} />}
+              label="New"
+              count={newLocations}
+              active={isLocations("new")}
               onClick={() => {
                 setSelectedSection("locations");
                 setSelectedStatus("new");
               }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "locations" && selectedStatus === "new"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin
-                  className={selectedSection === "locations" && selectedStatus === "new" ? "text-red-500" : ""}
-                  size={20}
-                />
-                <span>New</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {newLocationsCount} locations
-              </span>
-            </button>
-            <button
+            />
+            <NavItem
+              icon={<MapPin className="w-4 h-4" strokeWidth={1.75} />}
+              label="Approved"
+              count={approvedLocations}
+              active={isLocations("approved")}
               onClick={() => {
                 setSelectedSection("locations");
                 setSelectedStatus("approved");
               }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "locations" && selectedStatus === "approved"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin
-                  className={selectedSection === "locations" && selectedStatus === "approved" ? "text-green-500" : ""}
-                  size={20}
-                />
-                <span>Approved</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {approvedLocationsCount} locations
-              </span>
-            </button>
-            <button
+            />
+            <NavItem
+              icon={<MapPin className="w-4 h-4" strokeWidth={1.75} />}
+              label="Pending verification"
+              count={pendingLocations}
+              active={isLocations("pending_verification")}
               onClick={() => {
                 setSelectedSection("locations");
                 setSelectedStatus("pending_verification");
               }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "locations" && selectedStatus === "pending_verification"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin
-                  className={selectedSection === "locations" && selectedStatus === "pending_verification" ? "text-yellow-500" : ""}
-                  size={20}
-                />
-                <span>Pending Verification</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {pendingLocationsCount} locations
-              </span>
-            </button>
-            <button
+            />
+            <NavItem
+              icon={<MapPin className="w-4 h-4" strokeWidth={1.75} />}
+              label="Rejected"
+              count={rejectedLocations}
+              active={isLocations("rejected")}
               onClick={() => {
                 setSelectedSection("locations");
                 setSelectedStatus("rejected");
               }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "locations" && selectedStatus === "rejected"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin
-                  className={selectedSection === "locations" && selectedStatus === "rejected" ? "text-red-500" : ""}
-                  size={20}
-                />
-                <span>Rejected</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {rejectedLocationsCount} locations
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                setSelectedSection("categories");
-              }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "categories"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Tag
-                  className={selectedSection === "categories" ? "text-purple-500" : ""}
-                  size={20}
-                />
-                <span>Categories</span>
-              </div>
-            </button>
-          </nav>
+            />
+            <NavItem
+              icon={<Tag className="w-4 h-4" strokeWidth={1.75} />}
+              label="Categories"
+              active={selectedSection === "categories"}
+              onClick={() => setSelectedSection("categories")}
+            />
+          </div>
         </div>
 
         <div>
-          <h2 className="font-medium mb-4">Users</h2>
-          <nav className="space-y-2">
-            <button
+          <GroupLabel>Gebruikers</GroupLabel>
+          <div className="space-y-1">
+            <NavItem
+              icon={<Users className="w-4 h-4" strokeWidth={1.75} />}
+              label="Management"
+              active={selectedSection === "users"}
               onClick={() => setSelectedSection("users")}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "users"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Users
-                  className={selectedSection === "users" ? "text-blue-500" : ""}
-                  size={20}
-                />
-                <span>Management</span>
-              </div>
-            </button>
-          </nav>
+            />
+          </div>
         </div>
 
         <div>
-          <h2 className="font-medium mb-4">Videos</h2>
-          <nav className="space-y-2">
-            <button
-              onClick={() => {
-                setSelectedSection("videos");
-              }}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
-                selectedSection === "videos"
-                  ? "bg-zinc-900 text-white"
-                  : "hover:bg-zinc-100"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <VideoIcon
-                  className={selectedSection === "videos" ? "text-blue-500" : ""}
-                  size={20}
-                />
-                <span>Management</span>
-              </div>
-            </button>
-          </nav>
+          <GroupLabel>Video's</GroupLabel>
+          <div className="space-y-1">
+            <NavItem
+              icon={<VideoIcon className="w-4 h-4" strokeWidth={1.75} />}
+              label="Management"
+              active={selectedSection === "videos"}
+              onClick={() => setSelectedSection("videos")}
+            />
+          </div>
         </div>
       </div>
     </aside>
