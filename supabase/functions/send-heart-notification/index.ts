@@ -103,7 +103,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="background: #FFF5F5; border-radius: 12px; padding: 30px; margin-bottom: 30px;">
-            <h2 style="color: #734439; margin-top: 0;">Hallo ${profile.name || 'daar'},</h2>
+            <h2 style="color: #734439; margin-top: 0;">Hallo ${escapeHtml(profile.name || 'daar')},</h2>
             
             <p style="color: #333; font-size: 16px; line-height: 1.6;">
               We hebben geweldig nieuws! Je hartje is goedgekeurd en staat nu live op onze website voor iedereen om te zien! 💖
