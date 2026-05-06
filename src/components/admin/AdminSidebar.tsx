@@ -23,6 +23,7 @@ export const AdminSidebar = ({
   const newLocationsCount = locations?.filter(location => location.status === "new").length || 0;
   const approvedLocationsCount = locations?.filter(location => location.status === "approved").length || 0;
   const pendingLocationsCount = locations?.filter(location => location.status === "pending_verification").length || 0;
+  const rejectedLocationsCount = locations?.filter(location => location.status === "rejected").length || 0;
 
   return (
     <aside className="w-64 flex-shrink-0">
