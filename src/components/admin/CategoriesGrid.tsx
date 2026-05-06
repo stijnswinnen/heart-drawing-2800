@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CategoryEditDialog } from "./CategoryEditDialog";
+import { SectionHeader } from "./SectionHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -106,18 +107,20 @@ export const CategoriesGrid = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Categories</h1>
-          <p className="text-muted-foreground">
-            Beheer categorieën voor locaties
-          </p>
-        </div>
-        <Button onClick={handleAddCategory}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nieuwe Categorie
-        </Button>
-      </div>
+      <SectionHeader
+        eyebrow="Categorieën"
+        title="Beheer categorieën."
+        description="Maak en bewerk categorieën die gebruikers kunnen toewijzen aan plekken."
+        action={
+          <button
+            onClick={handleAddCategory}
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-pink-500 text-white text-[14px] font-medium hover:bg-pink-600 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Nieuwe categorie
+          </button>
+        }
+      />
 
       {categories && categories.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

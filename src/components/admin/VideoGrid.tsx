@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Play, RefreshCw, Clock, VideoIcon, Archive, AlertTriangle, ExternalLink, Loader2, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { SectionHeader } from "./SectionHeader";
 
 interface VideoJob {
   id: string;
@@ -253,14 +254,11 @@ export const VideoGrid = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Video Management</h1>
-          <p className="text-muted-foreground">
-            Generate and manage heart compilation videos using cloud processing
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        eyebrow="Video's"
+        title="Video management."
+        description="Genereer en beheer hartjes-compilatievideo's via cloud processing."
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Generation Controls */}
