@@ -149,6 +149,28 @@ export const AdminSidebar = ({
             </button>
             <button
               onClick={() => {
+                setSelectedSection("locations");
+                setSelectedStatus("rejected");
+              }}
+              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
+                selectedSection === "locations" && selectedStatus === "rejected"
+                  ? "bg-zinc-900 text-white"
+                  : "hover:bg-zinc-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin
+                  className={selectedSection === "locations" && selectedStatus === "rejected" ? "text-red-500" : ""}
+                  size={20}
+                />
+                <span>Rejected</span>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {rejectedLocationsCount} locations
+              </span>
+            </button>
+            <button
+              onClick={() => {
                 setSelectedSection("categories");
               }}
               className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
