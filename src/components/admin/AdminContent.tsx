@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-type DrawingStatus = "new" | "approved" | "pending_verification";
+type DrawingStatus = "new" | "approved" | "pending_verification" | "rejected";
 type AdminSection = "hearts" | "locations" | "videos" | "categories" | "users";
 
 interface AdminContentProps {
@@ -244,7 +244,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
           {selectedSection === "hearts" ? (
             <DrawingGrid
               drawings={filteredDrawings}
-              selectedStatus={selectedStatus}
+              selectedStatus={selectedStatus === "rejected" ? "new" : selectedStatus}
               onApprove={handleApproveDrawing}
               onDecline={handleDeclineDrawing}
             />

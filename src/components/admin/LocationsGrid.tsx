@@ -199,13 +199,22 @@ export const LocationsGrid = ({
                             Wacht op e-mailverificatie
                           </div>
                         )}
-                       <Button
-                         variant="ghost"
-                         size="icon"
-                         onClick={() => handleDeleteClick(location)}
-                       >
-                         <Trash2 className="h-4 w-4 text-red-500" />
-                       </Button>
+                       {(() => {
+                         const isRejected = selectedStatus === "rejected";
+                         const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+                         const updatedMs = location.updated_at ? new Date(location.updated_at).getTime() : 0;
+                         const showDelete = !isRejected || updatedMs < oneMonthAgo;
+                         if (!showDelete) return null;
+                         return (
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={() => handleDeleteClick(location)}
+                           >
+                             <Trash2 className="h-4 w-4 text-red-500" />
+                           </Button>
+                         );
+                       })()}
                      </div>
                    </TableCell>
                 </TableRow>

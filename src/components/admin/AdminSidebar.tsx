@@ -2,9 +2,9 @@ import { Heart, MapPin, VideoIcon, Tag, Users } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface AdminSidebarProps {
-  selectedStatus: "new" | "approved" | "pending_verification";
+  selectedStatus: "new" | "approved" | "pending_verification" | "rejected";
   selectedSection: "hearts" | "locations" | "videos" | "categories" | "users";
-  setSelectedStatus: (status: "new" | "approved" | "pending_verification") => void;
+  setSelectedStatus: (status: "new" | "approved" | "pending_verification" | "rejected") => void;
   setSelectedSection: (section: "hearts" | "locations" | "videos" | "categories" | "users") => void;
   drawings: Tables<"drawings">[] | null;
   locations: Tables<"locations">[] | null;
@@ -23,6 +23,7 @@ export const AdminSidebar = ({
   const newLocationsCount = locations?.filter(location => location.status === "new").length || 0;
   const approvedLocationsCount = locations?.filter(location => location.status === "approved").length || 0;
   const pendingLocationsCount = locations?.filter(location => location.status === "pending_verification").length || 0;
+  const rejectedLocationsCount = locations?.filter(location => location.status === "rejected").length || 0;
 
   return (
     <aside className="w-64 flex-shrink-0">
@@ -144,6 +145,28 @@ export const AdminSidebar = ({
               </div>
               <span className="text-sm text-muted-foreground">
                 {pendingLocationsCount} locations
+              </span>
+            </button>
+            <button
+              onClick={() => {
+                setSelectedSection("locations");
+                setSelectedStatus("rejected");
+              }}
+              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
+                selectedSection === "locations" && selectedStatus === "rejected"
+                  ? "bg-zinc-900 text-white"
+                  : "hover:bg-zinc-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin
+                  className={selectedSection === "locations" && selectedStatus === "rejected" ? "text-red-500" : ""}
+                  size={20}
+                />
+                <span>Rejected</span>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {rejectedLocationsCount} locations
               </span>
             </button>
             <button
