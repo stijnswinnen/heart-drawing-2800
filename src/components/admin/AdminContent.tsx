@@ -305,7 +305,6 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
           <VideoGrid />
         )}
       </main>
-    </div>
 
       <LocationEditDialog
         location={editingLocation}
