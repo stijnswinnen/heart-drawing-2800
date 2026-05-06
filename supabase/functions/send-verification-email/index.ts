@@ -45,12 +45,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Profile not found");
     }
 
-    // Generate new verification token
+    // Generate new verification token (plaintext sent in email; SHA-256 hash stored in DB)
     const newToken = crypto.randomUUID();
+    const tokenHashBuffer = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(newToken)
+    );
+    const tokenHash = Array.from(new Uint8Array(tokenHashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
-        verification_token: newToken,
+        verification_token: tokenHash,
         verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
         last_verification_email_sent_at: new Date().toISOString()
       })
