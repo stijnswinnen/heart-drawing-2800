@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="background: #FFF5F5; border-radius: 12px; padding: 30px; margin-bottom: 30px;">
-            <h2 style="color: #734439; margin-top: 0;">Hallo ${profile.name || 'daar'},</h2>
+            <h2 style="color: #734439; margin-top: 0;">Hallo ${escapeHtml(profile.name || 'daar')},</h2>
             
             <p style="color: #333; font-size: 16px; line-height: 1.6;">
               Bedankt voor het delen van je hartje met ons. Helaas konden we het deze keer niet goedkeuren.
@@ -140,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
             ${reason ? `
             <div style="background: #F2DCE2; border-radius: 8px; padding: 20px; margin: 20px 0;">
               <p style="color: #734439; font-size: 14px; margin: 0;">
-                <strong>Reden:</strong> ${reason}
+                <strong>Reden:</strong> ${escapeHtml(reason)}
               </p>
             </div>
             ` : ''}
