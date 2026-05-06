@@ -2,9 +2,9 @@ import { Heart, MapPin, VideoIcon, Tag, Users } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface AdminSidebarProps {
-  selectedStatus: "new" | "approved" | "pending_verification";
+  selectedStatus: "new" | "approved" | "pending_verification" | "rejected";
   selectedSection: "hearts" | "locations" | "videos" | "categories" | "users";
-  setSelectedStatus: (status: "new" | "approved" | "pending_verification") => void;
+  setSelectedStatus: (status: "new" | "approved" | "pending_verification" | "rejected") => void;
   setSelectedSection: (section: "hearts" | "locations" | "videos" | "categories" | "users") => void;
   drawings: Tables<"drawings">[] | null;
   locations: Tables<"locations">[] | null;
