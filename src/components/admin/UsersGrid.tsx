@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { SectionHeader } from "./SectionHeader";
 
 interface ProfileRow {
   id: string;
@@ -132,8 +133,13 @@ export const UsersGrid = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-medium mb-6">Users</h1>
+      <SectionHeader
+        eyebrow="Gebruikers"
+        title={`${profiles?.length || 0} ${profiles?.length === 1 ? "gebruiker" : "gebruikers"}.`}
+        description="Overzicht van alle profielen en hun bijdragen."
+      />
       <div className="rounded-lg border">
+
         <Table>
           <TableHeader>
             <TableRow>
