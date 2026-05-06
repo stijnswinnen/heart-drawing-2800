@@ -1,11 +1,11 @@
-import { Heart, MapPin, VideoIcon, Tag } from "lucide-react";
+import { Heart, MapPin, VideoIcon, Tag, Users } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 
 interface AdminSidebarProps {
   selectedStatus: "new" | "approved" | "pending_verification";
-  selectedSection: "hearts" | "locations" | "videos" | "categories";
+  selectedSection: "hearts" | "locations" | "videos" | "categories" | "users";
   setSelectedStatus: (status: "new" | "approved" | "pending_verification") => void;
-  setSelectedSection: (section: "hearts" | "locations" | "videos" | "categories") => void;
+  setSelectedSection: (section: "hearts" | "locations" | "videos" | "categories" | "users") => void;
   drawings: Tables<"drawings">[] | null;
   locations: Tables<"locations">[] | null;
 }
@@ -162,6 +162,28 @@ export const AdminSidebar = ({
                   size={20}
                 />
                 <span>Categories</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        <div>
+          <h2 className="font-medium mb-4">Users</h2>
+          <nav className="space-y-2">
+            <button
+              onClick={() => setSelectedSection("users")}
+              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between ${
+                selectedSection === "users"
+                  ? "bg-zinc-900 text-white"
+                  : "hover:bg-zinc-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Users
+                  className={selectedSection === "users" ? "text-blue-500" : ""}
+                  size={20}
+                />
+                <span>Management</span>
               </div>
             </button>
           </nav>
