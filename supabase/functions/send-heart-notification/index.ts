@@ -11,6 +11,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const escapeHtml = (s: string): string =>
+  String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]!));
+
 interface HeartNotificationRequest {
   drawingId: string;
   action: "approved" | "rejected";
