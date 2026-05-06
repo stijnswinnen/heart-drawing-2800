@@ -244,7 +244,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
           {selectedSection === "hearts" ? (
             <DrawingGrid
               drawings={filteredDrawings}
-              selectedStatus={selectedStatus}
+              selectedStatus={selectedStatus === "rejected" ? "new" : selectedStatus}
               onApprove={handleApproveDrawing}
               onDecline={handleDeclineDrawing}
             />
