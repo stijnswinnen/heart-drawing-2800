@@ -96,21 +96,25 @@ const handler = async (req: Request): Promise<Response> => {
     let subject = "";
     let html = "";
 
+    const safeUserName = escapeHtml(userName);
+    const safeLocationName = escapeHtml(locationName);
+    const safeReason = reason ? escapeHtml(reason) : "";
+
     if (action === "rejected") {
       subject = `Je locatie "${locationName}" werd niet goedgekeurd`;
       html = `
-        <p>Beste ${userName},</p>
-        <p>Je ingediende locatie "${locationName}" werd niet goedgekeurd om de volgende reden:</p>
-        <p>${reason}</p>
+        <p>Beste ${safeUserName},</p>
+        <p>Je ingediende locatie "${safeLocationName}" werd niet goedgekeurd om de volgende reden:</p>
+        <p>${safeReason}</p>
         <p>Je kan een nieuwe locatie indienen via onze website.</p>
         <p>Met vriendelijke groeten,<br>Het 2800.Love team</p>
       `;
     } else if (action === "deleted") {
       subject = `Je locatie "${locationName}" werd verwijderd`;
       html = `
-        <p>Beste ${userName},</p>
-        <p>Je ingediende locatie "${locationName}" werd verwijderd${
-        reason ? ` om de volgende reden:</p><p>${reason}</p>` : ".</p>"
+        <p>Beste ${safeUserName},</p>
+        <p>Je ingediende locatie "${safeLocationName}" werd verwijderd${
+        safeReason ? ` om de volgende reden:</p><p>${safeReason}</p>` : ".</p>"
       }
         <p>Je kan een nieuwe locatie indienen via onze website.</p>
         <p>Met vriendelijke groeten,<br>Het 2800.Love team</p>
