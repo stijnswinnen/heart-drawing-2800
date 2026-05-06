@@ -51,3 +51,7 @@ verify_jwt = false
 [[functions]]
 name = "cleanup-unverified-profiles"
 verify_jwt = false
+
+[[functions]]
+name = "admin-delete-user"
+verify_jwt = true
