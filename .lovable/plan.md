@@ -1,46 +1,60 @@
-## Problem
+## Goal
 
-When the user clicks the password reset link, they land on `/reset-password` and immediately see **"Ongeldige of verlopen reset link"** — even though the link is valid.
+Serve `sitemap.xml` dynamically from a Supabase edge function so newly approved locations show up in Google Search Console immediately, without waiting for the next publish.
 
-## Root cause
+## Approach
 
-The auth logs confirm the link itself works: Supabase's `/verify` endpoint returns a 303 redirect to `/reset-password#access_token=...&type=recovery&...` and an actual `login` auth event is recorded server-side. So the token is consumed correctly the first time.
+Lovable hosting serves files from the build output as-is and doesn't support rewrite rules, so we can't keep the URL `https://2800.love/sitemap.xml` and have it secretly hit an edge function. The cleanest "always live" option is to serve the sitemap directly from a public Supabase edge function URL and point Google + `robots.txt` at it.
 
-The bug is in `src/pages/ResetPassword.tsx`:
+The edge function URL stays stable for the life of the project, so this is safe to submit to Google Search Console.
 
-```ts
-useEffect(() => {
-  const validateSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error("Ongeldige of verlopen reset link");
-      navigate("/");
-    }
-    ...
-  };
-  validateSession();
-}, []);
+### What gets built
+
+1. **New edge function `sitemap`** (public, `verify_jwt = false`)
+   - Queries `locations` where `status = 'approved'` (id, name, updated_at, created_at)
+   - Reuses the same slug logic as `scripts/generate-sitemap.ts` (port `slugify` + `buildSlugMap` into the function)
+   - Emits the same XML shape as today: static pages first, then `/locaties/{slug}` entries with `lastmod`
+   - Returns `Content-Type: application/xml` and a short `Cache-Control` (e.g. `public, max-age=300, s-maxage=300`) so Google sees fresh data within minutes but we don't hammer the DB
+   - URL: `https://webocybzloqwnyxpquam.supabase.co/functions/v1/sitemap`
+
+2. **Update `public/robots.txt`**
+   - Change the `Sitemap:` line to point at the edge function URL above
+
+3. **Remove the build-time sitemap generator** (no longer needed)
+   - Delete `scripts/generate-sitemap.ts`
+   - Remove the `sitemapPlugin()` import + entry from `vite.config.ts`
+   - This avoids two competing sitemaps and keeps a single source of truth
+
+4. **Google Search Console**
+   - You re-submit the sitemap once, using the new edge function URL
+   - From then on it's always live — no further action on new locations
+
+## Pages included
+
+Same set as today, kept in sync inside the edge function:
+
+```text
+/                       priority 1.0   weekly
+/locaties               priority 0.9   weekly
+/locaties/{slug}        priority 0.8   monthly   (one per approved location, with lastmod)
+/over                   priority 0.7   monthly
+/mijn-favoriete-plek    priority 0.6   monthly
+/teken                  priority 0.5   monthly
+/privacy                priority 0.3   yearly
 ```
 
-`supabase.auth.getSession()` is called **synchronously on mount**, but `detectSessionInUrl` parses the recovery hash **asynchronously**. On the first render the hash hasn't been processed yet, so `session` is `null` → we toast the error and redirect to `/`. By the time the user clicks the link again the one-time token is already consumed (which then matches the second cluster of `One-time token not found` entries in the auth logs at 22:36, 22:37, 22:39 — those are the user retrying after we wrongly bounced them).
+Routes intentionally excluded (match current `robots.txt` disallow list): `/profile`, `/auth`, `/admin`, `/verify`, `/reset-password`, `/hearts`.
 
-## Fix
+## Trade-offs
 
-Change `ResetPassword.tsx` to subscribe to `onAuthStateChange` and accept the session via the `PASSWORD_RECOVERY` / `SIGNED_IN` event, with `getSession()` only as a fallback:
+- **Pro**: Always fresh — a new approved location appears in the sitemap within ~5 minutes (cache TTL), no republish needed.
+- **Pro**: Single source of truth, less build complexity.
+- **Con**: The sitemap URL is on the `*.supabase.co` domain rather than `2800.love`. Google Search Console accepts cross-host sitemaps as long as they're declared in `robots.txt` on the site, which we'll do.
 
-1. On mount, register `supabase.auth.onAuthStateChange((event, session) => ...)`. When `event === 'PASSWORD_RECOVERY'` (or any event with a valid session), set `validatingToken = false`.
-2. Also call `getSession()` once for the case where the hash was already processed before we subscribed.
-3. Only show the "Ongeldige of verlopen reset link" toast after a short grace period (e.g. 1.5s) with no session and no recovery event — not synchronously on first render.
-4. Unsubscribe on unmount.
+## Technical details
 
-No other files need changes. The edge function, the email link, and the `Auth.tsx` reset form are all working correctly (auth log shows the recovery link does its job on first click).
-
-## File to touch
-
-- `src/pages/ResetPassword.tsx` — rewrite the `useEffect` validation block as described.
-
-## Out of scope
-
-- No edge function changes.
-- No DB / SQL changes.
-- Magic-link flow is unrelated.
+- Function file: `supabase/functions/sitemap/index.ts`
+- Uses anon key + public `SELECT` RLS policy `Anyone can view approved locations` — no service role needed
+- CORS headers included (harmless for a GET XML endpoint)
+- `slugify` / `buildSlugMap` copied verbatim so URLs stay identical to the current sitemap (no SEO churn)
+- Response headers: `Content-Type: application/xml; charset=utf-8`, `Cache-Control: public, max-age=300`
