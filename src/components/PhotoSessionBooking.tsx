@@ -285,6 +285,11 @@ export function PhotoSessionBooking({
           open={!!openUrl}
           onModalClose={() => setOpenUrl(null)}
           rootElement={rootEl}
+          prefill={{
+            customAnswers: {
+              a1: window.location.href,
+            },
+          }}
         />
       )}
     </section>

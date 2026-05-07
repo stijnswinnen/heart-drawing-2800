@@ -1,32 +1,27 @@
-## Goal
+## Prefill Calendly "Locatie" question with current URL
 
-Serve the sitemap at `https://2800.love/sitemap.xml` (same domain as the site, ideal for Google Search Console). It refreshes on every publish.
+Add a `prefill` prop to the `PopupModal` in `src/components/PhotoSessionBooking.tsx` so that the custom "Locatie" question on each Calendly event is automatically filled with the current location detail page URL.
 
-## Changes
+### Change
 
-1. **Restore `scripts/generate-sitemap.ts`** — a Vite build plugin that, at build time:
-   - Fetches all `approved` locations from Supabase (id, name, updated_at, created_at)
-   - Slugifies names with the same logic the app uses
-   - Emits `dist/sitemap.xml` with: `/`, `/locaties`, every `/locaties/{slug}` (with `lastmod`), `/over`, `/mijn-favoriete-plek`, `/teken`, `/privacy`
+In `PhotoSessionBooking.tsx` (around lines 282–289), extend the `PopupModal` with:
 
-2. **Re-register the plugin in `vite.config.ts`** so it runs on `vite build`.
+```tsx
+prefill={{
+  customAnswers: {
+    a1: window.location.href,
+  },
+}}
+```
 
-3. **Update `public/robots.txt`** — point `Sitemap:` back to `https://2800.love/sitemap.xml`.
+`a1` is Calendly's identifier for the first custom question on the event type. Since "Locatie" was added as the (only/first) custom question on all three events, `a1` targets it consistently.
 
-4. **Delete the live edge function `sitemap`** (no longer used, avoids two competing sitemaps).
+### Notes
 
-## How refresh works
+- No new props on `PhotoSessionBooking` needed — `window.location.href` already reflects `/locaties/:slug`.
+- `PopupModal` only mounts client-side (guarded by `rootEl`), so `window` is safe to read.
+- No styling, copy, or data-loading changes.
 
-- New approved location → next time you click **Publish** in Lovable → sitemap regenerates with the new URL → Google sees it on its next crawl.
-- No code action needed when approving locations; just remember to publish afterwards if you want Google to pick it up sooner.
+### Verification
 
-## In Google Search Console
-
-Submit: `https://2800.love/sitemap.xml`
-
-## Files touched
-
-- `scripts/generate-sitemap.ts` (re-created)
-- `vite.config.ts` (re-add plugin import + entry)
-- `public/robots.txt` (sitemap URL back to 2800.love)
-- `supabase/functions/sitemap/index.ts` (deleted + undeployed)
+After implementation: open a card on `/locaties/skatepark`, confirm the Calendly modal loads, and the "Locatie" field is pre-populated with the full page URL.
