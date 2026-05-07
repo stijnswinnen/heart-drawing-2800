@@ -79,7 +79,7 @@ const Over = () => {
         <p
           className="m-0"
           style={{
-            marginTop: "56px",
+            marginTop: "28px",
             fontSize: "17px",
             color: "var(--ink-2)",
             lineHeight: 1.7,
@@ -92,7 +92,7 @@ const Over = () => {
         <p
           className="m-0"
           style={{
-            marginTop: "56px",
+            marginTop: "28px",
             fontSize: "17px",
             color: "var(--ink-2)",
             lineHeight: 1.7,
