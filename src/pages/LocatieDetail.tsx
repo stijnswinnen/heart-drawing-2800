@@ -9,6 +9,8 @@ import { ArrowLeft } from "lucide-react";
 import { LocationCard } from "@/components/LocationCard";
 import { buildSlugMap } from "@/utils/slug";
 import { Seo } from "@/components/Seo";
+import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
+import { CALENDLY_URLS } from "@/config/calendly";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -177,6 +179,12 @@ const LocatieDetail = () => {
             </div>
           </div>
         </div>
+
+        <PhotoSessionBooking
+          soloUrl={CALENDLY_URLS.solo}
+          koppelUrl={CALENDLY_URLS.koppel}
+          gezinUrl={CALENDLY_URLS.gezin}
+        />
 
         {/* Related locations */}
         {selectedLocation && locations.length > 1 && (
