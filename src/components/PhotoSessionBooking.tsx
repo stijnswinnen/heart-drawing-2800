@@ -287,7 +287,7 @@ export function PhotoSessionBooking({
           rootElement={rootEl}
           prefill={{
             customAnswers: {
-              a1: window.location.href,
+              a2: window.location.href,
             },
           }}
         />
