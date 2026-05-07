@@ -72,7 +72,7 @@ const Over = () => {
             maxWidth: "60ch",
           }}
         >
-          2800.love is een groeiend project dat de liefde voor Mechelen viert — en jij kan meedoen. Met dit initiatief zetten we de fijnste plekken in de stad op een positieve manier in de kijker.
+          2800.love is een groeiend project dat de liefde voor Mechelen viert. Jij kan meedoen. Met dit initiatief zet Mechels fotograaf en initiatiefnemer Stijn inspirerende plekken in de stad in de kijker.
         </p>
 
         {/* Prose paragraph */}
@@ -86,7 +86,20 @@ const Over = () => {
             maxWidth: "60ch",
           }}
         >
-          Ken je de hashtag <strong style={{ fontWeight: 600, color: "var(--ink)" }}>#2800love</strong> al? Die duikt overal in Mechelen op, van slogans tot op fanartikelen. Nu krijgt die hashtag een nieuwe dimensie met dit project.
+          "Als fotograaf kom ik op diverse plaatsen terecht en leer ik telkens nieuwe mensen kennen. Wanneer een fotosessie wordt ingepland, kwam ik echter vaak terug op dezelfde plekken. Met dit project hoop ik betekenisvolle en inspirerende plaatsen in kaart te brengen."
+        </p>
+
+        <p
+          className="m-0"
+          style={{
+            marginTop: "24px",
+            fontSize: "17px",
+            color: "var(--ink-2)",
+            lineHeight: 1.7,
+            maxWidth: "60ch",
+          }}
+        >
+          De hashtag <strong style={{ fontWeight: 600, color: "var(--ink)" }}>#2800love</strong> is ondertussen al goed gekend. Overal in Mechelen duikt deze op: van marketingcampagne tot t-shirt of coole prints. Dankzij 2800.love kan jij deze hashtag mee vorm geven.
         </p>
 
         {/* Pull-quote divider */}
