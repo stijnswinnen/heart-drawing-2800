@@ -9,6 +9,8 @@ import { ArrowLeft } from "lucide-react";
 import { LocationCard } from "@/components/LocationCard";
 import { buildSlugMap } from "@/utils/slug";
 import { Seo } from "@/components/Seo";
+import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
+import { CALENDLY_URLS } from "@/config/calendly";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
