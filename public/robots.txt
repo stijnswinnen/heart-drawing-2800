@@ -6,4 +6,4 @@ Disallow: /register
 Disallow: /forgot-password
 Disallow: /admin
 
-Sitemap: https://webocybzloqwnyxpquam.supabase.co/functions/v1/sitemap
+Sitemap: https://2800.love/sitemap.xml
