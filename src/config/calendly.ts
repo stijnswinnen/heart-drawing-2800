@@ -1,5 +1,5 @@
 export const CALENDLY_URLS = {
-  solo: "https://calendly.com/PLACEHOLDER/mijn-mechelen",
-  koppel: "https://calendly.com/PLACEHOLDER/ons-plekje",
-  gezin: "https://calendly.com/PLACEHOLDER/thuis-in-de-stad",
+  solo: "https://calendly.com/stijnswinnen/mijn-mechelen",
+  koppel: "https://calendly.com/stijnswinnen/ons-plekje",
+  gezin: "https://calendly.com/stijnswinnen/thuis-in-de-stad",
 } as const;
