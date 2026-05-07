@@ -1,27 +1,25 @@
-## Prefill Calendly "Locatie" question with current URL
+## Fix: Calendly prefill targets the wrong field
 
-Add a `prefill` prop to the `PopupModal` in `src/components/PhotoSessionBooking.tsx` so that the custom "Locatie" question on each Calendly event is automatically filled with the current location detail page URL.
+The screenshot shows the URL landed in the "Deel alsjeblieft alles wat kan helpen…" textarea (the built-in "additional notes" question) instead of the custom **Locatie** field below it.
+
+### Cause
+
+In Calendly's `customAnswers`, `a1` is reserved for the built-in "Please share anything…" notes question. Custom questions added by the organizer start at `a2`. We're currently passing the URL to `a1`, which is why it ends up in the notes box.
 
 ### Change
 
-In `PhotoSessionBooking.tsx` (around lines 282–289), extend the `PopupModal` with:
+In `src/components/PhotoSessionBooking.tsx`, update the `prefill.customAnswers` key from `a1` to `a2`:
 
 ```tsx
 prefill={{
   customAnswers: {
-    a1: window.location.href,
+    a2: window.location.href,
   },
 }}
 ```
 
-`a1` is Calendly's identifier for the first custom question on the event type. Since "Locatie" was added as the (only/first) custom question on all three events, `a1` targets it consistently.
-
-### Notes
-
-- No new props on `PhotoSessionBooking` needed — `window.location.href` already reflects `/locaties/:slug`.
-- `PopupModal` only mounts client-side (guarded by `rootEl`), so `window` is safe to read.
-- No styling, copy, or data-loading changes.
+No other changes. All three Calendly events have "Locatie" as their only custom question, so `a2` applies uniformly.
 
 ### Verification
 
-After implementation: open a card on `/locaties/skatepark`, confirm the Calendly modal loads, and the "Locatie" field is pre-populated with the full page URL.
+Reopen any of the three cards on `/locaties/skatepark` and confirm the URL appears in the **Locatie** field (and the notes textarea is empty).
