@@ -238,8 +238,8 @@ export function PhotoSessionBooking({
         <h2 className="psb-title">Wil je hier gefotografeerd worden?</h2>
         <p className="psb-intro">
           Ik kom graag bij je op locatie voor een korte fotosessie op de plek
-          waar jouw hart sneller klopt. Drie pakketten, op maat van waarmee je
-          komt.
+          waar jouw hart sneller klopt. Kies uit één van de drie pakketten, op
+          maat van met je komt.
         </p>
       </header>
 
