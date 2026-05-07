@@ -264,7 +264,7 @@ const Over = () => {
               Initiatief
             </div>
             <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
-              Een onafhankelijk gefinancierd project van Mechels fotograaf{" "}
+              Een project van Mechels fotograaf{" "}
               <a
                 href="https://www.stijnswinnen.be"
                 target="_blank"
