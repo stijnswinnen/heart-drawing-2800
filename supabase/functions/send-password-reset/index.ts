@@ -47,18 +47,20 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, redirectTo } = body ?? {};
+    const { email } = body ?? {};
 
     if (!isValidEmail(email)) {
       // Return generic to avoid enumeration / probing
       return respondGeneric();
     }
 
-    const origin =
-      (typeof redirectTo === "string" && redirectTo.startsWith("http")
-        ? new URL(redirectTo).origin
-        : req.headers.get("origin")) || "https://2800.love";
-    const resetRedirect = `${origin}/reset-password`;
+    // Hardcoded allowlist of trusted origins to prevent open-redirect token theft.
+    // Never derive the reset link origin from caller-controlled input (body or headers).
+    const ALLOWED_ORIGINS = [
+      "https://2800.love",
+      "https://heart-drawing-2800.lovable.app",
+    ];
+    const resetRedirect = `${ALLOWED_ORIGINS[0]}/reset-password`;
 
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
