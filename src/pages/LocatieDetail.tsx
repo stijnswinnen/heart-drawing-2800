@@ -180,11 +180,13 @@ const LocatieDetail = () => {
           </div>
         </div>
 
-        <PhotoSessionBooking
-          soloUrl={CALENDLY_URLS.solo}
-          koppelUrl={CALENDLY_URLS.koppel}
-          gezinUrl={CALENDLY_URLS.gezin}
-        />
+        {!selectedLocation?.photo_session_hidden && (
+          <PhotoSessionBooking
+            soloUrl={CALENDLY_URLS.solo}
+            koppelUrl={CALENDLY_URLS.koppel}
+            gezinUrl={CALENDLY_URLS.gezin}
+          />
+        )}
 
         {/* Related locations */}
         {selectedLocation && locations.length > 1 && (
