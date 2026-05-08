@@ -70,6 +70,7 @@ export const LocationEditDialog = ({
         latitude: location.latitude?.toString() || "",
         longitude: location.longitude?.toString() || "",
         status: location.status,
+        photo_session_hidden: (location as any).photo_session_hidden ?? false,
       });
     }
   }, [location]);
