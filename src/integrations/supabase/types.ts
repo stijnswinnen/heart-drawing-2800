@@ -120,6 +120,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          photo_session_hidden: boolean
           recommendation: string | null
           rejection_reason: string | null
           share_consent: boolean | null
@@ -137,6 +138,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
+          photo_session_hidden?: boolean
           recommendation?: string | null
           rejection_reason?: string | null
           share_consent?: boolean | null
@@ -154,6 +156,7 @@ export type Database = {
           latitude?: number
           longitude?: number
           name?: string
+          photo_session_hidden?: boolean
           recommendation?: string | null
           rejection_reason?: string | null
           share_consent?: boolean | null

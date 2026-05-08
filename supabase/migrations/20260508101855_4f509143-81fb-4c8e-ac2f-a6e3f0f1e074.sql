@@ -1,0 +1,1 @@
+ALTER TABLE public.locations ADD COLUMN photo_session_hidden boolean NOT NULL DEFAULT false;
