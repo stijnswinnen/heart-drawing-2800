@@ -274,19 +274,17 @@ const Over = () => {
                 marginBottom: "10px",
               }}
             >
-              Initiatief
+              Volg 2800.love
             </div>
             <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
-              Een project van Mechels fotograaf{" "}
               <a
-                href="https://www.stijnswinnen.be"
+                href="https://www.instagram.com/2800loves"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="over-link"
               >
-                Stijn Swinnen
+                Instagram @2800loves
               </a>
-              .
             </p>
           </div>
           <div>
@@ -300,17 +298,19 @@ const Over = () => {
                 marginBottom: "10px",
               }}
             >
-              Volg het project
+              Initiatief
             </div>
             <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
+              Een project van Mechels fotograaf{" "}
               <a
-                href="https://www.instagram.com/2800loves"
+                href="https://www.stijnswinnen.be"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="over-link"
               >
-                Instagram @2800loves
+                Stijn Swinnen
               </a>
+              .
             </p>
           </div>
           <div>
