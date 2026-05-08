@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface LocationEditDialogProps {
   location: Tables<"locations"> | null;
@@ -42,6 +43,7 @@ export const LocationEditDialog = ({
     latitude: "",
     longitude: "",
     status: "new" as "new" | "approved" | "rejected" | "pending_verification",
+    photo_session_hidden: false,
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -69,6 +71,7 @@ export const LocationEditDialog = ({
         latitude: location.latitude?.toString() || "",
         longitude: location.longitude?.toString() || "",
         status: location.status,
+        photo_session_hidden: (location as any).photo_session_hidden ?? false,
       });
     }
   }, [location]);
@@ -87,7 +90,8 @@ export const LocationEditDialog = ({
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
         status: formData.status,
-      };
+        photo_session_hidden: formData.photo_session_hidden,
+      } as any;
 
       await onSave(location.id, updates);
       onClose();
@@ -232,6 +236,22 @@ export const LocationEditDialog = ({
                 required
               />
             </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="photo_session_hidden">Fotosessie-blok verbergen</Label>
+              <p className="text-sm text-muted-foreground">
+                Verberg het "Photo Session Booking"-blok op deze locatie.
+              </p>
+            </div>
+            <Switch
+              id="photo_session_hidden"
+              checked={formData.photo_session_hidden}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, photo_session_hidden: checked }))
+              }
+            />
           </div>
 
           {formData.image_path && (
