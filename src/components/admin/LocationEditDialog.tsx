@@ -238,6 +238,22 @@ export const LocationEditDialog = ({
             </div>
           </div>
 
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="photo_session_hidden">Fotosessie-blok verbergen</Label>
+              <p className="text-sm text-muted-foreground">
+                Verberg het "Photo Session Booking"-blok op deze locatie.
+              </p>
+            </div>
+            <Switch
+              id="photo_session_hidden"
+              checked={formData.photo_session_hidden}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, photo_session_hidden: checked }))
+              }
+            />
+          </div>
+
           {formData.image_path && (
             <div className="space-y-2">
               <Label>Voorvertoning afbeelding</Label>
