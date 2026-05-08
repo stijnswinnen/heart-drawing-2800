@@ -42,6 +42,7 @@ export const LocationEditDialog = ({
     latitude: "",
     longitude: "",
     status: "new" as "new" | "approved" | "rejected" | "pending_verification",
+    photo_session_hidden: false,
   });
   const [isSaving, setIsSaving] = useState(false);
 
