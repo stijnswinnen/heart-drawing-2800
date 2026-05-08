@@ -256,13 +256,37 @@ const Over = () => {
 
         {/* Credits footer */}
         <footer
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
           style={{
             marginTop: "56px",
             paddingTop: "40px",
             borderTop: "1px solid var(--line)",
           }}
         >
+          <div>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                color: "var(--muted-foreground, #7A726B)",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Volg 2800.love
+            </div>
+            <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
+              <a
+                href="https://www.instagram.com/2800loves"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="over-link"
+              >
+                Instagram @2800loves
+              </a>
+            </p>
+          </div>
           <div>
             <div
               style={{
@@ -287,30 +311,6 @@ const Over = () => {
                 Stijn Swinnen
               </a>
               .
-            </p>
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                color: "var(--muted-foreground, #7A726B)",
-                textTransform: "uppercase",
-                marginBottom: "10px",
-              }}
-            >
-              Volg het project
-            </div>
-            <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
-              <a
-                href="https://www.instagram.com/2800loves"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="over-link"
-              >
-                Instagram @2800loves
-              </a>
             </p>
           </div>
           <div>
