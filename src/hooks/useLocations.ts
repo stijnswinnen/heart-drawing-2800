@@ -15,6 +15,7 @@ export interface Location {
   recommendation: string | null;
   image_path: string | null;
   category: string | null;
+  photo_session_hidden: boolean | null;
 }
 
 export const useLocations = () => {
