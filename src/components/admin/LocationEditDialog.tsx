@@ -89,7 +89,8 @@ export const LocationEditDialog = ({
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
         status: formData.status,
-      };
+        photo_session_hidden: formData.photo_session_hidden,
+      } as any;
 
       await onSave(location.id, updates);
       onClose();
