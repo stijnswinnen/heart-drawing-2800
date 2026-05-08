@@ -25,7 +25,7 @@ export const useLocations = () => {
     try {
       const { data, error } = await supabase
         .from('locations')
-        .select('id, name, description, latitude, longitude, user_id, heart_user_id, status, rejection_reason, recommendation, image_path, category')
+        .select('id, name, description, latitude, longitude, user_id, heart_user_id, status, rejection_reason, recommendation, image_path, category, photo_session_hidden')
         .eq('status', 'approved');
 
       if (error) throw error;
