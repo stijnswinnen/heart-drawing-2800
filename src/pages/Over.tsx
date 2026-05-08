@@ -256,7 +256,7 @@ const Over = () => {
 
         {/* Credits footer */}
         <footer
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
           style={{
             marginTop: "56px",
             paddingTop: "40px",
@@ -311,6 +311,23 @@ const Over = () => {
               >
                 Instagram @2800loves
               </a>
+            </p>
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                color: "var(--muted-foreground, #7A726B)",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Contact
+            </div>
+            <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
+              Eskwadraat VOF — BE 0635.785.807
             </p>
           </div>
         </footer>
