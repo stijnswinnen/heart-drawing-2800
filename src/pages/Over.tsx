@@ -313,6 +313,23 @@ const Over = () => {
               </a>
             </p>
           </div>
+          <div>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                color: "var(--muted-foreground, #7A726B)",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+              }}
+            >
+              Contact
+            </div>
+            <p className="m-0" style={{ fontSize: "15px", color: "var(--ink-2)" }}>
+              Eskwadraat VOF — BE 0635.785.807
+            </p>
+          </div>
         </footer>
 
         <style>{`
