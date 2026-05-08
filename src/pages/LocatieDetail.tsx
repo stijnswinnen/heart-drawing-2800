@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { HomeFooter } from "@/components/HomeFooter";
 import { LocationsMap } from "@/components/LocationsMap";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocations } from "@/hooks/useLocations";
 import { LocationDetailsPanel } from "@/components/LocationDetailsPanel";
@@ -24,6 +24,10 @@ const LocatieDetail = () => {
     slugMap.forEach((s, id) => m.set(s, id));
     return m;
   }, [slugMap]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [slug]);
 
   const selectedLocationId = slug ? slugToId.get(slug) ?? null : null;
   const selectedLocation = locations.find((loc) => loc.id === selectedLocationId);
