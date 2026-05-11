@@ -138,10 +138,32 @@ export function PhotoSessionBooking({
           grid-template-columns: repeat(3, 1fr);
           gap: 14px;
         }
+        .psb-grid--four {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        @media (max-width: 1100px) {
+          .psb-grid--four {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
         @media (max-width: 880px) {
           .psb-grid {
             grid-template-columns: 1fr;
           }
+        }
+        @media (max-width: 600px) {
+          .psb-grid--four {
+            grid-template-columns: 1fr;
+          }
+        }
+        .booking-badge--owner {
+          background: var(--pink-100);
+          color: var(--pink-600);
+          border-color: transparent;
+        }
+        .booking-meta-free {
+          color: var(--pink-500);
+          font-weight: 500;
         }
         .psb-card {
           display: flex;
