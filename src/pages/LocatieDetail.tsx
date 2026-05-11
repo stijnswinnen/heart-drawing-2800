@@ -11,11 +11,13 @@ import { buildSlugMap } from "@/utils/slug";
 import { Seo } from "@/components/Seo";
 import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
 import { CALENDLY_URLS } from "@/config/calendly";
+import { useSession } from "@supabase/auth-helpers-react";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const locations = useLocations();
+  const session = useSession();
 
   const slugMap = useMemo(() => buildSlugMap(locations), [locations]);
   const idToSlug = slugMap;
@@ -189,6 +191,14 @@ const LocatieDetail = () => {
             soloUrl={CALENDLY_URLS.solo}
             koppelUrl={CALENDLY_URLS.koppel}
             gezinUrl={CALENDLY_URLS.gezin}
+            ownerUrl={CALENDLY_URLS.owner}
+            isOwner={Boolean(
+              session?.user?.id &&
+                selectedLocation &&
+                (selectedLocation.user_id === session.user.id ||
+                  selectedLocation.heart_user_id === session.user.id) &&
+                selectedLocation.status === "approved"
+            )}
           />
         )}
 

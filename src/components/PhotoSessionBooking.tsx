@@ -5,6 +5,8 @@ interface PhotoSessionBookingProps {
   soloUrl: string;
   koppelUrl: string;
   gezinUrl: string;
+  ownerUrl: string;
+  isOwner: boolean;
 }
 
 type Audience = "solo" | "koppel" | "gezin";
@@ -86,6 +88,8 @@ export function PhotoSessionBooking({
   soloUrl,
   koppelUrl,
   gezinUrl,
+  ownerUrl,
+  isOwner,
 }: PhotoSessionBookingProps) {
   const [openUrl, setOpenUrl] = useState<string | null>(null);
   const urls = { soloUrl, koppelUrl, gezinUrl };
@@ -134,10 +138,32 @@ export function PhotoSessionBooking({
           grid-template-columns: repeat(3, 1fr);
           gap: 14px;
         }
+        .psb-grid--four {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        @media (max-width: 1100px) {
+          .psb-grid--four {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
         @media (max-width: 880px) {
           .psb-grid {
             grid-template-columns: 1fr;
           }
+        }
+        @media (max-width: 600px) {
+          .psb-grid--four {
+            grid-template-columns: 1fr;
+          }
+        }
+        .booking-badge--owner {
+          background: var(--pink-100);
+          color: var(--pink-600);
+          border-color: transparent;
+        }
+        .booking-meta-free {
+          color: var(--pink-500);
+          font-weight: 500;
         }
         .psb-card {
           display: flex;
@@ -243,7 +269,32 @@ export function PhotoSessionBooking({
         </p>
       </header>
 
-      <div className="psb-grid">
+      <div className={`psb-grid${isOwner ? " psb-grid--four" : ""}`}>
+        {isOwner && (
+          <article className="psb-card">
+            <span className="psb-badge booking-badge--owner">
+              Enkel voor jou
+            </span>
+            <h3 className="psb-card-title">Je favoriete plek</h3>
+            <div className="psb-meta">
+              15 min
+              <span className="psb-dot">·</span>
+              <strong className="booking-meta-free">Gratis</strong>
+            </div>
+            <ul className="psb-list">
+              <li>1 bewerkte foto</li>
+              <li>Hoge resolutie</li>
+              <li>Voor 2800.love en social media</li>
+            </ul>
+            <button
+              type="button"
+              className="psb-cta"
+              onClick={() => setOpenUrl(ownerUrl)}
+            >
+              Boek je gratis sessie
+            </button>
+          </article>
+        )}
         {SESSIONS.map((s) => {
           const url = urls[s.urlKey];
           return (
