@@ -191,6 +191,14 @@ const LocatieDetail = () => {
             soloUrl={CALENDLY_URLS.solo}
             koppelUrl={CALENDLY_URLS.koppel}
             gezinUrl={CALENDLY_URLS.gezin}
+            ownerUrl={CALENDLY_URLS.owner}
+            isOwner={Boolean(
+              session?.user?.id &&
+                selectedLocation &&
+                (selectedLocation.user_id === session.user.id ||
+                  selectedLocation.heart_user_id === session.user.id) &&
+                selectedLocation.status === "approved"
+            )}
           />
         )}
 
