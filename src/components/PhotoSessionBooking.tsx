@@ -5,6 +5,8 @@ interface PhotoSessionBookingProps {
   soloUrl: string;
   koppelUrl: string;
   gezinUrl: string;
+  ownerUrl: string;
+  isOwner: boolean;
 }
 
 type Audience = "solo" | "koppel" | "gezin";
