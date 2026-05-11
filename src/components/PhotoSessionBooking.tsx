@@ -269,7 +269,32 @@ export function PhotoSessionBooking({
         </p>
       </header>
 
-      <div className="psb-grid">
+      <div className={`psb-grid${isOwner ? " psb-grid--four" : ""}`}>
+        {isOwner && (
+          <article className="psb-card">
+            <span className="psb-badge booking-badge--owner">
+              Enkel voor jou
+            </span>
+            <h3 className="psb-card-title">Je favoriete plek</h3>
+            <div className="psb-meta">
+              15 min
+              <span className="psb-dot">·</span>
+              <strong className="booking-meta-free">Gratis</strong>
+            </div>
+            <ul className="psb-list">
+              <li>1 bewerkte foto</li>
+              <li>Hoge resolutie</li>
+              <li>Voor 2800.love en social media</li>
+            </ul>
+            <button
+              type="button"
+              className="psb-cta"
+              onClick={() => setOpenUrl(ownerUrl)}
+            >
+              Boek je gratis sessie
+            </button>
+          </article>
+        )}
         {SESSIONS.map((s) => {
           const url = urls[s.urlKey];
           return (
