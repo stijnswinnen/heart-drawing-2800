@@ -88,6 +88,8 @@ export function PhotoSessionBooking({
   soloUrl,
   koppelUrl,
   gezinUrl,
+  ownerUrl,
+  isOwner,
 }: PhotoSessionBookingProps) {
   const [openUrl, setOpenUrl] = useState<string | null>(null);
   const urls = { soloUrl, koppelUrl, gezinUrl };
