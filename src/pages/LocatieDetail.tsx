@@ -179,7 +179,7 @@ const LocatieDetail = () => {
 
         <div className="grid grid-cols-1 min-[880px]:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-16 items-start">
           {/* LEFT: details */}
-          <div className="order-2 min-[880px]:order-1">
+          <div className="order-1 min-[880px]:order-1">
             {selectedLocation && (
               <LocationDetailsPanel
                 location={{
