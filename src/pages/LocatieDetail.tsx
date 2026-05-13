@@ -28,9 +28,20 @@ const LocatieDetail = () => {
     return m;
   }, [slugMap]);
 
+  const [hasScrolled, setHasScrolled] = useState(false);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    setHasScrolled(false);
   }, [slug]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 0) setHasScrolled(true);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const selectedLocationId = slug ? slugToId.get(slug) ?? null : null;
   const selectedLocation = locations.find((loc) => loc.id === selectedLocationId);
