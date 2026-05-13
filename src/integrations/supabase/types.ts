@@ -125,6 +125,7 @@ export type Database = {
           rejection_reason: string | null
           share_consent: boolean | null
           status: Database["public"]["Enums"]["location_status"]
+          summary: string | null
           updated_at: string
           user_id: string | null
         }
@@ -143,6 +144,7 @@ export type Database = {
           rejection_reason?: string | null
           share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
+          summary?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -161,6 +163,7 @@ export type Database = {
           rejection_reason?: string | null
           share_consent?: boolean | null
           status?: Database["public"]["Enums"]["location_status"]
+          summary?: string | null
           updated_at?: string
           user_id?: string | null
         }

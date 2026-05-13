@@ -15,17 +15,60 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cleanupAuthState } from "@/utils/authCleanup";
 
-export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
+export const Navigation = ({
+  isDrawing,
+  transparentOverHero = false,
+}: {
+  isDrawing?: boolean;
+  transparentOverHero?: boolean;
+}) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [navT, setNavT] = useState(transparentOverHero ? 0 : 1);
+  const [scrolled, setScrolled] = useState(!transparentOverHero);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!transparentOverHero) {
+      setNavT(1);
+      setScrolled(true);
+      return;
+    }
+    setNavT(0);
+    setScrolled(window.scrollY > 8);
+    const onState = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { navT: number; scrollY: number };
+      setNavT(detail.navT);
+      setScrolled(detail.scrollY > 8);
+    };
+    window.addEventListener("hero-nav-state", onState as EventListener);
+    return () => window.removeEventListener("hero-nav-state", onState as EventListener);
+  }, [transparentOverHero]);
+
+  const floating = transparentOverHero;
+  const headerStyle = floating
+    ? {
+        background: `rgba(251,250,247,${0.92 * navT})`,
+        backdropFilter: navT > 0.05 ? "saturate(140%) blur(12px)" : "none",
+        WebkitBackdropFilter: navT > 0.05 ? "saturate(140%) blur(12px)" : "none",
+        borderBottomColor: `rgba(235,229,222,${navT})`,
+      }
+    : {
+        background: "rgba(251,250,247,0.85)",
+        backdropFilter: "saturate(140%) blur(10px)",
+        WebkitBackdropFilter: "saturate(140%) blur(10px)",
+      };
+  const headerClass = floating
+    ? "fixed top-0 left-0 right-0 z-50 border-b"
+    : "sticky top-0 z-50 border-b border-line";
+  const isLight = floating && !scrolled;
 
   if (isDrawing) {
     return null;
@@ -61,10 +104,12 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   const Brand = () => (
     <Link
       to="/"
-      className="inline-flex items-center gap-2 font-sans font-semibold tracking-[-0.01em] text-[15px] text-ink"
+      className={`inline-flex items-center gap-2 font-sans font-semibold tracking-[-0.01em] text-[15px] transition-colors ${
+        isLight ? "text-white" : "text-ink"
+      }`}
     >
       <span className="w-2 h-2 rounded-full bg-pink-500" aria-hidden="true" />
-      <span>2800<span className="opacity-50">.love</span></span>
+      <span>2800<span className="opacity-60">.love</span></span>
     </Link>
   );
 
@@ -72,16 +117,16 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
     <nav className="flex gap-7 ml-2 font-sans">
       {links.map((link) => {
         const active = location.pathname === link.path;
+        const base = "text-[14px] font-normal py-1.5 border-b-[1.5px] transition-colors";
+        const cls = isLight
+          ? active
+            ? "text-white border-white"
+            : "text-white/75 border-transparent hover:text-white"
+          : active
+            ? "text-ink border-ink"
+            : "text-ink-muted border-transparent hover:text-ink";
         return (
-          <Link
-            key={link.path}
-            to={link.path}
-            className={`text-[14px] font-normal py-1.5 border-b-[1.5px] transition-colors ${
-              active
-                ? "text-ink border-ink"
-                : "text-ink-muted border-transparent hover:text-ink"
-            }`}
-          >
+          <Link key={link.path} to={link.path} className={`${base} ${cls}`}>
             {link.label}
           </Link>
         );
@@ -89,10 +134,12 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
     </nav>
   );
 
-  const ghostBtn =
-    "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-ink bg-transparent border border-transparent hover:bg-pink-50 transition-colors";
-  const outlineBtn =
-    "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-ink bg-surface border border-line-strong hover:border-ink-2 transition-colors";
+  const ghostBtn = isLight
+    ? "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-white bg-white/10 border border-white/25 backdrop-blur hover:bg-white/20 transition-colors"
+    : "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-ink bg-transparent border border-transparent hover:bg-pink-50 transition-colors";
+  const outlineBtn = isLight
+    ? "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-white bg-white/10 border border-white/30 backdrop-blur hover:bg-white/20 transition-colors"
+    : "inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-full text-[14px] font-medium font-sans text-ink bg-surface border border-line-strong hover:border-ink-2 transition-colors";
 
   const Actions = () => (
     <div className="flex items-center gap-2">
@@ -117,19 +164,16 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
   if (isMobile) {
     return (
       <>
-        <header
-          className="sticky top-0 z-50 border-b border-line"
-          style={{
-            background: "rgba(251,250,247,0.85)",
-            backdropFilter: "saturate(140%) blur(10px)",
-            WebkitBackdropFilter: "saturate(140%) blur(10px)",
-          }}
-        >
+        <header className={headerClass} style={headerStyle}>
           <div className="h-16 px-5 flex items-center justify-between max-w-[1200px] mx-auto">
             <Brand />
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-full ${isLight ? "text-white hover:bg-white/15" : ""}`}
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -166,14 +210,7 @@ export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 border-b border-line"
-        style={{
-          background: "rgba(251,250,247,0.85)",
-          backdropFilter: "saturate(140%) blur(10px)",
-          WebkitBackdropFilter: "saturate(140%) blur(10px)",
-        }}
-      >
+      <header className={headerClass} style={headerStyle}>
         <div className="max-w-[1200px] mx-auto h-16 px-7 flex items-center gap-8">
           <Brand />
           <DesktopLinks />
