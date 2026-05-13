@@ -257,7 +257,7 @@ const LocatieDetail = () => {
           </section>
         )}
       </main>
-      <HomeFooter />
+      {hasScrolled && <HomeFooter />}
     </div>
   );
 };
