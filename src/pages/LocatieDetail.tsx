@@ -152,7 +152,7 @@ const LocatieDetail = () => {
               rel="preload"
               as="image"
               href={selectedLocation.image_path as string}
-              fetchpriority="high"
+              fetchPriority="high"
             />
           </Helmet>
           <LocationHero
