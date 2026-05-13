@@ -65,6 +65,7 @@ export const LocationEditDialog = ({
     if (location) {
       setFormData({
         name: location.name || "",
+        summary: (location as any).summary || "",
         description: location.description || "",
         recommendation: location.recommendation || "",
         image_path: location.image_path || "",
@@ -84,6 +85,7 @@ export const LocationEditDialog = ({
     try {
       const updates: Partial<Tables<"locations">> = {
         name: formData.name,
+        summary: formData.summary.trim() ? formData.summary.trim() : null,
         description: formData.description || null,
         recommendation: formData.recommendation || null,
         image_path: formData.image_path || null,
