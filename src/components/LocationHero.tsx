@@ -271,6 +271,10 @@ export const LocationHero = ({
           0%, 100% { transform: translateX(-50%) translateY(0); }
           50% { transform: translateX(-50%) translateY(6px); }
         }
+        @keyframes hero-shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
       `}</style>
     </div>
   );
