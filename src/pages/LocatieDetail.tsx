@@ -118,6 +118,8 @@ const LocatieDetail = () => {
     : null;
   const jsonLd = [placeJsonLd, breadcrumbJsonLd].filter(Boolean) as unknown[];
 
+  const hasHero = Boolean(selectedLocation?.image_path);
+
   return (
     <div className="min-h-screen bg-bg">
       <Seo
@@ -127,8 +129,22 @@ const LocatieDetail = () => {
         ogType="article"
         jsonLd={jsonLd}
       />
-      <Navigation />
-      <main className="max-w-[1200px] mx-auto px-7 pt-14 pb-24">
+      <Navigation transparentOverHero={hasHero} />
+
+      {hasHero && selectedLocation && (
+        <LocationHero
+          imageUrl={selectedLocation.image_path as string}
+          name={selectedLocation.name}
+          category={selectedLocation.category}
+          summary={selectedLocation.summary}
+        />
+      )}
+
+      <main
+        className={`max-w-[1200px] mx-auto px-7 pb-24 ${
+          hasHero ? "pt-14" : "pt-[88px]"
+        }`}
+      >
         <Link
           to="/locaties"
           className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted hover:text-ink transition-colors mb-9"
@@ -150,8 +166,10 @@ const LocatieDetail = () => {
                   recommendation: selectedLocation.recommendation,
                   image_path: selectedLocation.image_path || null,
                   category: selectedLocation.category || null,
+                  summary: selectedLocation.summary || null,
                 }}
                 onClose={() => navigate("/locaties")}
+                heroAbove={hasHero}
               />
             )}
           </div>
