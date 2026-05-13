@@ -1,57 +1,58 @@
-## Problem
+## Context
 
-On desktop, the map briefly shows at the top of the page before the hero image appears. The cause is **not** image loading — the hero image already preloads with `fetchpriority="high"` and the wrapper is correctly `100svh`. The real issue is data loading:
+Supabase is changing the default for the Data API:
+- **New projects** (after 30 May): tables in `public` are no longer auto-exposed.
+- **Existing projects** (this one included) get the same behaviour on **30 Oct**.
+- Existing tables keep their current grants — nothing breaks today.
+- Only **new** tables created in `public` after the cutover need explicit `GRANT` statements before `supabase-js` / PostgREST / GraphQL can read or write them.
 
-1. `useLocations()` starts as `[]` and fetches asynchronously.
-2. Until that fetch resolves, `selectedLocation` is `undefined`, so `hasHero` is `false`.
-3. With `hasHero=false`, the entire `<LocationHero>` block in `LocatieDetail.tsx` (lines 148–165) is skipped.
-4. `<main>` renders at the top → the map appears above the fold for a frame.
-5. Locations resolve → hero mounts → map gets pushed down (visible "jump").
+This project's current 8 tables (`profiles`, `locations`, `drawings`, `location_likes`, `categories`, `security_logs`, `video_jobs`, `video_generation`) already have the legacy grants and will continue to work.
 
-So the hero wrapper never reserves its 100svh height during the data-loading window.
+## Plan
 
-## Fix
+The fix is a **convention change**, not a code change to existing files. From now on, every migration that creates a table in `public` must:
 
-Reserve the hero's vertical space from the very first paint on any detail route, regardless of whether `selectedLocation` is loaded yet.
+1. Create the table.
+2. `GRANT` the appropriate verbs to `anon`, `authenticated`, `service_role`.
+3. Enable RLS.
+4. Add RLS policies.
 
-### Changes to `src/pages/LocatieDetail.tsx`
+### Standard template to use in every future `CREATE TABLE` migration
 
-1. Detect "we are on a detail route and locations haven't resolved yet" — i.e. `slug` is present and `locations.length === 0`. Treat this as "hero pending".
-2. Always render a hero placeholder when either the real hero is available OR hero is pending. The placeholder is a `div` with `height: 100svh`, the same dark background (`#1a1612`) and the existing shimmer gradient already used inside `LocationHero`. This guarantees the map cannot appear above the fold.
-3. Once `selectedLocation` resolves:
-   - If it has `image_path` → swap placeholder for `<LocationHero>` (the preload link + image priority work as before).
-   - If it has no `image_path` → drop the placeholder and fall back to the current `pt-[88px]` layout.
-4. Keep the existing `<Helmet>` preload link exactly as-is (still fires as soon as `image_path` is known).
-5. Adjust `Navigation transparentOverHero` so it stays transparent during the pending state too (otherwise the nav style would flicker).
-
-No changes to `LocationHero.tsx` — its wrapper is already `100svh` and image loading is already prioritised. No business-logic changes.
-
-### Technical detail
-
-```text
-hasHero      = Boolean(selectedLocation?.image_path)
-heroPending  = Boolean(slug) && locations.length === 0 && !selectedLocation
-showHeroSlot = hasHero || heroPending
-```
-
-Render order inside the page root:
-
-```text
-<Seo />
-<Navigation transparentOverHero={showHeroSlot} />
-
-{hasHero && <Helmet preload /> + <LocationHero />}
-{!hasHero && heroPending && <div style="height:100svh; background:#1a1612; shimmer" />}
-
-<main className={showHeroSlot ? "pt-14" : "pt-[88px]"}>
+```sql
+create table public.example (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
   ...
-</main>
+  created_at timestamptz not null default now()
+);
+
+-- Data API exposure (required from 30 Oct 2026)
+grant select                         on public.example to anon;
+grant select, insert, update, delete on public.example to authenticated;
+grant select, insert, update, delete on public.example to service_role;
+
+alter table public.example enable row level security;
+
+create policy "..." on public.example for select to authenticated using (...);
+-- etc.
 ```
 
-The placeholder uses the same gradient + `@keyframes hero-shimmer` already defined in `LocationHero` — duplicate the small style block locally (or extract a tiny shared `HeroPlaceholder` component if cleaner) so the visual matches exactly.
+Pick the verb set per table:
+- **Public read-only reference data** → `grant select` to `anon` + `authenticated`.
+- **User-owned data** → `select` to `anon` only if rows are public; full CRUD to `authenticated`; full CRUD to `service_role` for edge functions.
+- **Admin-only / internal** → grants only to `service_role`; revoke from `anon`/`authenticated`.
 
-### Out of scope
+### What does NOT need to change now
 
-- No change to `LocationHero` internals.
-- No change to image preload/priority (already correct).
-- No change to map, footer, or scroll behaviour.
+- No backfill migration. Existing tables keep their grants.
+- No edge-function or client code changes.
+- No action required before 30 Oct.
+
+### Optional safety net (recommended but not required)
+
+Add a one-line note at the top of `supabase/migrations/` (e.g. a `README.md`) reminding future contributors and the AI agent to include the `GRANT` block whenever creating a new public table. This prevents a silent `42501` error later.
+
+## Out of scope
+
+- The other open security findings in the panel (set_admin_role, hearts bucket, open edge functions, etc.) — those are tracked separately and are unrelated to this Data API change.
