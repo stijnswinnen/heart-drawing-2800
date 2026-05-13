@@ -146,11 +146,17 @@ export const LocationHero = ({
           ref={imgRef}
           src={imageUrl}
           alt={name}
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
           className="block w-full h-full"
           style={{
             objectFit: "cover",
             objectPosition: "center 40%",
             willChange: "transform",
+            opacity: loaded ? 1 : 0,
+            transition: "opacity 0.6s ease",
           }}
         />
         {/* gradient overlay */}
