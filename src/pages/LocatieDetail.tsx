@@ -145,7 +145,7 @@ const LocatieDetail = () => {
         ogType="article"
         jsonLd={jsonLd}
       />
-      <Navigation transparentOverHero={hasHero} />
+      <Navigation transparentOverHero={showHeroSlot} />
 
       {hasHero && selectedLocation && (
         <>
@@ -166,9 +166,31 @@ const LocatieDetail = () => {
         </>
       )}
 
+      {!hasHero && heroPending && (
+        <>
+          <div
+            className="relative w-full"
+            style={{
+              height: "100svh",
+              background: "#1a1612",
+              backgroundImage:
+                "linear-gradient(110deg, #1a1612 0%, #1a1612 40%, #2a2118 50%, #1a1612 60%, #1a1612 100%)",
+              backgroundSize: "200% 100%",
+              animation: "hero-shimmer 1.8s linear infinite",
+            }}
+          />
+          <style>{`
+            @keyframes hero-shimmer {
+              0%   { background-position: 200% 0; }
+              100% { background-position: -200% 0; }
+            }
+          `}</style>
+        </>
+      )}
+
       <main
         className={`max-w-[1200px] mx-auto px-7 pb-24 ${
-          hasHero ? "pt-14" : "pt-[88px]"
+          showHeroSlot ? "pt-14" : "pt-[88px]"
         }`}
       >
         <Link
