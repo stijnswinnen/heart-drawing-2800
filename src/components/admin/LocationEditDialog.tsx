@@ -36,6 +36,7 @@ export const LocationEditDialog = ({
 }: LocationEditDialogProps) => {
   const [formData, setFormData] = useState({
     name: "",
+    summary: "",
     description: "",
     recommendation: "",
     image_path: "",
