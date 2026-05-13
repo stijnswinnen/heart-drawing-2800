@@ -13,6 +13,7 @@ import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
 import { CALENDLY_URLS } from "@/config/calendly";
 import { useSession } from "@supabase/auth-helpers-react";
 import { LocationHero } from "@/components/LocationHero";
+import { Helmet } from "react-helmet-async";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
