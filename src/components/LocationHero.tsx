@@ -112,6 +112,14 @@ export const LocationHero = ({
     };
   }, [imageUrl]);
 
+  // Handle cached images (already loaded before React hydration)
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [imageUrl]);
+
   return (
     <div className="relative w-full" style={{ height: "100svh" }}>
       <figure
