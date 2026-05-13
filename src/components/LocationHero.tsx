@@ -132,6 +132,11 @@ export const LocationHero = ({
           height: "100svh",
           margin: 0,
           background: "#1a1612",
+          backgroundImage: loaded
+            ? "none"
+            : "linear-gradient(110deg, #1a1612 0%, #1a1612 40%, #2a2118 50%, #1a1612 60%, #1a1612 100%)",
+          backgroundSize: "200% 100%",
+          animation: loaded ? "none" : "hero-shimmer 1.8s linear infinite",
           borderRadius: 0,
           willChange: "width, height, margin-left, border-radius, top",
           transition: "box-shadow .4s ease",
