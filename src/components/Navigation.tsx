@@ -15,17 +15,60 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cleanupAuthState } from "@/utils/authCleanup";
 
-export const Navigation = ({ isDrawing }: { isDrawing?: boolean }) => {
+export const Navigation = ({
+  isDrawing,
+  transparentOverHero = false,
+}: {
+  isDrawing?: boolean;
+  transparentOverHero?: boolean;
+}) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [showAuth, setShowAuth] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [navT, setNavT] = useState(transparentOverHero ? 0 : 1);
+  const [scrolled, setScrolled] = useState(!transparentOverHero);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!transparentOverHero) {
+      setNavT(1);
+      setScrolled(true);
+      return;
+    }
+    setNavT(0);
+    setScrolled(window.scrollY > 8);
+    const onState = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { navT: number; scrollY: number };
+      setNavT(detail.navT);
+      setScrolled(detail.scrollY > 8);
+    };
+    window.addEventListener("hero-nav-state", onState as EventListener);
+    return () => window.removeEventListener("hero-nav-state", onState as EventListener);
+  }, [transparentOverHero]);
+
+  const floating = transparentOverHero;
+  const headerStyle = floating
+    ? {
+        background: `rgba(251,250,247,${0.92 * navT})`,
+        backdropFilter: navT > 0.05 ? "saturate(140%) blur(12px)" : "none",
+        WebkitBackdropFilter: navT > 0.05 ? "saturate(140%) blur(12px)" : "none",
+        borderBottomColor: `rgba(235,229,222,${navT})`,
+      }
+    : {
+        background: "rgba(251,250,247,0.85)",
+        backdropFilter: "saturate(140%) blur(10px)",
+        WebkitBackdropFilter: "saturate(140%) blur(10px)",
+      };
+  const headerClass = floating
+    ? "fixed top-0 left-0 right-0 z-50 border-b"
+    : "sticky top-0 z-50 border-b border-line";
+  const isLight = floating && !scrolled;
 
   if (isDrawing) {
     return null;
