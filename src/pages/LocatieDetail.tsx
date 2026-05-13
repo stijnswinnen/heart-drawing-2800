@@ -199,7 +199,7 @@ const LocatieDetail = () => {
           </div>
 
           {/* RIGHT: map */}
-          <div className="order-1 min-[880px]:order-2">
+          <div className="order-2 min-[880px]:order-2">
             <div className="min-[880px]:sticky min-[880px]:top-[88px]">
               <div
                 className="rounded-[20px] overflow-hidden bg-surface border border-line"
