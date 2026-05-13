@@ -154,6 +154,24 @@ export const LocationEditDialog = ({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="summary">Summary</Label>
+            <small className="block text-xs text-muted-foreground -mt-1">
+              Eén zin onder de titel. Wordt gebruikt op de detail‑pagina als korte introductie. Alleen jij kan dit veld invullen.
+            </small>
+            <Input
+              id="summary"
+              type="text"
+              maxLength={200}
+              value={formData.summary}
+              onChange={(e) => handleInputChange("summary", e.target.value)}
+              placeholder="Bv. 'Een rustig stukje natuur vlakbij de spoorlijn, voor wandelingen of een boekje in het gras.'"
+            />
+            <div className="text-[12.5px]" style={{ color: "var(--muted)" }}>
+              {formData.summary.length}/200
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description">Beschrijving</Label>
             <Textarea
               id="description"
