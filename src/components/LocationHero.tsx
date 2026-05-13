@@ -211,19 +211,20 @@ export const LocationHero = ({
           )}
         </div>
 
-        {credit && (
-          <span
-            className="absolute italic"
-            style={{
-              bottom: 20,
-              right: 24,
-              fontSize: 12,
-              color: "rgba(255,255,255,.5)",
-            }}
-          >
-            {credit}
-          </span>
-        )}
+        <a
+          href="https://www.stijnswinnen.be/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute italic hover:text-white transition-colors"
+          style={{
+            bottom: 20,
+            right: 24,
+            fontSize: 12,
+            color: "rgba(255,255,255,.6)",
+          }}
+        >
+          Foto · Stijn Swinnen
+        </a>
 
         {/* scroll hint */}
         <div
