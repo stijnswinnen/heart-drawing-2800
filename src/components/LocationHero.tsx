@@ -146,7 +146,7 @@ export const LocationHero = ({
           ref={imgRef}
           src={imageUrl}
           alt={name}
-          fetchpriority="high"
+          fetchPriority="high"
           loading="eager"
           decoding="async"
           onLoad={() => setLoaded(true)}
