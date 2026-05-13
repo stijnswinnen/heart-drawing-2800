@@ -133,6 +133,8 @@ const LocatieDetail = () => {
   const jsonLd = [placeJsonLd, breadcrumbJsonLd].filter(Boolean) as unknown[];
 
   const hasHero = Boolean(selectedLocation?.image_path);
+  const heroPending = Boolean(slug) && locations.length === 0 && !selectedLocation;
+  const showHeroSlot = hasHero || heroPending;
 
   return (
     <div className="min-h-screen bg-bg">
