@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { HomeFooter } from "@/components/HomeFooter";
 import { LocationsMap } from "@/components/LocationsMap";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLocations } from "@/hooks/useLocations";
 import { LocationDetailsPanel } from "@/components/LocationDetailsPanel";
