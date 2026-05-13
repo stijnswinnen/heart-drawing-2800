@@ -146,12 +146,22 @@ const LocatieDetail = () => {
       <Navigation transparentOverHero={hasHero} />
 
       {hasHero && selectedLocation && (
-        <LocationHero
-          imageUrl={selectedLocation.image_path as string}
-          name={selectedLocation.name}
-          category={selectedLocation.category}
-          summary={selectedLocation.summary}
-        />
+        <>
+          <Helmet>
+            <link
+              rel="preload"
+              as="image"
+              href={selectedLocation.image_path as string}
+              fetchpriority="high"
+            />
+          </Helmet>
+          <LocationHero
+            imageUrl={selectedLocation.image_path as string}
+            name={selectedLocation.name}
+            category={selectedLocation.category}
+            summary={selectedLocation.summary}
+          />
+        </>
       )}
 
       <main
