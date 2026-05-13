@@ -33,6 +33,7 @@ export const LocationHero = ({
   const figRef = useRef<HTMLElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const hintRef = useRef<HTMLDivElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let scrollY = 0;
