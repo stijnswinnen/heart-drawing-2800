@@ -19,8 +19,11 @@ interface LocationDetailsPanelProps {
     recommendation: string | null;
     image_path?: string | null;
     category?: string | null;
+    summary?: string | null;
   };
   onClose: () => void;
+  /** When true, the hero already shows title/category/summary, so this panel hides those */
+  heroAbove?: boolean;
 }
 
 export const LocationDetailsPanel = ({ location, onClose }: LocationDetailsPanelProps) => {
