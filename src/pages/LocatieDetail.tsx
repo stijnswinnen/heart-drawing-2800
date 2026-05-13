@@ -270,7 +270,11 @@ const LocatieDetail = () => {
           </section>
         )}
       </main>
-      {hasScrolled && <HomeFooter />}
+      <div
+        className={`transition-opacity duration-500 ${hasScrolled ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      >
+        <HomeFooter />
+      </div>
     </div>
   );
 };
