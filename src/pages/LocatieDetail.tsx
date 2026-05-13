@@ -37,8 +37,10 @@ const LocatieDetail = () => {
 
   useEffect(() => {
     const onScroll = () => {
-      if (window.scrollY > 0) setHasScrolled(true);
+      if (window.scrollY > 100) setHasScrolled(true);
+      else setHasScrolled(false);
     };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -268,7 +270,11 @@ const LocatieDetail = () => {
           </section>
         )}
       </main>
-      {hasScrolled && <HomeFooter />}
+      <div
+        className={`transition-opacity duration-500 ${hasScrolled ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      >
+        <HomeFooter />
+      </div>
     </div>
   );
 };
