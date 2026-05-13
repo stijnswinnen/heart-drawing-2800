@@ -126,7 +126,7 @@ export const LocationDetailsPanel = ({ location, onClose, heroAbove = false }: L
 
   return (
     <div>
-      {location.category && (
+      {!heroAbove && location.category && (
         <span
           className="inline-block uppercase text-[12px] font-medium tracking-wide rounded-full"
           style={{
@@ -142,17 +142,32 @@ export const LocationDetailsPanel = ({ location, onClose, heroAbove = false }: L
       <h1
         className="font-fraunces font-normal text-ink"
         style={{
-          fontSize: "clamp(44px, 6vw, 72px)",
+          fontSize: heroAbove ? "clamp(32px, 4.4vw, 52px)" : "clamp(44px, 6vw, 72px)",
           lineHeight: 1.02,
           letterSpacing: "-0.02em",
-          marginTop: "18px",
-          marginBottom: "32px",
+          marginTop: heroAbove ? 0 : "18px",
+          marginBottom: location.summary ? "16px" : "32px",
         }}
       >
         {location.name}
       </h1>
 
-      {location.image_path && (
+      {location.summary && (
+        <p
+          className="article-lead text-ink-2"
+          style={{
+            fontSize: "clamp(17px, 1.4vw, 19px)",
+            lineHeight: 1.55,
+            maxWidth: "56ch",
+            marginBottom: "32px",
+            color: "var(--ink-2)",
+          }}
+        >
+          {location.summary}
+        </p>
+      )}
+
+      {!heroAbove && location.image_path && (
         <div className="mb-6">
           <img
             src={location.image_path}
