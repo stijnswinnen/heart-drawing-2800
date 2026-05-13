@@ -13,6 +13,7 @@ import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
 import { CALENDLY_URLS } from "@/config/calendly";
 import { useSession } from "@supabase/auth-helpers-react";
 import { LocationHero } from "@/components/LocationHero";
+import { Helmet } from "react-helmet-async";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -145,12 +146,22 @@ const LocatieDetail = () => {
       <Navigation transparentOverHero={hasHero} />
 
       {hasHero && selectedLocation && (
-        <LocationHero
-          imageUrl={selectedLocation.image_path as string}
-          name={selectedLocation.name}
-          category={selectedLocation.category}
-          summary={selectedLocation.summary}
-        />
+        <>
+          <Helmet>
+            <link
+              rel="preload"
+              as="image"
+              href={selectedLocation.image_path as string}
+              fetchPriority="high"
+            />
+          </Helmet>
+          <LocationHero
+            imageUrl={selectedLocation.image_path as string}
+            name={selectedLocation.name}
+            category={selectedLocation.category}
+            summary={selectedLocation.summary}
+          />
+        </>
       )}
 
       <main

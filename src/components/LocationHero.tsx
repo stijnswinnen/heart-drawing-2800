@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowDown } from "lucide-react";
 
 interface LocationHeroProps {
@@ -33,6 +33,7 @@ export const LocationHero = ({
   const figRef = useRef<HTMLElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const hintRef = useRef<HTMLDivElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let scrollY = 0;
@@ -111,6 +112,14 @@ export const LocationHero = ({
     };
   }, [imageUrl]);
 
+  // Handle cached images (already loaded before React hydration)
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [imageUrl]);
+
   return (
     <div className="relative w-full" style={{ height: "100svh" }}>
       <figure
@@ -123,6 +132,11 @@ export const LocationHero = ({
           height: "100svh",
           margin: 0,
           background: "#1a1612",
+          backgroundImage: loaded
+            ? "none"
+            : "linear-gradient(110deg, #1a1612 0%, #1a1612 40%, #2a2118 50%, #1a1612 60%, #1a1612 100%)",
+          backgroundSize: "200% 100%",
+          animation: loaded ? "none" : "hero-shimmer 1.8s linear infinite",
           borderRadius: 0,
           willChange: "width, height, margin-left, border-radius, top",
           transition: "box-shadow .4s ease",
@@ -132,11 +146,17 @@ export const LocationHero = ({
           ref={imgRef}
           src={imageUrl}
           alt={name}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
           className="block w-full h-full"
           style={{
             objectFit: "cover",
             objectPosition: "center 40%",
             willChange: "transform",
+            opacity: loaded ? 1 : 0,
+            transition: "opacity 0.6s ease",
           }}
         />
         {/* gradient overlay */}
@@ -250,6 +270,10 @@ export const LocationHero = ({
         @keyframes hero-hint-bounce {
           0%, 100% { transform: translateX(-50%) translateY(0); }
           50% { transform: translateX(-50%) translateY(6px); }
+        }
+        @keyframes hero-shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
       `}</style>
     </div>
