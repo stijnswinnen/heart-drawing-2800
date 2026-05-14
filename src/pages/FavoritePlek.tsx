@@ -41,8 +41,8 @@ const FavoritePlek = () => {
             letterSpacing: "-0.02em",
           }}
         >
-          Welke plek in Mechelen<br className="hidden md:inline" />{" "}
-          doet jouw hart sneller kloppen?
+          Welke plek in Mechelen
+          <br className="hidden md:inline" /> doet jouw hart sneller kloppen?
         </h1>
 
         {/* Lead */}
@@ -56,9 +56,8 @@ const FavoritePlek = () => {
             maxWidth: "60ch",
           }}
         >
-          Mechelen is een stad vol verborgen pareltjes. Een romantisch bankje aan
-          de Dijle, een gezellig terrasje op de Grote Markt, of misschien een
-          geheime stek in het Vrijbroekpark — vertel het ons.
+          Mechelen is een stad vol verborgen pareltjes. Een romantisch bankje aan de Dijle, een gezellig terrasje op de
+          Grote Markt, of misschien een geheime stek in het Vrijbroekpark, laat het weten.
         </p>
 
         {/* Callout */}
@@ -93,9 +92,8 @@ const FavoritePlek = () => {
               maxWidth: "56ch",
             }}
           >
-            Jouw verhaal verdient een podium. Deel je favoriete plek en maak
-            kans op een exclusieve mini-fotoreportage op locatie — helemaal
-            gratis.
+            Jouw verhaal verdient een podium. Deel je favoriete plek en maak kans op een exclusieve mini-fotoreportage
+            op locatie — helemaal gratis.
           </p>
           <p
             className="font-sans m-0"
@@ -120,15 +118,12 @@ const FavoritePlek = () => {
           }}
         >
           <p style={{ marginTop: 0 }}>
-            Als fotograaf kom ik op diverse plekken in Mechelen en ontmoet ik
-            vele mensen. Een vraag die ik telkens graag stel is wat hun
-            favoriete plek is in of rond de stad. Een plaats waar men graag
-            komt of waar een verhaal aan verbonden is. Indien haalbaar plannen
-            we dan ook een fotosessie op die plaats.
+            Als fotograaf kom ik op diverse plekken in Mechelen en ontmoet ik vele mensen. Een vraag die ik telkens
+            graag stel is wat hun favoriete plek is in of rond de stad. Een plaats waar men graag komt of waar een
+            verhaal aan verbonden is. Indien haalbaar plannen we dan ook een fotosessie op die plaats.
           </p>
           <p>
-            Graag verzamel ik hier al deze fijne plaatsen om ook anderen te
-            inspireren en deze verhalen te kunnen delen.
+            Graag verzamel ik hier al deze fijne plaatsen om ook anderen te inspireren en deze verhalen te kunnen delen.
           </p>
           <p
             className="font-serif italic"
