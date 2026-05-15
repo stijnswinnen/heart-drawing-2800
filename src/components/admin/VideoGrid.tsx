@@ -68,6 +68,57 @@ export const VideoGrid = () => {
     refetchInterval: 2000,
   });
 
+  // Active loop video on /hearts
+  const { data: loopVideo, refetch: refetchLoopVideo } = useQuery({
+    queryKey: ["hearts-loop-video"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("hearts_loop_video")
+        .select("id, video_path, video_job_id")
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const setAsLoopVideo = async (job: VideoJob) => {
+    if (!job.video_path) return;
+    try {
+      toast.loading("Instellen als /hearts loop...");
+      if (loopVideo?.id) {
+        const { error } = await supabase
+          .from("hearts_loop_video")
+          .update({ video_path: job.video_path, video_job_id: job.id })
+          .eq("id", loopVideo.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("hearts_loop_video")
+          .insert({ video_path: job.video_path, video_job_id: job.id });
+        if (error) throw error;
+      }
+      toast.success("Loop video ingesteld op /hearts");
+      refetchLoopVideo();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Instellen mislukt: ${e.message}`);
+    }
+  };
+
+  const clearLoopVideo = async () => {
+    if (!loopVideo?.id) return;
+    try {
+      const { error } = await supabase
+        .from("hearts_loop_video")
+        .delete()
+        .eq("id", loopVideo.id);
+      if (error) throw error;
+      toast.success("Loop video verwijderd — /hearts toont nu de cyclische afbeeldingen");
+      refetchLoopVideo();
+    } catch (e: any) {
+      toast.error(`Verwijderen mislukt: ${e.message}`);
+    }
+  };
+
   // Set active job (most recent processing job or null)
   useEffect(() => {
     const processingJob = videoJobs?.find(job => job.status === 'processing' || job.status === 'pending');
