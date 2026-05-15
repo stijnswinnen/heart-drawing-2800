@@ -71,6 +71,27 @@ export type Database = {
         }
         Relationships: []
       }
+      hearts_loop_video: {
+        Row: {
+          id: string
+          updated_at: string
+          video_job_id: string | null
+          video_path: string
+        }
+        Insert: {
+          id?: string
+          updated_at?: string
+          video_job_id?: string | null
+          video_path: string
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          video_job_id?: string | null
+          video_path?: string
+        }
+        Relationships: []
+      }
       location_likes: {
         Row: {
           created_at: string
