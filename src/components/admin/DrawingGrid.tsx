@@ -184,10 +184,6 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
                   src={getStorageUrl(drawing.image_path, drawing.status)}
                   alt="Heart drawing"
                   className="max-w-[180px] max-h-full object-contain"
-                  style={{
-                    filter:
-                      "brightness(0) saturate(100%) invert(48%) sepia(57%) saturate(599%) hue-rotate(307deg) brightness(94%) contrast(86%)",
-                  }}
                 />
               </div>
               <div className="flex flex-col gap-3">
