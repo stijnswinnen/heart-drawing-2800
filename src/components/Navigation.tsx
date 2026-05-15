@@ -108,7 +108,7 @@ export const Navigation = ({
         isLight ? "text-white" : "text-ink"
       }`}
     >
-      <span className="font-['Fraunces'] font-light text-pink-500">2800</span>
+      <span className="font-['Fraunces'] text-pink-500" style={{ fontWeight: 900 }}>2800</span>
       <span className="opacity-60">.love</span>
     </Link>
   );
