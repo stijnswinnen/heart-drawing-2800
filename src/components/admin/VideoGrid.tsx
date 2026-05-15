@@ -598,19 +598,38 @@ export const VideoGrid = () => {
               <div>
                 <p className="text-sm font-medium mb-2">Latest Completed Videos</p>
                 <div className="space-y-4">
-                  {latestCompletedJobs.slice(0, 2).map((job) => (
+                {latestCompletedJobs.slice(0, 2).map((job) => {
+                  const isActiveLoop = loopVideo?.video_path === job.video_path;
+                  return (
                     <div key={job.id}>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-2 gap-2">
                         <p className="text-sm font-medium">
                           {job.job_type} - {job.max_frames} frames
                         </p>
-                        <Badge variant="outline" className="text-xs">
-                          {new Date(job.completed_at!).toLocaleDateString()}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {isActiveLoop && (
+                            <Badge className="bg-green-100 text-green-800 text-xs">Actief op /hearts</Badge>
+                          )}
+                          <Badge variant="outline" className="text-xs">
+                            {new Date(job.completed_at!).toLocaleDateString()}
+                          </Badge>
+                        </div>
                       </div>
                       {job.video_path && renderVideoPlayer(job.video_path)}
+                      <div className="flex items-center gap-2 mt-2">
+                        {isActiveLoop ? (
+                          <Button variant="outline" size="sm" onClick={clearLoopVideo}>
+                            Verwijder van /hearts
+                          </Button>
+                        ) : (
+                          <Button size="sm" onClick={() => setAsLoopVideo(job)}>
+                            Stel in als /hearts loop
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
               </div>
             )}
