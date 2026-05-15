@@ -119,7 +119,7 @@ export const DrawingGrid = ({ drawings, selectedStatus, onApprove, onDecline }: 
                   <img
                     src={getStorageUrl(drawing.image_path, drawing.status)}
                     alt="Heart drawing"
-                    className="max-w-full max-h-full object-contain"
+                    className="max-w-full max-h-full object-contain mix-blend-multiply"
                     style={{ filter: "brightness(0)" }}
                   />
                 </div>
