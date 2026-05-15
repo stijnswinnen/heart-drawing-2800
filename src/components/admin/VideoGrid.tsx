@@ -136,6 +136,11 @@ export const VideoGrid = () => {
       return;
     }
 
+    if (!/^#[0-9a-fA-F]{6}$/.test(backgroundColor)) {
+      toast.error("Background color must be a valid hex value (e.g. #FFFFFF)");
+      return;
+    }
+
     const targetFrames = mode === "daily" ? 50 : parseInt(maxFrames);
     
     try {
@@ -151,7 +156,8 @@ export const VideoGrid = () => {
           mode,
           maxFrames: targetFrames,
           fps: parseInt(fps),
-          sorting
+          sorting,
+          backgroundColor,
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
