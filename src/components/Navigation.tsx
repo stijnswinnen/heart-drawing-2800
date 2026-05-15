@@ -104,12 +104,12 @@ export const Navigation = ({
   const Brand = () => (
     <Link
       to="/"
-      className={`inline-flex items-center gap-2 font-sans font-semibold tracking-[-0.01em] text-[15px] transition-colors ${
+      className={`inline-flex items-center font-sans font-semibold tracking-[-0.01em] text-[15px] transition-colors ${
         isLight ? "text-white" : "text-ink"
       }`}
     >
-      <span className="w-2 h-2 rounded-full bg-pink-500" aria-hidden="true" />
-      <span>2800<span className="opacity-60">.love</span></span>
+      <span className="font-['Fraunces'] font-light text-pink-500">2800</span>
+      <span className="opacity-60">.love</span>
     </Link>
   );
 
