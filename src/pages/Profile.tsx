@@ -65,7 +65,7 @@ const Profile = () => {
       />
       <Navigation />
       <main className="min-h-screen bg-bg">
-        <div className="mx-auto w-full max-w-[980px] px-7 pt-14 pb-24">
+        <div className="mx-auto w-full max-w-[1200px] px-7 pt-14 pb-24">
           <ProfileHeader />
           <div
             className="profile-grid"
