@@ -60,9 +60,7 @@ export function renderEmail(options: RenderEmailOptions): string {
       : "";
 
   const footerNoteHtml = footerNote
-    ? `<p style="font-size:12px;color:#7A726B;line-height:1.6;margin:16px 0 0;font-family:${FONT_STACK};">${escapeHtml(
-        footerNote,
-      )}</p>`
+    ? `<p style="font-size:12px;color:#7A726B;line-height:1.6;margin:16px 0 0;font-family:${FONT_STACK};">${footerNote}</p>`
     : "";
 
   return `<!DOCTYPE html>
