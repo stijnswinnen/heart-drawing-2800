@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderEmail } from "../_shared/email-template.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -85,28 +86,30 @@ const handler = async (req: Request): Promise<Response> => {
         ? `${resetRedirect}?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`
         : actionLink;
 
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #111;">
-        <h1 style="font-size: 22px; margin: 0 0 16px;">Reset je wachtwoord</h1>
-        <p style="font-size: 15px; line-height: 1.5;">
-          Je ontving deze e-mail omdat er een wachtwoord reset werd aangevraagd voor je 2800.love account.
-        </p>
-        <p style="margin: 24px 0;">
-          <a href="${resetLink}"
-             style="background: #F26D85; color: #ffffff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
-            Reset wachtwoord
-          </a>
-        </p>
-        <p style="font-size: 13px; color: #555; line-height: 1.5;">
-          Werkt de knop niet? Kopieer dan deze link in je browser:<br/>
-          <a href="${resetLink}" style="color: #F26D85; word-break: break-all;">${resetLink}</a>
-        </p>
-        <p style="font-size: 13px; color: #555; line-height: 1.5; margin-top: 24px;">
-          Deze link is 1 uur geldig. Heb je geen reset aangevraagd? Dan kan je deze e-mail negeren.
-        </p>
-        <p style="font-size: 12px; color: #999; margin-top: 32px;">— 2800.love</p>
-      </div>
-    `;
+    // Look up profile name (best-effort; falls back to "gebruiker")
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("email", email)
+      .maybeSingle();
+    const safeName = (profile?.name || "gebruiker")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    const ctaUrl = `${resetLink}${resetLink.includes("?") ? "&" : "?"}utm_source=email&utm_medium=transactional&utm_campaign=password-reset&utm_content=reset-wachtwoord`;
+
+    const html = renderEmail({
+      preheader: "Reset je wachtwoord voor je 2800.love account.",
+      heading: "Reset je wachtwoord",
+      bodyHtml: `
+        <p>Hallo ${safeName},</p>
+        <p>Je ontving deze mail omdat er een wachtwoord reset werd aangevraagd voor je 2800.love account.</p>
+      `,
+      ctaLabel: "Reset wachtwoord",
+      ctaUrl,
+      footerNote: `Werkt de knop niet? Kopieer dan deze link in je browser: ${ctaUrl}<br>Deze link is 1 uur geldig. Heb je geen reset aangevraagd? Dan kan je deze mail negeren.`,
+    });
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -117,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "2800.love <noreply@2800.love>",
         to: [email],
-        subject: "Reset je wachtwoord · 2800.love",
+        subject: "Reset je wachtwoord",
         html,
       }),
     });
