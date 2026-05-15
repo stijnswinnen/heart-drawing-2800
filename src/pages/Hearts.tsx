@@ -1,5 +1,5 @@
 import { Navigation } from "@/components/Navigation";
-import { RandomApprovedHeart } from "@/components/RandomApprovedHeart";
+import { HeartsLoopVideo } from "@/components/HeartsLoopVideo";
 import { HeartTrail } from "@/components/HeartTrail";
 import { HomeFooter } from "@/components/HomeFooter";
 import { Seo } from "@/components/Seo";
