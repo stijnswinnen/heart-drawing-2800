@@ -18,7 +18,14 @@ serve(async (req) => {
   }
 
   try {
-    const { mode, maxFrames, fps, sorting } = await req.json();
+    const { mode, maxFrames, fps, sorting, backgroundColor } = await req.json();
+
+    // Validate background color (hex #RRGGBB), default white
+    const bgInput = typeof backgroundColor === 'string' ? backgroundColor.trim() : '#FFFFFF';
+    if (!/^#[0-9a-fA-F]{6}$/.test(bgInput)) {
+      throw new Error('Invalid backgroundColor: must be a hex value like #FFFFFF');
+    }
+    const bgFfmpeg = '0x' + bgInput.slice(1).toUpperCase();
     const authHeader = req.headers.get('Authorization');
     
     if (!authHeader) {
