@@ -227,7 +227,7 @@ async function processVideoJob(jobId: string) {
       input_files,
       output_files,
       ffmpeg_command: ffmpegCommand.join(' '),
-      max_command_run_seconds: 300,
+      max_command_run_seconds: 60,
       vcpu_count: 2,
     };
 
