@@ -99,7 +99,7 @@ serve(async (req) => {
   }
 });
 
-async function processVideoJob(jobId: string) {
+async function processVideoJob(jobId: string, bgFfmpeg: string = '0xFFFFFF', bgHex: string = '#FFFFFF') {
   try {
     // Update job status to processing
     await supabase
