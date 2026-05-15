@@ -64,7 +64,7 @@ serve(async (req) => {
         status: 'pending',
         logs: [{ 
           timestamp: new Date().toISOString(), 
-          message: 'Job created, preparing images...' 
+          message: `Job created with background ${bgInput}, preparing images...` 
         }]
       })
       .select()
