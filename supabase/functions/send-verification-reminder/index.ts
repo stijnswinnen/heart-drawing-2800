@@ -48,7 +48,32 @@ const handler = async (req: Request): Promise<Response> => {
     const results = [];
     for (const user of unverifiedUsers || []) {
       try {
-        const verificationUrl = `https://2800.love/verify?token=${user.verification_token}&email=${encodeURIComponent(user.email)}`;
+        // Generate fresh verification token (plaintext sent in email; SHA-256 hash stored in DB)
+        const newToken = crypto.randomUUID();
+        const tokenHashBuffer = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(newToken)
+        );
+        const tokenHash = Array.from(new Uint8Array(tokenHashBuffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        const { error: tokenUpdateError } = await supabase
+          .from("heart_users")
+          .update({
+            verification_token: tokenHash,
+            verification_token_expires_at: new Date(Date.now() + 3600000).toISOString(), // 1 hour
+            last_verification_email_sent_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+
+        if (tokenUpdateError) {
+          console.error(`Error updating verification token for ${user.email}:`, tokenUpdateError);
+          results.push({ email: user.email, status: "failed", error: tokenUpdateError });
+          continue;
+        }
+
+        const verificationUrl = `https://2800.love/verify?token=${newToken}&email=${encodeURIComponent(user.email)}`;
         
         // Send reminder email using Resend
         const res = await fetch("https://api.resend.com/emails", {
