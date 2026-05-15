@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "verify@2800.love",
+            from: "2800.love <noreply@2800.love>",
             to: [user.email],
             subject: "Herinnering: Bevestig je e-mailadres voor je hart tekening",
             html: `
