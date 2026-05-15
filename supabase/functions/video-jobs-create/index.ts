@@ -77,7 +77,7 @@ serve(async (req) => {
     console.log('Job created:', job);
 
     // Start background processing with EdgeRuntime.waitUntil for persistence
-    EdgeRuntime.waitUntil(processVideoJob(job.id));
+    EdgeRuntime.waitUntil(processVideoJob(job.id, bgFfmpeg, bgInput));
 
     return new Response(JSON.stringify({ 
       success: true, 
