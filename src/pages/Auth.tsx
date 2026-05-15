@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
@@ -49,20 +49,28 @@ const AuthPage = () => {
     }
   }, [session, navigate]);
 
+  const hadSessionRef = useRef<boolean | null>(null);
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        toast.success('Succesvol ingelogd!');
-        navigate('/admin');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.debug('Auth state changed:', event);
+
+      // Only show the toast on a real sign-in transition (no session -> session),
+      // not on the initial replay event Supabase fires when the listener attaches.
+      if (event === 'SIGNED_IN' && newSession?.user) {
+        if (hadSessionRef.current === false) {
+          toast.success('Succesvol ingelogd!');
+        }
+        hadSessionRef.current = true;
+      } else if (event === 'SIGNED_OUT') {
+        hadSessionRef.current = false;
       } else if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery initiated');
+        console.debug('Password recovery initiated');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const handleCleanLogin = async () => {
     try {

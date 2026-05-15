@@ -34,7 +34,7 @@ export const useAuthStateChange = (onClose: () => void) => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
+      console.debug('Auth state changed:', event);
       
       if (event === 'SIGNED_IN' && session?.user?.id) {
         handleSignedInUser(session.user);
