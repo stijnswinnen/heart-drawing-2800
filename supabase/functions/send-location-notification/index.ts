@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderEmail } from "../_shared/email-template.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -101,14 +102,22 @@ const handler = async (req: Request): Promise<Response> => {
     const safeReason = reason ? escapeHtml(reason) : "";
 
     if (action === "rejected") {
-      subject = `Je locatie "${locationName}" werd niet goedgekeurd`;
-      html = `
-        <p>Beste ${safeUserName},</p>
-        <p>Je ingediende locatie "${safeLocationName}" werd niet goedgekeurd om de volgende reden:</p>
-        <p>${safeReason}</p>
-        <p>Je kan een nieuwe locatie indienen via onze website.</p>
-        <p>Met vriendelijke groeten,<br>Het 2800.Love team</p>
-      `;
+      subject = "Update over je favoriete plek";
+      const reasonHtml = safeReason
+        ? `<p style="background:#F2DCE2;border-radius:8px;padding:16px 20px;margin:16px 0;color:#734439;font-size:14px;"><strong>Reden:</strong> ${safeReason}</p>`
+        : "";
+      html = renderEmail({
+        preheader: "Een update over je ingediende plek.",
+        heading: "Je locatie werd niet goedgekeurd",
+        bodyHtml: `
+          <p>Hallo ${safeUserName},</p>
+          <p>Je ingediende plek "${safeLocationName}" werd niet goedgekeurd.</p>
+          ${reasonHtml}
+          <p>Je kan een nieuwe plek indienen via onze website.</p>
+        `,
+        ctaLabel: "Dien een nieuwe plek in",
+        ctaUrl: "https://2800.love/mijn-favoriete-plek?utm_source=email&utm_medium=transactional&utm_campaign=location-rejected&utm_content=dien-nieuwe-plek-in",
+      });
     } else if (action === "deleted") {
       subject = `Je locatie "${locationName}" werd verwijderd`;
       html = `
