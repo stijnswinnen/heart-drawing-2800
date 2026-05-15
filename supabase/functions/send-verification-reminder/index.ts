@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderEmail } from "../_shared/email-template.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -74,7 +75,24 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         const verificationUrl = `https://2800.love/verify?token=${newToken}&email=${encodeURIComponent(user.email)}`;
-        
+        const ctaUrl = `${verificationUrl}&utm_source=email&utm_medium=transactional&utm_campaign=email-verification-reminder&utm_content=bevestig-emailadres`;
+        const safeName = (user.name || "gebruiker")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+        const html = renderEmail({
+          preheader: "Je hartje wacht nog op je — bevestig snel je e-mailadres.",
+          heading: "Je hartje wacht nog op je",
+          bodyHtml: `
+            <p>Hallo ${safeName},</p>
+            <p>Je hebt gisteren een hartje getekend, maar je e-mailadres nog niet bevestigd. Doe het nu — het duurt maar een seconde.</p>
+          `,
+          ctaLabel: "Bevestig e-mailadres",
+          ctaUrl,
+          footerNote: "Deze link is 1 uur geldig. Heb je geen hartje getekend? Dan kan je deze mail negeren.",
+        });
+
         // Send reminder email using Resend
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -85,35 +103,8 @@ const handler = async (req: Request): Promise<Response> => {
           body: JSON.stringify({
             from: "2800.love <noreply@2800.love>",
             to: [user.email],
-            subject: "Herinnering: Bevestig je e-mailadres voor je hart tekening",
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <p>Beste ${user.name},</p>
-                
-                <p>We zien dat je gisteren een hart hebt getekend, maar je e-mailadres nog niet hebt bevestigd. 
-                   Gelieve je e-mailadres te bevestigen door op onderstaande link te drukken.</p>
-                
-                <p style="margin: 30px 0;">
-                  <a href="${verificationUrl}" 
-                     style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-                    Valideer je e-mailadres
-                  </a>
-                </p>
-                
-                <p>Na validatie van je e-mailadres kan je altijd een nieuwe bijdrage maken.</p>
-                <p>Het kan zijn dat jouw bijdrage niet onmiddellijk live verschijnt. Elke tekening wordt manueel nagekeken. Ongeldige bijdrages worden verwijderd.</p>
-                
-                <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
-                  Deze link is nog 1 uur geldig.<br>
-                  Indien je deze aanvraag niet het gedaan, kan je deze mail gewoon negeren.
-                </p>
-                
-                <p style="margin-top: 30px;">
-                  Hartelijk dank<br>
-                  2800.love
-                </p>
-              </div>
-            `,
+            subject: "Nog even je e-mailadres bevestigen",
+            html,
           }),
         });
 
