@@ -18,7 +18,14 @@ serve(async (req) => {
   }
 
   try {
-    const { mode, maxFrames, fps, sorting } = await req.json();
+    const { mode, maxFrames, fps, sorting, backgroundColor } = await req.json();
+
+    // Validate background color (hex #RRGGBB), default white
+    const bgInput = typeof backgroundColor === 'string' ? backgroundColor.trim() : '#FFFFFF';
+    if (!/^#[0-9a-fA-F]{6}$/.test(bgInput)) {
+      throw new Error('Invalid backgroundColor: must be a hex value like #FFFFFF');
+    }
+    const bgFfmpeg = '0x' + bgInput.slice(1).toUpperCase();
     const authHeader = req.headers.get('Authorization');
     
     if (!authHeader) {
@@ -57,7 +64,7 @@ serve(async (req) => {
         status: 'pending',
         logs: [{ 
           timestamp: new Date().toISOString(), 
-          message: 'Job created, preparing images...' 
+          message: `Job created with background ${bgInput}, preparing images...` 
         }]
       })
       .select()
@@ -70,7 +77,7 @@ serve(async (req) => {
     console.log('Job created:', job);
 
     // Start background processing with EdgeRuntime.waitUntil for persistence
-    EdgeRuntime.waitUntil(processVideoJob(job.id));
+    EdgeRuntime.waitUntil(processVideoJob(job.id, bgFfmpeg, bgInput));
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -92,7 +99,7 @@ serve(async (req) => {
   }
 });
 
-async function processVideoJob(jobId: string) {
+async function processVideoJob(jobId: string, bgFfmpeg: string = '0xFFFFFF', bgHex: string = '#FFFFFF') {
   try {
     // Update job status to processing
     await supabase
@@ -195,7 +202,7 @@ async function processVideoJob(jobId: string) {
 
     const filters: string[] = [];
     for (let i = 0; i < optimizedUrls.length; i++) {
-      filters.push(`[${i}:v]scale=w='min(iw,1080)':h='min(ih,1080)':force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2:color=white,format=yuv420p,setsar=1[v${i}]`);
+      filters.push(`[${i}:v]scale=w='min(iw,1080)':h='min(ih,1080)':force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2:color=${bgFfmpeg},format=yuv420p,setsar=1[v${i}]`);
     }
     const concatFilter = `${filters.join(';')};${optimizedUrls.map((_, i) => `[v${i}]`).join('')}concat=n=${optimizedUrls.length}:v=1:a=0[outv]`;
 

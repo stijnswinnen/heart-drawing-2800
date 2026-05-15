@@ -36,6 +36,7 @@ export const VideoGrid = () => {
   const [maxFrames, setMaxFrames] = useState("50");
   const [fps, setFps] = useState("2");
   const [sorting, setSorting] = useState<"new_to_old" | "random">("new_to_old");
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [activeJob, setActiveJob] = useState<VideoJob | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<VideoJob | null>(null);
@@ -135,6 +136,11 @@ export const VideoGrid = () => {
       return;
     }
 
+    if (!/^#[0-9a-fA-F]{6}$/.test(backgroundColor)) {
+      toast.error("Background color must be a valid hex value (e.g. #FFFFFF)");
+      return;
+    }
+
     const targetFrames = mode === "daily" ? 50 : parseInt(maxFrames);
     
     try {
@@ -150,7 +156,8 @@ export const VideoGrid = () => {
           mode,
           maxFrames: targetFrames,
           fps: parseInt(fps),
-          sorting
+          sorting,
+          backgroundColor,
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -333,6 +340,29 @@ export const VideoGrid = () => {
                 min="1"
                 max="10"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="backgroundColor">Background color</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="backgroundColor"
+                  type="text"
+                  value={backgroundColor}
+                  onChange={(e) => setBackgroundColor(e.target.value)}
+                  placeholder="#FFFFFF"
+                  maxLength={7}
+                  className="font-mono"
+                />
+                <div
+                  className="h-9 w-9 shrink-0 rounded border"
+                  style={{ backgroundColor: /^#[0-9a-fA-F]{6}$/.test(backgroundColor) ? backgroundColor : "transparent" }}
+                  aria-hidden
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Used to fill transparent areas in drawings (hex, e.g. #FFFFFF).
+              </p>
             </div>
 
             <Separator />
