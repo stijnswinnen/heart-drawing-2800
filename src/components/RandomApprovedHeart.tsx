@@ -85,7 +85,7 @@ export function RandomApprovedHeart() {
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-center gap-8 px-4 md:px-8">
-      <h1 className="text-[100px] md:text-[150px] font-bold font-['Montserrat_Alternates'] text-center">
+      <h1 className="text-[100px] md:text-[150px] font-light font-['Fraunces'] text-center">
         2800
       </h1>
       <div className="w-[250px] h-[250px] md:w-[300px] md:h-[300px] animate-fade-in">
