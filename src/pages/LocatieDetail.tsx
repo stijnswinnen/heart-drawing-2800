@@ -46,7 +46,7 @@ const LocatieDetail = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const selectedLocationId = slug ? slugToId.get(slug) ?? null : null;
+  const selectedLocationId = slug ? (slugToId.get(slug) ?? null) : null;
   const selectedLocation = locations.find((loc) => loc.id === selectedLocationId);
 
   const osmUrl = selectedLocation
@@ -66,9 +66,7 @@ const LocatieDetail = () => {
     const sharedBy = (selectedLocation as any).sharedBy as string | undefined;
     const rawShort =
       ((selectedLocation as any).shortDescription as string | undefined) ||
-      (selectedLocation.description
-        ? selectedLocation.description.split(/(?<=[.!?])\s/)[0]
-        : "");
+      (selectedLocation.description ? selectedLocation.description.split(/(?<=[.!?])\s/)[0] : "");
     const truncate = (s: string, max: number) => {
       if (s.length <= max) return s;
       const cut = s.slice(0, max);
@@ -150,12 +148,7 @@ const LocatieDetail = () => {
       {hasHero && selectedLocation && (
         <>
           <Helmet>
-            <link
-              rel="preload"
-              as="image"
-              href={selectedLocation.image_path as string}
-              fetchPriority="high"
-            />
+            <link rel="preload" as="image" href={selectedLocation.image_path as string} fetchPriority="high" />
           </Helmet>
           <LocationHero
             imageUrl={selectedLocation.image_path as string}
@@ -188,11 +181,7 @@ const LocatieDetail = () => {
         </>
       )}
 
-      <main
-        className={`max-w-[1200px] mx-auto px-7 pb-24 ${
-          showHeroSlot ? "pt-14" : "pt-[88px]"
-        }`}
-      >
+      <main className={`max-w-[1200px] mx-auto px-7 pb-24 ${showHeroSlot ? "pt-14" : "pt-[88px]"}`}>
         <Link
           to="/locaties"
           className="inline-flex items-center gap-1.5 text-[13px] text-ink-muted hover:text-ink transition-colors mb-9"
@@ -230,10 +219,7 @@ const LocatieDetail = () => {
                 style={{ boxShadow: "var(--shadow-soft)" }}
               >
                 <div className="aspect-[4/5] w-full">
-                  <LocationsMap
-                    selectedLocationId={selectedLocationId}
-                    onLocationSelect={handleSelect}
-                  />
+                  <LocationsMap selectedLocationId={selectedLocationId} onLocationSelect={handleSelect} />
                 </div>
               </div>
               {selectedLocation && (
@@ -261,26 +247,19 @@ const LocatieDetail = () => {
             ownerUrl={CALENDLY_URLS.owner}
             isOwner={Boolean(
               session?.user?.id &&
-                selectedLocation &&
-                (selectedLocation.user_id === session.user.id ||
-                  selectedLocation.heart_user_id === session.user.id) &&
-                selectedLocation.status === "approved"
+              selectedLocation &&
+              (selectedLocation.user_id === session.user.id || selectedLocation.heart_user_id === session.user.id) &&
+              selectedLocation.status === "approved",
             )}
           />
         )}
 
         {/* Related locations */}
         {selectedLocation && locations.length > 1 && (
-          <section
-            className="border-t border-line"
-            style={{ marginTop: "96px", paddingTop: "48px" }}
-          >
+          <section className="border-t border-line" style={{ marginTop: "96px", paddingTop: "48px" }}>
             <div className="flex items-center justify-between mb-8">
-              <h2
-                className="font-fraunces font-normal text-ink"
-                style={{ fontSize: "28px", lineHeight: 1.1 }}
-              >
-                Andere plekjes in 2800
+              <h2 className="font-fraunces font-normal text-ink" style={{ fontSize: "28px", lineHeight: 1.1 }}>
+                Andere plekjes in Mechelen
               </h2>
               <Link
                 to="/locaties"
@@ -295,11 +274,7 @@ const LocatieDetail = () => {
                 .filter((l) => l.id !== selectedLocation.id)
                 .slice(0, 3)
                 .map((loc) => (
-                  <LocationCard
-                    key={loc.id}
-                    location={loc}
-                    slug={idToSlug.get(loc.id) || ""}
-                  />
+                  <LocationCard key={loc.id} location={loc} slug={idToSlug.get(loc.id) || ""} />
                 ))}
             </div>
           </section>
