@@ -96,33 +96,18 @@ const handler = async (req: Request): Promise<Response> => {
     let htmlContent: string;
 
     if (action === "approved") {
-      subject = "Je hartje is goedgekeurd! 💖";
-      htmlContent = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #F26D85; margin: 0;">Goed nieuws! 🎉</h1>
-          </div>
-          
-          <div style="background: #FFF5F5; border-radius: 12px; padding: 30px; margin-bottom: 30px;">
-            <h2 style="color: #734439; margin-top: 0;">Hallo ${escapeHtml(profile.name || 'daar')},</h2>
-            
-            <p style="color: #333; font-size: 16px; line-height: 1.6;">
-              We hebben geweldig nieuws! Je hartje is goedgekeurd en staat nu live op onze website voor iedereen om te zien! 💖
-            </p>
-            
-            <p style="color: #333; font-size: 16px; line-height: 1.6;">
-              Dank je wel dat je je creativiteit met ons hebt gedeeld. Je bijdrage maakt onze gemeenschap mooier!
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 30px;">
-            <p style="color: #7EA672; font-size: 14px; margin: 0;">
-              Met liefde,<br>
-              Het Heart Team
-            </p>
-          </div>
-        </div>
-      `;
+      subject = "Je hartje staat online";
+      const ctaUrl = `https://2800.love/hearts/${encodeURIComponent(drawingId)}?utm_source=email&utm_medium=transactional&utm_campaign=heart-approved&utm_content=bekijk-hartje`;
+      htmlContent = renderEmail({
+        preheader: "Goed nieuws — je hartje staat live op 2800.love!",
+        heading: "Je hartje staat online 💖",
+        bodyHtml: `
+          <p>Hallo ${escapeHtml(profile.name || "daar")},</p>
+          <p>Goed nieuws — je hartje is goedgekeurd en staat nu live op 2800.love. Bedankt dat je je creativiteit deelt. Je bijdrage maakt onze kaart mooier!</p>
+        `,
+        ctaLabel: "Bekijk je hartje",
+        ctaUrl,
+      });
     } else {
       subject = "Update over je hartje";
       htmlContent = `
