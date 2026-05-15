@@ -12,7 +12,7 @@ const FavoritePlek = () => {
         path="/mijn-favoriete-plek"
       />
       <Navigation />
-      <main className="mx-auto w-full max-w-[760px] px-7 pt-14 pb-24">
+      <main className="mx-auto w-full max-w-[1200px] px-7 pt-14 pb-24">
         {/* Eyebrow */}
         <span
           className="inline-flex items-center gap-2 rounded-full font-sans font-medium uppercase mb-7"
