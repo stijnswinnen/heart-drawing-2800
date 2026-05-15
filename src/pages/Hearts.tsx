@@ -15,7 +15,7 @@ export default function Hearts() {
       <HeartTrail />
       <Navigation />
       <div className="container mx-auto px-4 flex-grow flex items-center justify-center pt-4">
-        <RandomApprovedHeart />
+        <HeartsLoopVideo />
       </div>
       <HomeFooter />
     </div>
