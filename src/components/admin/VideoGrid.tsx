@@ -36,6 +36,7 @@ export const VideoGrid = () => {
   const [maxFrames, setMaxFrames] = useState("50");
   const [fps, setFps] = useState("2");
   const [sorting, setSorting] = useState<"new_to_old" | "random">("new_to_old");
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [activeJob, setActiveJob] = useState<VideoJob | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<VideoJob | null>(null);
