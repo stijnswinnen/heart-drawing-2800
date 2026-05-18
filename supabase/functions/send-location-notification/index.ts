@@ -145,7 +145,26 @@ const handler = async (req: Request): Promise<Response> => {
         ctaLabel: "Dien een nieuwe plek in",
         ctaUrl: "https://2800.love/mijn-favoriete-plek?utm_source=email&utm_medium=transactional&utm_campaign=location-deleted&utm_content=dien-nieuwe-plek-in",
       });
+    } else if (action === "approved") {
+      subject = "Je favoriete plek staat online";
+      const slug = await buildSlugForLocation(location.id, location.name);
+      const locationUrl = `https://2800.love/locaties/${slug}?utm_source=email&utm_medium=transactional&utm_campaign=location-approved`;
+      const photoSessionHtml = location.photo_session_hidden
+        ? ""
+        : `<p>Als indiener van deze plek kan je een <strong>gratis fotosessie</strong> aanvragen op deze locatie. Klik op de knop hieronder en boek je sessie via de locatiepagina.</p>`;
+      html = renderEmail({
+        preheader: "Je ingediende plek is goedgekeurd en staat nu live.",
+        heading: "Je plek is goedgekeurd",
+        bodyHtml: `
+          <p>Hallo ${safeUserName},</p>
+          <p>Je ingediende plek "${safeLocationName}" is goedgekeurd en staat nu live op 2800.love.</p>
+          ${photoSessionHtml}
+        `,
+        ctaLabel: "Bekijk je plek",
+        ctaUrl: locationUrl,
+      });
     }
+
 
     // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
