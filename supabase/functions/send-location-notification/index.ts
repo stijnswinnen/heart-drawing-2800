@@ -51,7 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Fetch location details first
     const { data: location, error: locationError } = await supabase
       .from("locations")
-      .select("id, name, user_id, heart_user_id")
+      .select("id, name, user_id, heart_user_id, photo_session_hidden")
       .eq("id", locationId)
       .single();
 
