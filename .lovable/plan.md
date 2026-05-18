@@ -1,56 +1,51 @@
-## Goal
+# Approval confirmation email for location submitters
 
-Replace the cycling PNG on `/hearts` with a looping, controls-free MP4 of all approved hearts. Fall back to the current cycling behavior when no rendered video exists.
+When an admin approves a submitted plek, send a Dutch confirmation email to the submitter using the existing shared `renderEmail` template, including a direct link to the location page. If the location has the free photo session booking enabled, mention it in the email body.
 
-## Approach
+## 1. Extend the edge function `send-location-notification`
 
-Reuse the existing `video_jobs` pipeline — no new tables, no scheduler. Track the "current loop video" via an admin-selected job and read its `video_path` on the public page.
+Add a new `action: "approved"` branch alongside `"rejected"` / `"deleted"`.
 
-### 1. Database
+The handler will:
+- Fetch the location (already does), additionally selecting `name`, `photo_session_hidden`.
+- Fetch all approved locations and the just-approved location, then build the same slug (using the same algorithm as `src/utils/slug.ts`: lowercase, ASCII, dash-separated, deduped by appending `-2`, `-3`, … in id-sorted order) so the URL matches what the site uses (`/locaties/:slug`).
+- Compose the email with `renderEmail({...})`:
+  - **Subject:** `"Je favoriete plek staat online"`
+  - **Heading:** `"Je plek is goedgekeurd"`
+  - **Body (Dutch):**
+    - Greeting with submitter name
+    - "Je ingediende plek '<name>' is goedgekeurd en staat nu live op 2800.love."
+    - If `photo_session_hidden !== true`: extra paragraph — "Als indiener van deze plek kan je een **gratis fotosessie** aanvragen op deze locatie. Klik op de knop hieronder en boek je sessie via de locatiepagina."
+  - **CTA:** `"Bekijk je plek"` → `https://2800.love/locaties/<slug>?utm_source=email&utm_medium=transactional&utm_campaign=location-approved`
+- Send via Resend with the existing `from: "2800.love <noreply@2800.love>"`.
 
-Add a small singleton table to point at the active loop video:
+The slug-building logic will be inlined in the edge function (small, ~10 lines) to avoid a shared-module import.
 
+## 2. Wire the trigger in `src/components/admin/AdminContent.tsx`
+
+Update `handleApproveLocation` (currently just updates status + toast) to invoke the function after a successful status update, mirroring the rejection/deletion pattern:
+
+```ts
+try {
+  await supabase.functions.invoke('send-location-notification', {
+    body: { locationId: location.id, action: "approved" }
+  });
+  toast.success("Locatie goedgekeurd en gebruiker genotificeerd");
+} catch (emailError) {
+  console.error("Error sending notification:", emailError);
+  toast.warning("Locatie goedgekeurd, maar notificatie mislukt");
+}
 ```
-public.hearts_loop_video
-  id              uuid pk default gen_random_uuid()
-  video_path      text not null      -- path inside the `videos` bucket
-  video_job_id    uuid               -- reference to video_jobs.id (nullable)
-  updated_at      timestamptz default now()
-```
 
-- RLS: anyone can SELECT (public page reads it); only admins can INSERT/UPDATE/DELETE.
-- Explicit GRANTs to `anon`, `authenticated`, `service_role` (per project memory).
-- Enforce single row via a partial unique index on a constant column, or simply upsert one row by a fixed sentinel id from the admin action.
+Also consider `handleSaveLocation` in the same file: when the edit dialog changes a location's status from non-approved to `approved`, send the same email. This covers the case where an admin approves via the edit dialog instead of the quick-approve button. Implementation: compare `editingLocation.status` to `updates.status` and trigger the invoke if it transitions to `"approved"`.
 
-### 2. Admin: "Rebuild loop" action
+## Out of scope
 
-In `src/components/admin/VideoGrid.tsx`:
-- Add a "Stel in als /hearts loop" button on each completed job row (rows where `status = 'completed' && video_path` exists).
-- Clicking it upserts `hearts_loop_video` with that job's `video_path` + `video_job_id`.
-- Show a small badge "Actief op /hearts" on the currently-selected job.
-- No new edge function — direct supabase client write is fine since admin RLS already gates it.
+- No schema changes.
+- No new edge function (extending existing one).
+- No idempotency table — relying on admin not re-approving an already-approved location, same as current rejected/deleted flow.
 
-To rebuild a fresh loop, the admin uses the existing "Generate video" flow (already in the page), waits for it to complete, then clicks "Stel in als /hearts loop". Manual, no schedule.
+## Technical notes
 
-### 3. Public `/hearts` page
-
-Refactor `src/components/RandomApprovedHeart.tsx` (or split into `HeartsLoopVideo.tsx` + keep current as fallback):
-
-- On mount, query `hearts_loop_video` (single row).
-- If a `video_path` exists → render `<video autoPlay muted loop playsInline>` (no `controls`) inside the existing 250×250 / 300×300 square next to the `2800` heading. Keep the current side-by-side layout.
-- If query returns no row OR the video fails to load → fall back to existing cycling-PNG behavior.
-- Use `getPublicUrl('videos', path)` for the source.
-
-### 4. Out of scope
-
-- No automated re-render on new approvals.
-- No changes to `video-jobs-create` / ffmpeg pipeline.
-- No changes to admin moderation, drawings RLS, or storage buckets.
-
-## Verification
-
-1. Run migration → confirm table + policies + grants.
-2. On `/admin` Video Management, generate a loop, then click "Stel in als /hearts loop" on the completed job.
-3. Open `/hearts` → video plays muted, loops, no controls visible, sits beside `2800` heading.
-4. Delete the row in `hearts_loop_video` → `/hearts` reverts to cycling PNGs.
-5. Network tab: only one mp4 request on page load (vs many PNG requests today).
+- The function uses the legacy direct-Resend pattern (not the Lovable Emails queue), matching the existing `send-location-notification`, `send-heart-notification`, `send-verification-email` setup in this project. Keeping the same pattern for consistency.
+- `photo_session_hidden` is a boolean field on `locations` already used in `LocatieDetail.tsx` to gate the `<PhotoSessionBooking>` component, so the same check determines whether to mention the photo session offer in the email.
