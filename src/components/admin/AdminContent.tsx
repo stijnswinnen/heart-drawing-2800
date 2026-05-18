@@ -214,12 +214,23 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
   const handleSaveLocation = async (locationId: string, updates: Partial<Tables<"locations">>) => {
     try {
+      const previousStatus = editingLocation?.status;
       const { error } = await supabase
         .from("locations")
         .update(updates)
         .eq("id", locationId);
 
       if (error) throw error;
+
+      if (updates.status === "approved" && previousStatus !== "approved") {
+        try {
+          await supabase.functions.invoke('send-location-notification', {
+            body: { locationId, action: "approved" }
+          });
+        } catch (emailError) {
+          console.error("Error sending approval notification:", emailError);
+        }
+      }
 
       toast.success("Locatie succesvol bijgewerkt");
       queryClient.invalidateQueries({ queryKey: ["locations"] });
@@ -230,6 +241,7 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
       toast.error("Fout bij het bijwerken van de locatie");
     }
   };
+
 
   // Filter items based on selected status
   const filteredDrawings = drawings?.filter(drawing => drawing.status === selectedStatus) || null;
