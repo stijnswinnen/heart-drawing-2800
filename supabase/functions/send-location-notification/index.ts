@@ -23,9 +23,19 @@ const escapeHtml = (s: string): string =>
 
 interface LocationNotificationRequest {
   locationId: string;
-  action: "rejected" | "deleted";
+  action: "rejected" | "deleted" | "approved";
   reason?: string;
 }
+
+const slugify = (input: string): string =>
+  input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
 
 const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
