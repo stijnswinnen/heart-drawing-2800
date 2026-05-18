@@ -117,13 +117,23 @@ export const AdminContent = ({ drawings }: AdminContentProps) => {
 
       if (error) throw error;
 
-      toast.success("Locatie goedgekeurd");
+      try {
+        await supabase.functions.invoke('send-location-notification', {
+          body: { locationId: location.id, action: "approved" }
+        });
+        toast.success("Locatie goedgekeurd en gebruiker genotificeerd");
+      } catch (emailError) {
+        console.error("Error sending notification:", emailError);
+        toast.warning("Locatie goedgekeurd, maar notificatie mislukt");
+      }
+
       queryClient.invalidateQueries({ queryKey: ["locations"] });
     } catch (error) {
       console.error("Error approving location:", error);
       toast.error("Fout bij het goedkeuren van de locatie");
     }
   };
+
 
   const handleDeclineLocation = async (location: Tables<"locations">, reason: string) => {
     try {
