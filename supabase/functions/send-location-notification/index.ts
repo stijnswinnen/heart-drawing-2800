@@ -39,6 +39,30 @@ const slugify = (input: string): string =>
 
 const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
+const buildSlugForLocation = async (
+  locationId: string,
+  locationName: string,
+): Promise<string> => {
+  const { data: approved } = await supabase
+    .from("locations")
+    .select("id, name")
+    .eq("status", "approved");
+  const items: Array<{ id: string; name: string }> = approved ?? [];
+  if (!items.find((l) => l.id === locationId)) {
+    items.push({ id: locationId, name: locationName });
+  }
+  const sorted = [...items].sort((a, b) => a.id.localeCompare(b.id));
+  const used = new Map<string, number>();
+  for (const item of sorted) {
+    const base = slugify(item.name) || "plek";
+    const count = used.get(base) || 0;
+    const slug = count === 0 ? base : `${base}-${count + 1}`;
+    used.set(base, count + 1);
+    if (item.id === locationId) return slug;
+  }
+  return slugify(locationName) || "plek";
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
