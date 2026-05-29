@@ -250,15 +250,20 @@
 
 /* On mobile, while drawing, collapse the hero column so the canvas fills the viewport width */
 @media (max-width: 767px) {
+  .canvas-mode .home-stage {
+    width: 100%;
+  }
   .canvas-mode .home-stage .hero {
-    flex: 0 0 0;
-    padding: 0;
+    flex: 0 0 0% !important;
+    width: 0 !important;
+    padding: 0 !important;
     overflow: hidden;
     opacity: 0;
     pointer-events: none;
   }
   .canvas-mode .home-stage .canvas-stage {
-    flex: 0 0 100vw;
+    flex: 1 1 100% !important;
+    width: 100% !important;
   }
 }
 
