@@ -1,22 +1,20 @@
-## Update submit nudge hover styles
+# Update approved heart confirmation email
 
-In `src/index.css`, update the `.submit-nudge:hover` rules:
+Edit `supabase/functions/send-heart-notification/index.ts` in the `action === "approved"` branch:
 
-- `.submit-nudge-heart`: change hover color from `--pink-500` to `--pink-600` (keep `scale(1.2)`)
-- `.submit-nudge-link`: keep color shift to `--pink-600`, change `text-decoration-color` from `--pink-300` to `--pink-300` (already set — no change needed there)
+1. **CTA URL** — replace the per-heart link with a fixed link:
+   - From: `https://2800.love/hearts/{drawingId}?utm_...&utm_content=bekijk-hartje`
+   - To: `https://2800.love/hearts` (no UTM params, fixed)
 
-Wait — re-reading the request: "shift the colour of the heart to --pink-600 on hover" and "update the underline color shifting to --pink-300 on hover". The underline is already `--pink-300` on hover. Only the heart color needs changing (from `--pink-500` → `--pink-600`).
+2. **Body copy** — replace the current two paragraphs with:
+   ```
+   Hallo {firstname}
 
-### Color tokens confirmation
-Both exist in `src/index.css`:
-- `--pink-600: #BD506A`
-- `--pink-300: #E8A9B6`
+   Je getekende hart is goedgekeurd en staat nu live op 2800.love. Bedankt dat je je creativiteit deelt. Je bijdrage maakt 2800.love mooier!
+   ```
+   - `{firstname}` = first token of `profile.name` (split on whitespace). Fallback to "daar" when name is missing, matching the existing pattern.
+   - Render as two `<p>` tags (greeting + message), HTML-escaped.
 
-### Change
-```css
-.submit-nudge:hover .submit-nudge-heart {
-  color: var(--pink-600);  /* was --pink-500 */
-  transform: scale(1.2);
-}
-```
-The link underline hover already uses `--pink-300`, so no change there.
+3. Leave subject (`"Je hartje staat online"`), preheader, heading, and CTA label unchanged. Rejected-email branch untouched.
+
+After edit, redeploy the `send-heart-notification` edge function.

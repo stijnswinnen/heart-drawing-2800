@@ -97,16 +97,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (action === "approved") {
       subject = "Je hartje staat online";
-      const ctaUrl = `https://2800.love/hearts/${encodeURIComponent(drawingId)}?utm_source=email&utm_medium=transactional&utm_campaign=heart-approved&utm_content=bekijk-hartje`;
+      const firstName = profile.name ? profile.name.trim().split(/\s+/)[0] : "daar";
       htmlContent = renderEmail({
         preheader: "Goed nieuws — je hartje staat live op 2800.love!",
         heading: "Je hartje staat online 💖",
         bodyHtml: `
-          <p>Hallo ${escapeHtml(profile.name || "daar")},</p>
-          <p>Goed nieuws — je hartje is goedgekeurd en staat nu live op 2800.love. Bedankt dat je je creativiteit deelt. Je bijdrage maakt onze kaart mooier!</p>
+          <p>Hallo ${escapeHtml(firstName)}</p>
+          <p>Je getekende hart is goedgekeurd en staat nu live op 2800.love. Bedankt dat je je creativiteit deelt. Je bijdrage maakt 2800.love mooier!</p>
         `,
         ctaLabel: "Bekijk je hartje",
-        ctaUrl,
+        ctaUrl: "https://2800.love/hearts",
       });
     } else {
       subject = "Update over je hartje";
