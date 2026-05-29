@@ -47,7 +47,7 @@ export const DrawingTitle = ({ onHeartClick }: DrawingTitleProps) => {
           gap: "0.12em",
         }}
       >
-        <span className="hidden-2800-mobile-canvas">2800</span>
+        2800
         <button
           type="button"
           className="heart-btn"
