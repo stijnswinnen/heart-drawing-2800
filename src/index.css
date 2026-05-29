@@ -248,10 +248,17 @@
   .hero-title .heart { animation: none; }
 }
 
-/* Hide "2800" headline on mobile while drawing so canvas gets full width */
+/* On mobile, while drawing, collapse the hero column so the canvas fills the viewport width */
 @media (max-width: 767px) {
-  .canvas-mode .hidden-2800-mobile-canvas {
-    display: none;
+  .canvas-mode .home-stage .hero {
+    flex: 0 0 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .canvas-mode .home-stage .canvas-stage {
+    flex: 0 0 100vw;
   }
 }
 
