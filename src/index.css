@@ -248,6 +248,13 @@
   .hero-title .heart { animation: none; }
 }
 
+/* Hide "2800" headline on mobile while drawing so canvas gets full width */
+@media (max-width: 767px) {
+  .canvas-mode .hidden-2800-mobile-canvas {
+    display: none;
+  }
+}
+
 /* Canvas-mode chrome */
 .canvas-mode-only {
   opacity: 0;
