@@ -1,0 +1,15 @@
+# 2800.love
+
+> Een liefdesbrief aan Mechelen (postcode 2800). Inwoners en bezoekers tekenen een hartje en delen hun favoriete plek in de stad.
+
+2800.love is een community-project waarbij mensen hun verbondenheid met Mechelen tonen door een hartje te tekenen en hun favoriete plekken in de stad te delen. Alle hartjes en locaties worden samengebracht in een gezamenlijke kaart en galerij.
+
+## Pages
+
+- [Home](/): Teken je hartje voor Mechelen en ontdek het project.
+- [Teken een hartje](/teken): Open de tekencanvas en stuur je hartje in.
+- [Hartjes galerij](/hearts): Bekijk alle goedgekeurde hartjes van de community.
+- [Over](/over): Het verhaal achter 2800.love en de maker Stijn Swinnen.
+- [Mijn favoriete plek](/mijn-favoriete-plek): Deel jouw favoriete plek in Mechelen.
+- [Locaties overzicht](/locaties): Bekijk alle gedeelde favoriete plekken in Mechelen.
+- [Privacy](/privacy): Privacybeleid.
