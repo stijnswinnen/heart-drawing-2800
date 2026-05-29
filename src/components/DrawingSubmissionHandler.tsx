@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { submitDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
 import { SubmissionConfetti } from "@/components/SubmissionConfetti";
+import { AuthDialog } from "@/components/AuthDialog";
+
 
 interface DrawingSubmissionHandlerProps {
   session: any;
