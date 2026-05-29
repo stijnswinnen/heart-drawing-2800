@@ -141,7 +141,7 @@ export const submitDrawing = async (
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError);
-      throw new Error("Failed to upload drawing: " + uploadError.message);
+      throw new Error("Uploaden van je tekening is mislukt. Probeer het opnieuw.");
     }
 
     console.log('Successfully uploaded to storage');
@@ -160,8 +160,19 @@ export const submitDrawing = async (
       console.error('Database insert error:', dbError);
       // Clean up the uploaded file
       await supabase.storage.from('hearts').remove([fileName]);
-      throw new Error("Failed to save drawing information: " + dbError.message);
+      const isRls =
+        (dbError as any).code === '42501' ||
+        /row-level security/i.test(dbError.message || '');
+      if (isRls && !userId) {
+        const err: any = new Error(
+          "Dit e-mailadres is al geregistreerd en geverifieerd. Log in om je hart te versturen."
+        );
+        err.code = "EMAIL_VERIFIED_LOGIN_REQUIRED";
+        throw err;
+      }
+      throw new Error("Opslaan van je tekening is mislukt. Probeer het opnieuw.");
     }
+
 
     console.log('Successfully inserted into database');
     return fileName;
