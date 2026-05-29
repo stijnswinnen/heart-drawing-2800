@@ -387,7 +387,7 @@
 .canvas-privacy:hover { color: var(--ink); }
 
 .submit-nudge:hover .submit-nudge-heart {
-  color: var(--pink-500);
+  color: var(--pink-600);
   transform: scale(1.2);
 }
 .submit-nudge:hover .submit-nudge-link {

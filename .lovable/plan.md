@@ -1,21 +1,22 @@
-## Context
+## Update submit nudge hover styles
 
-The SEO scanner flagged two findings assuming `heart-drawing-2800.lovable.app` is the canonical domain:
+In `src/index.css`, update the `.submit-nudge:hover` rules:
 
-- `http:robots` — "Sitemap directive points at 2800.love, not your project domain"
-- `http:sitemap` — "Sitemap entries point at 2800.love, not your project domain"
+- `.submit-nudge-heart`: change hover color from `--pink-500` to `--pink-600` (keep `scale(1.2)`)
+- `.submit-nudge-link`: keep color shift to `--pink-600`, change `text-decoration-color` from `--pink-300` to `--pink-300` (already set — no change needed there)
 
-In reality, **`2800.love` is the production domain**. The codebase confirms this:
-- `public/robots.txt` → `Sitemap: https://2800.love/sitemap.xml`
-- `scripts/generate-sitemap.ts` → `const SITE = "https://2800.love"`
-- `src/components/Seo.tsx` → `const SITE = "https://2800.love"`
+Wait — re-reading the request: "shift the colour of the heart to --pink-600 on hover" and "update the underline color shifting to --pink-300 on hover". The underline is already `--pink-300` on hover. Only the heart color needs changing (from `--pink-500` → `--pink-600`).
 
-The scanner is wrong; no code changes are needed.
+### Color tokens confirmation
+Both exist in `src/index.css`:
+- `--pink-600: #BD506A`
+- `--pink-300: #E8A9B6`
 
-## Plan
-
-Mark both findings as fixed via `seo_chat--update_findings`, with explanations stating that `2800.love` is the intended canonical domain and the sitemap/robots already point to it correctly.
-
-The `http:sitemap` finding also mentions missing routes (`/auth`, `/admin`, `/verify`, `/hearts`, `/locaties/:slug`). Those are intentionally excluded (admin/auth/utility) or already covered (`/locaties/:slug` is generated dynamically in `scripts/generate-sitemap.ts`). `/hearts` could arguably be added — flagging here, but not changing unless you want it indexed.
-
-No file changes. Two `update_findings` calls only.
+### Change
+```css
+.submit-nudge:hover .submit-nudge-heart {
+  color: var(--pink-600);  /* was --pink-500 */
+  transform: scale(1.2);
+}
+```
+The link underline hover already uses `--pink-300`, so no change there.
