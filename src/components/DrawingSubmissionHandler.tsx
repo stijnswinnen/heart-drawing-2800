@@ -23,6 +23,9 @@ export const DrawingSubmissionHandler = ({
   setHasDrawn,
 }: DrawingSubmissionHandlerProps) => {
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
+
 
   useEffect(() => {
     if (showConfetti) {
