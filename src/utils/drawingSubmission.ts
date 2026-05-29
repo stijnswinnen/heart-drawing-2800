@@ -18,14 +18,14 @@ export const submitDrawing = async (
   
   if (!canvas) {
     console.error('No canvas element found');
-    throw new Error("No drawing found!");
+    throw new Error("Geen tekening gevonden.");
   }
 
   // Validate that the canvas actually contains a drawing
   const context = canvas.getContext('2d');
   if (!context) {
     console.error('Could not get canvas context');
-    throw new Error("Could not get canvas context");
+    throw new Error("Kon de tekening niet inlezen. Probeer het opnieuw.");
   }
 
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -33,7 +33,7 @@ export const submitDrawing = async (
 
   if (!hasDrawing) {
     console.error('Canvas is empty');
-    throw new Error("Please draw something before submitting!");
+    throw new Error("Teken eerst iets voor je verzendt.");
   }
 
   // First, create or get the profile
@@ -44,12 +44,22 @@ export const submitDrawing = async (
 
   if (profileError) {
     console.error('Error checking for existing profile:', profileError);
-    throw new Error("Failed to check user information: " + profileError.message);
+    throw new Error("Kon je gegevens niet controleren. Probeer het opnieuw.");
   }
 
   if (existingProfile?.[0]) {
     profileId = existingProfile[0].id;
     console.log('Using existing profile ID:', profileId);
+
+    // If this email belongs to a verified profile and the user is not logged in,
+    // we cannot attach a new drawing anonymously (RLS protects against impersonation).
+    if (existingProfile[0].email_verified && !userId) {
+      const err: any = new Error(
+        "Dit e-mailadres is al geregistreerd en geverifieerd. Log in om je hart te versturen."
+      );
+      err.code = "EMAIL_VERIFIED_LOGIN_REQUIRED";
+      throw err;
+    }
   } else {
     // Create new profile
     console.log('Creating new profile...');
@@ -66,7 +76,7 @@ export const submitDrawing = async (
 
     if (insertError) {
       console.error('Error creating profile:', insertError);
-      throw new Error("Failed to save user information: " + insertError.message);
+      throw new Error("Kon je gegevens niet opslaan. Probeer het opnieuw.");
     }
 
     profileId = newProfileId;
@@ -90,6 +100,7 @@ export const submitDrawing = async (
       // Continue with drawing submission even if email fails
     }
   }
+
 
   console.log('Converting canvas to transparent blob...');
   const exportCanvas = document.createElement('canvas');
@@ -130,7 +141,7 @@ export const submitDrawing = async (
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError);
-      throw new Error("Failed to upload drawing: " + uploadError.message);
+      throw new Error("Uploaden van je tekening is mislukt. Probeer het opnieuw.");
     }
 
     console.log('Successfully uploaded to storage');
@@ -149,8 +160,19 @@ export const submitDrawing = async (
       console.error('Database insert error:', dbError);
       // Clean up the uploaded file
       await supabase.storage.from('hearts').remove([fileName]);
-      throw new Error("Failed to save drawing information: " + dbError.message);
+      const isRls =
+        (dbError as any).code === '42501' ||
+        /row-level security/i.test(dbError.message || '');
+      if (isRls && !userId) {
+        const err: any = new Error(
+          "Dit e-mailadres is al geregistreerd en geverifieerd. Log in om je hart te versturen."
+        );
+        err.code = "EMAIL_VERIFIED_LOGIN_REQUIRED";
+        throw err;
+      }
+      throw new Error("Opslaan van je tekening is mislukt. Probeer het opnieuw.");
     }
+
 
     console.log('Successfully inserted into database');
     return fileName;

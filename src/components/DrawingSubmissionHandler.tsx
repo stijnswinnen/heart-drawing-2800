@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { submitDrawing } from "@/utils/drawingSubmission";
 import { SubmitForm } from "@/components/SubmitForm";
 import { SubmissionConfetti } from "@/components/SubmissionConfetti";
+import { AuthDialog } from "@/components/AuthDialog";
+
 
 interface DrawingSubmissionHandlerProps {
   session: any;
@@ -21,6 +23,9 @@ export const DrawingSubmissionHandler = ({
   setHasDrawn,
 }: DrawingSubmissionHandlerProps) => {
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
+
 
   useEffect(() => {
     if (showConfetti) {
@@ -60,6 +65,16 @@ export const DrawingSubmissionHandler = ({
       setHasDrawn(false);
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
+      if (error?.code === "EMAIL_VERIFIED_LOGIN_REQUIRED") {
+        toast.error(error.message, {
+          duration: 8000,
+          action: {
+            label: "Inloggen",
+            onClick: () => setShowAuthDialog(true),
+          },
+        });
+        return;
+      }
       toast.error(error.message || "Versturen van tekening is mislukt");
     }
   };
@@ -70,6 +85,7 @@ export const DrawingSubmissionHandler = ({
         <SubmitForm onClose={() => setShowSubmitForm(false)} onSubmit={handleSubmit} />
       )}
       <SubmissionConfetti isActive={showConfetti} />
+      {showAuthDialog && <AuthDialog onClose={() => setShowAuthDialog(false)} />}
     </>
   );
 };
