@@ -65,6 +65,16 @@ export const DrawingSubmissionHandler = ({
       setHasDrawn(false);
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
+      if (error?.code === "EMAIL_VERIFIED_LOGIN_REQUIRED") {
+        toast.error(error.message, {
+          duration: 8000,
+          action: {
+            label: "Inloggen",
+            onClick: () => setShowAuthDialog(true),
+          },
+        });
+        return;
+      }
       toast.error(error.message || "Versturen van tekening is mislukt");
     }
   };
@@ -75,6 +85,7 @@ export const DrawingSubmissionHandler = ({
         <SubmitForm onClose={() => setShowSubmitForm(false)} onSubmit={handleSubmit} />
       )}
       <SubmissionConfetti isActive={showConfetti} />
+      {showAuthDialog && <AuthDialog onClose={() => setShowAuthDialog(false)} />}
     </>
   );
 };
