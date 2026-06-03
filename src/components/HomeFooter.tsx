@@ -57,14 +57,26 @@ export const HomeFooter = () => {
             plekjes gedeeld
           </Link>
         </div>
-        <Link
-          to="/privacy"
-          className="transition-colors"
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ink-muted)")}
-        >
-          Privacy Policy →
-        </Link>
+        <div className="flex gap-6 items-center">
+          <a
+            href="https://www.instagram.com/2800loves"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ink-muted)")}
+          >
+            #2800love
+          </a>
+          <Link
+            to="/privacy"
+            className="transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ink-muted)")}
+          >
+            Privacy Policy →
+          </Link>
+        </div>
       </div>
     </footer>
   );
