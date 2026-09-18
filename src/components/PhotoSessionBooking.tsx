@@ -224,6 +224,10 @@ export function PhotoSessionBooking({
           color: var(--pink-500);
           font-weight: 500;
         }
+        .psb-owner {
+          margin-top: 40px;
+          margin-bottom: 0;
+        }
         .psb-owner .psb-cta {
           align-self: flex-start;
           width: auto;
@@ -231,6 +235,13 @@ export function PhotoSessionBooking({
           padding: 0 24px;
           font-size: 14px;
           margin-top: 4px;
+          background: var(--surface);
+          color: var(--ink);
+          border-color: var(--line-strong);
+        }
+        .psb-owner .psb-cta:hover {
+          background: var(--surface);
+          border-color: var(--ink-muted);
         }
         .psb-footnote {
           font-size: 13px;
