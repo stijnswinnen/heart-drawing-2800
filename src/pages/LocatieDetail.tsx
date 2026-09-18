@@ -10,7 +10,7 @@ import { LocationCard } from "@/components/LocationCard";
 import { buildSlugMap } from "@/utils/slug";
 import { Seo } from "@/components/Seo";
 import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
-import { CALENDLY_URLS } from "@/config/calendly";
+import { TIDYCAL_URLS } from "@/config/tidycal";
 import { useSession } from "@supabase/auth-helpers-react";
 import { LocationHero } from "@/components/LocationHero";
 import { Helmet } from "react-helmet-async";
@@ -241,10 +241,8 @@ const LocatieDetail = () => {
 
         {!selectedLocation?.photo_session_hidden && (
           <PhotoSessionBooking
-            soloUrl={CALENDLY_URLS.solo}
-            koppelUrl={CALENDLY_URLS.koppel}
-            gezinUrl={CALENDLY_URLS.gezin}
-            ownerUrl={CALENDLY_URLS.owner}
+            tidycalUrl={TIDYCAL_URLS.sessie}
+            ownerTidycalUrl={TIDYCAL_URLS.owner}
             isOwner={Boolean(
               session?.user?.id &&
               selectedLocation &&
