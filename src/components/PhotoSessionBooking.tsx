@@ -1,101 +1,38 @@
-import { useState } from "react";
-import { PopupModal } from "react-calendly";
+import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
 
-interface PhotoSessionBookingProps {
-  soloUrl: string;
-  koppelUrl: string;
-  gezinUrl: string;
-  ownerUrl: string;
-  isOwner: boolean;
-}
-
-type Audience = "solo" | "koppel" | "gezin";
-
-interface Session {
-  audience: Audience;
-  badge: string;
-  title: string;
-  duration: string;
+interface AddOn {
+  label: string;
   price: string;
-  inclusions: string[];
-  urlKey: "soloUrl" | "koppelUrl" | "gezinUrl";
 }
 
-const SESSIONS: Session[] = [
-  {
-    audience: "solo",
-    badge: "Solo",
-    title: "Mijn Mechelen",
-    duration: "30 min",
-    price: "€55",
-    inclusions: [
-      "10 bewerkte foto's",
-      "Levering binnen 5 werkdagen",
-      "Hoge resolutie, klaar om af te drukken",
-    ],
-    urlKey: "soloUrl",
-  },
-  {
-    audience: "koppel",
-    badge: "Koppel",
-    title: "Ons Plekje",
-    duration: "45 min",
-    price: "€75",
-    inclusions: [
-      "15 bewerkte foto's",
-      "Levering binnen 5 werkdagen",
-      "Hoge resolutie, klaar om af te drukken",
-    ],
-    urlKey: "koppelUrl",
-  },
-  {
-    audience: "gezin",
-    badge: "Gezin · max. 5",
-    title: "Thuis in de Stad",
-    duration: "60 min",
-    price: "€95",
-    inclusions: [
-      "20 bewerkte foto's",
-      "Levering binnen 7 werkdagen",
-      "€10 per extra persoon boven 5",
-    ],
-    urlKey: "gezinUrl",
-  },
+const BASE_OFFER = [
+  "30 minuten fotosessie op de gekozen locatie",
+  "Maximum 4 personen",
+  "10 bewerkte foto's in hoge resolutie (min. 300 dpi, sRGB, printklaar tot A3)",
+  "Levering binnen 5 werkdagen via online galerij",
 ];
 
-const badgeStyle = (audience: Audience): React.CSSProperties => {
-  switch (audience) {
-    case "solo":
-      return {
-        background: "var(--bg, #FAF7F2)",
-        border: "1px solid var(--line)",
-        color: "var(--ink-muted)",
-      };
-    case "koppel":
-      return {
-        background: "var(--pink-50)",
-        color: "var(--pink-600, #B84A60)",
-      };
-    case "gezin":
-      return {
-        background: "var(--lav-50)",
-        color: "var(--lav-700, #5B4A8A)",
-      };
-  }
-};
+const ADD_ONS: AddOn[] = [
+  { label: "Extra 15 minuten", price: "+€20" },
+  { label: "Extra persoon (vanaf 5e)", price: "+€15 / persoon" },
+  { label: "Extra bewerkte foto's", price: "+€5 / foto" },
+  { label: "Spoedlevering (binnen 48u)", price: "+€25" },
+  { label: "Fotoboek 15×15 cm — 20 pagina's", price: "+€100" },
+  { label: "Extra pagina's fotoboek", price: "+€10 / 2 pagina's" },
+  { label: "Gepersonaliseerd fotoboek", price: "Op aanvraag" },
+];
+
+interface PhotoSessionBookingProps {
+  tidycalUrl: string;
+  ownerTidycalUrl?: string;
+  isOwner?: boolean;
+}
 
 export function PhotoSessionBooking({
-  soloUrl,
-  koppelUrl,
-  gezinUrl,
-  ownerUrl,
-  isOwner,
+  tidycalUrl,
+  ownerTidycalUrl,
+  isOwner = false,
 }: PhotoSessionBookingProps) {
-  const [openUrl, setOpenUrl] = useState<string | null>(null);
-  const urls = { soloUrl, koppelUrl, gezinUrl };
-  const rootEl =
-    typeof document !== "undefined" ? document.getElementById("root") : null;
-
   return (
     <section
       className="photo-session-booking"
@@ -126,89 +63,40 @@ export function PhotoSessionBooking({
           color: var(--ink);
           margin: 0 0 12px 0;
         }
-        .psb-intro {
-          font-size: 14.5px;
-          line-height: 1.55;
-          color: var(--ink-muted);
-          max-width: 640px;
-          margin: 0;
-        }
-        .psb-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
-        }
-        .psb-grid--four {
-          grid-template-columns: repeat(4, 1fr);
-        }
-        @media (max-width: 1100px) {
-          .psb-grid--four {
-            grid-template-columns: repeat(2, 1fr);
-          }
+        .psb-columns {
+          display: flex;
+          gap: 48px;
+          align-items: flex-start;
         }
         @media (max-width: 880px) {
-          .psb-grid {
-            grid-template-columns: 1fr;
+          .psb-columns {
+            flex-direction: column;
+            gap: 32px;
           }
         }
-        @media (max-width: 600px) {
-          .psb-grid--four {
-            grid-template-columns: 1fr;
-          }
-        }
-        .booking-badge--owner {
-          background: var(--pink-100);
-          color: var(--pink-600);
-          border-color: transparent;
-        }
-        .booking-meta-free {
-          color: var(--pink-500);
-          font-weight: 500;
-        }
-        .psb-card {
+        .psb-base {
+          flex: 0 0 300px;
+          max-width: 300px;
           display: flex;
           flex-direction: column;
           gap: 18px;
-          border: 1px solid var(--line);
-          border-radius: 14px;
-          padding: 24px 22px;
-          background: var(--surface);
-          transition: border-color 150ms ease, transform 150ms ease;
         }
-        .psb-card:hover {
-          border-color: var(--ink-2);
-          transform: translateY(-2px);
+        .psb-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 10px;
         }
-        .psb-badge {
-          align-self: flex-start;
-          font-size: 11.5px;
-          font-weight: 500;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          padding: 4px 10px;
-          border-radius: 999px;
-        }
-        .psb-card-title {
+        .psb-price {
           font-family: 'Fraunces', serif;
           font-weight: 400;
-          font-size: 22px;
+          font-size: 40px;
           letter-spacing: -0.01em;
-          line-height: 1.15;
+          line-height: 1;
           color: var(--ink);
-          margin: 0;
         }
-        .psb-meta {
-          font-size: 14px;
-          color: var(--ink-2);
-          font-variant-numeric: tabular-nums;
-        }
-        .psb-meta .psb-dot {
+        .psb-price-note {
+          font-size: 13px;
           color: var(--ink-muted);
-          margin: 0 6px;
-        }
-        .psb-meta .psb-price {
-          font-weight: 500;
-          color: var(--ink);
         }
         .psb-list {
           list-style: none;
@@ -235,114 +123,173 @@ export function PhotoSessionBooking({
           border-radius: 999px;
           background: var(--pink-500);
         }
+        .psb-addons {
+          flex: 1;
+          min-width: 0;
+        }
+        .psb-addons-title {
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: var(--ink-muted);
+          margin: 0 0 14px 0;
+        }
+        .psb-addons-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .psb-addons-list li {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 8px 0;
+          border-bottom: 1px solid var(--line);
+          font-size: 13px;
+          line-height: 1.5;
+          color: var(--ink-2);
+        }
+        .psb-addons-list li:last-child {
+          border-bottom: none;
+        }
+        .psb-addon-price {
+          flex-shrink: 0;
+          font-variant-numeric: tabular-nums;
+          color: var(--ink-2);
+        }
         .psb-cta {
-          margin-top: auto;
+          display: inline-block;
           width: 100%;
+          box-sizing: border-box;
+          text-align: center;
           height: 42px;
+          line-height: 40px;
           font-size: 14px;
           font-weight: 500;
           background: transparent;
           color: var(--ink);
           border: 1px solid var(--line-strong, var(--line));
           border-radius: 999px;
+          text-decoration: none;
           cursor: pointer;
           transition: border-color 150ms ease, background 150ms ease;
         }
         .psb-cta:hover {
           border-color: var(--ink);
         }
+        .psb-owner {
+          border: 1px solid var(--line);
+          border-radius: 14px;
+          padding: 24px 22px;
+          background: var(--surface);
+          margin-bottom: 40px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .psb-owner-badge {
+          align-self: flex-start;
+          font-size: 11.5px;
+          font-weight: 500;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          padding: 4px 10px;
+          border-radius: 999px;
+          background: var(--pink-100);
+          color: var(--pink-600);
+        }
+        .psb-owner-title {
+          font-family: 'Fraunces', serif;
+          font-weight: 400;
+          font-size: 20px;
+          letter-spacing: -0.01em;
+          color: var(--ink);
+          margin: 0;
+        }
+        .psb-owner-meta {
+          font-size: 13.5px;
+          color: var(--ink-2);
+        }
+        .psb-owner-free {
+          color: var(--pink-500);
+          font-weight: 500;
+        }
+        .psb-owner .psb-cta {
+          align-self: flex-start;
+          width: auto;
+          padding: 0 24px;
+          margin-top: 4px;
+        }
         .psb-footnote {
-          font-size: 14.5px;
+          font-size: 13px;
           line-height: 1.55;
           color: var(--ink-muted);
-          max-width: 720px;
-          margin: 20px 0 0 0;
+          margin: 16px 0 0 0;
         }
       `}</style>
 
       <header className="psb-header">
         <h2 className="psb-title">Wil je hier gefotografeerd worden?</h2>
-        <p className="psb-intro">
-          Ik kom graag bij je op locatie voor een korte fotosessie op de plek
-          waar jouw hart sneller klopt. Kies uit één van de drie pakketten, op
-          maat van met je komt.
-        </p>
       </header>
 
-      <div className={`psb-grid${isOwner ? " psb-grid--four" : ""}`}>
-        {isOwner && (
-          <article className="psb-card">
-            <span className="psb-badge booking-badge--owner">
-              Enkel voor jou
-            </span>
-            <h3 className="psb-card-title">Je favoriete plek</h3>
-            <div className="psb-meta">
-              15 min
-              <span className="psb-dot">·</span>
-              <strong className="booking-meta-free">Gratis</strong>
-            </div>
-            <ul className="psb-list">
-              <li>1 bewerkte foto</li>
-              <li>Hoge resolutie</li>
-              <li>Voor 2800.love en social media</li>
-            </ul>
-            <button
-              type="button"
-              className="psb-cta"
-              onClick={() => setOpenUrl(ownerUrl)}
-            >
-              Boek je gratis sessie
-            </button>
-          </article>
-        )}
-        {SESSIONS.map((s) => {
-          const url = urls[s.urlKey];
-          return (
-            <article key={s.title} className="psb-card">
-              <span className="psb-badge" style={badgeStyle(s.audience)}>
-                {s.badge}
-              </span>
-              <h3 className="psb-card-title">{s.title}</h3>
-              <div className="psb-meta">
-                {s.duration}
-                <span className="psb-dot">·</span>
-                <span className="psb-price">{s.price}</span>
-              </div>
-              <ul className="psb-list">
-                {s.inclusions.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <button
-                type="button"
-                className="psb-cta"
-                onClick={() => setOpenUrl(url)}
-              >
-                Boek deze sessie
-              </button>
-            </article>
-          );
-        })}
-      </div>
-
-      <p className="psb-footnote">
-        Alle pakketten leveren digitale bestanden op hoge resolutie (min. 300
-        dpi, sRGB), geschikt om af te drukken tot A5-formaat.
-      </p>
-
-      {rootEl && openUrl && (
-        <PopupModal
-          url={openUrl}
-          open={!!openUrl}
-          onModalClose={() => setOpenUrl(null)}
-          rootElement={rootEl}
-          prefill={{
-            customAnswers: {
-              a2: window.location.href,
-            },
-          }}
-        />
+      {isOwner && ownerTidycalUrl && (
+        <div className="psb-owner">
+          <span className="psb-owner-badge">Enkel voor jou</span>
+          <h3 className="psb-owner-title">Je favoriete plek</h3>
+          <div className="psb-owner-meta">
+            15 min · <strong className="psb-owner-free">Gratis</strong> · 1
+            bewerkte foto, voor 2800.love en social media
+          </div>
+          <a
+            className="psb-cta"
+            href={ownerTidycalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Boek je gratis sessie
+          </a>
+        </div>
       )}
+
+      <div className="psb-columns">
+        <div className="psb-base">
+          <div className="psb-price-row">
+            <span className="psb-price">€65</span>
+            <span className="psb-price-note">per sessie</span>
+          </div>
+          <ul className="psb-list">
+            {BASE_OFFER.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <a
+            className="psb-cta"
+            href={tidycalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Boek een sessie op deze locatie
+          </a>
+          <p className="psb-footnote">
+            De uitbreidingen bespreek je bij de boeking of voeg je achteraf
+            toe.
+          </p>
+        </div>
+
+        <div className="psb-addons">
+          <h3 className="psb-addons-title">Uitbreidingen</h3>
+          <ul className="psb-addons-list">
+            {ADD_ONS.map((addOn) => (
+              <li key={addOn.label}>
+                <span>{addOn.label}</span>
+                <span className="psb-addon-price">{addOn.price}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </section>
   );
 }
