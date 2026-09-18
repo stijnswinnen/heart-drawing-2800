@@ -1,5 +1,3 @@
-import { PhotoSessionBooking } from "@/components/PhotoSessionBooking";
-
 interface AddOn {
   label: string;
   price: string;
