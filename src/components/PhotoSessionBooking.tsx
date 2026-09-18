@@ -63,21 +63,26 @@ export function PhotoSessionBooking({
         }
         .psb-columns {
           display: flex;
-          gap: 48px;
-          align-items: flex-start;
+          gap: 40px;
+          align-items: stretch;
         }
         @media (max-width: 880px) {
           .psb-columns {
             flex-direction: column;
-            gap: 32px;
+            gap: 24px;
           }
         }
         .psb-base {
-          flex: 0 0 300px;
-          max-width: 300px;
+          flex: 1 1 50%;
+          min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 16px;
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          padding: 28px 26px;
+          background: var(--surface);
+          box-shadow: var(--shadow-soft);
         }
         .psb-price-row {
           display: flex;
@@ -122,8 +127,10 @@ export function PhotoSessionBooking({
           background: var(--pink-500);
         }
         .psb-addons {
-          flex: 1;
+          flex: 1 1 50%;
           min-width: 0;
+          display: flex;
+          flex-direction: column;
         }
         .psb-addons-title {
           font-size: 12px;
@@ -158,24 +165,27 @@ export function PhotoSessionBooking({
           color: var(--ink-2);
         }
         .psb-cta {
-          display: inline-block;
-          width: 100%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
           box-sizing: border-box;
           text-align: center;
-          height: 42px;
-          line-height: 40px;
-          font-size: 14px;
+          height: 48px;
+          padding: 0 26px;
+          font-size: 15px;
           font-weight: 500;
-          background: transparent;
-          color: var(--ink);
-          border: 1px solid var(--line-strong, var(--line));
+          background: var(--pink-500);
+          color: var(--surface);
+          border: 1px solid var(--pink-500);
           border-radius: 999px;
           text-decoration: none;
           cursor: pointer;
-          transition: border-color 150ms ease, background 150ms ease;
+          transition: background 150ms ease, border-color 150ms ease;
         }
         .psb-cta:hover {
-          border-color: var(--ink);
+          background: var(--pink-600);
+          border-color: var(--pink-600);
         }
         .psb-owner {
           border: 1px solid var(--line);
@@ -217,7 +227,9 @@ export function PhotoSessionBooking({
         .psb-owner .psb-cta {
           align-self: flex-start;
           width: auto;
+          height: 44px;
           padding: 0 24px;
+          font-size: 14px;
           margin-top: 4px;
         }
         .psb-footnote {
@@ -268,6 +280,16 @@ export function PhotoSessionBooking({
             target="_blank"
             rel="noopener noreferrer"
           >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              style={{ flexShrink: 0 }}
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
             Boek een sessie op deze locatie
           </a>
           <p className="psb-footnote">
