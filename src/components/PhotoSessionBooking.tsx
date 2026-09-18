@@ -63,21 +63,26 @@ export function PhotoSessionBooking({
         }
         .psb-columns {
           display: flex;
-          gap: 48px;
-          align-items: flex-start;
+          gap: 40px;
+          align-items: stretch;
         }
         @media (max-width: 880px) {
           .psb-columns {
             flex-direction: column;
-            gap: 32px;
+            gap: 24px;
           }
         }
         .psb-base {
-          flex: 0 0 300px;
-          max-width: 300px;
+          flex: 1 1 50%;
+          min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 16px;
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          padding: 28px 26px;
+          background: var(--surface);
+          box-shadow: var(--shadow-soft);
         }
         .psb-price-row {
           display: flex;
@@ -122,8 +127,10 @@ export function PhotoSessionBooking({
           background: var(--pink-500);
         }
         .psb-addons {
-          flex: 1;
+          flex: 1 1 50%;
           min-width: 0;
+          display: flex;
+          flex-direction: column;
         }
         .psb-addons-title {
           font-size: 12px;
@@ -158,24 +165,27 @@ export function PhotoSessionBooking({
           color: var(--ink-2);
         }
         .psb-cta {
-          display: inline-block;
-          width: 100%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
           box-sizing: border-box;
           text-align: center;
-          height: 42px;
-          line-height: 40px;
-          font-size: 14px;
+          height: 48px;
+          padding: 0 26px;
+          font-size: 15px;
           font-weight: 500;
-          background: transparent;
-          color: var(--ink);
-          border: 1px solid var(--line-strong, var(--line));
+          background: var(--pink-500);
+          color: var(--surface);
+          border: 1px solid var(--pink-500);
           border-radius: 999px;
           text-decoration: none;
           cursor: pointer;
-          transition: border-color 150ms ease, background 150ms ease;
+          transition: background 150ms ease, border-color 150ms ease;
         }
         .psb-cta:hover {
-          border-color: var(--ink);
+          background: var(--pink-600);
+          border-color: var(--pink-600);
         }
         .psb-owner {
           border: 1px solid var(--line);
