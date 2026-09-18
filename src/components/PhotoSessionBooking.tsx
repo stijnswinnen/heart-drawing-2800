@@ -224,6 +224,10 @@ export function PhotoSessionBooking({
           color: var(--pink-500);
           font-weight: 500;
         }
+        .psb-owner {
+          margin-top: 40px;
+          margin-bottom: 0;
+        }
         .psb-owner .psb-cta {
           align-self: flex-start;
           width: auto;
@@ -231,6 +235,13 @@ export function PhotoSessionBooking({
           padding: 0 24px;
           font-size: 14px;
           margin-top: 4px;
+          background: var(--surface);
+          color: var(--ink);
+          border-color: var(--line-strong);
+        }
+        .psb-owner .psb-cta:hover {
+          background: var(--surface);
+          border-color: var(--ink-muted);
         }
         .psb-footnote {
           font-size: 13px;
@@ -243,25 +254,6 @@ export function PhotoSessionBooking({
       <header className="psb-header">
         <h2 className="psb-title">Wil je hier gefotografeerd worden?</h2>
       </header>
-
-      {isOwner && ownerTidycalUrl && (
-        <div className="psb-owner">
-          <span className="psb-owner-badge">Enkel voor jou</span>
-          <h3 className="psb-owner-title">Je favoriete plek</h3>
-          <div className="psb-owner-meta">
-            15 min · <strong className="psb-owner-free">Gratis</strong> · 1
-            bewerkte foto, voor 2800.love en social media
-          </div>
-          <a
-            className="psb-cta"
-            href={ownerTidycalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Boek je gratis sessie
-          </a>
-        </div>
-      )}
 
       <div className="psb-columns">
         <div className="psb-base">
@@ -310,6 +302,25 @@ export function PhotoSessionBooking({
           </ul>
         </div>
       </div>
+
+      {isOwner && ownerTidycalUrl && (
+        <div className="psb-owner">
+          <span className="psb-owner-badge">Enkel voor jou</span>
+          <h3 className="psb-owner-title">Je favoriete plek</h3>
+          <div className="psb-owner-meta">
+            15 min · <strong className="psb-owner-free">Gratis</strong> · 1
+            bewerkte foto, voor 2800.love en social media
+          </div>
+          <a
+            className="psb-cta"
+            href={ownerTidycalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Boek je gratis sessie
+          </a>
+        </div>
+      )}
     </section>
   );
 }
