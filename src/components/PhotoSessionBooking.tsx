@@ -302,6 +302,25 @@ export function PhotoSessionBooking({
           </ul>
         </div>
       </div>
+
+      {isOwner && ownerTidycalUrl && (
+        <div className="psb-owner">
+          <span className="psb-owner-badge">Enkel voor jou</span>
+          <h3 className="psb-owner-title">Je favoriete plek</h3>
+          <div className="psb-owner-meta">
+            15 min · <strong className="psb-owner-free">Gratis</strong> · 1
+            bewerkte foto, voor 2800.love en social media
+          </div>
+          <a
+            className="psb-cta"
+            href={ownerTidycalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Boek je gratis sessie
+          </a>
+        </div>
+      )}
     </section>
   );
 }
