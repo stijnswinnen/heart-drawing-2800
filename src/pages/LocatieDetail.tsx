@@ -241,10 +241,8 @@ const LocatieDetail = () => {
 
         {!selectedLocation?.photo_session_hidden && (
           <PhotoSessionBooking
-            soloUrl={CALENDLY_URLS.solo}
-            koppelUrl={CALENDLY_URLS.koppel}
-            gezinUrl={CALENDLY_URLS.gezin}
-            ownerUrl={CALENDLY_URLS.owner}
+            tidycalUrl={TIDYCAL_URLS.sessie}
+            ownerTidycalUrl={TIDYCAL_URLS.owner}
             isOwner={Boolean(
               session?.user?.id &&
               selectedLocation &&
