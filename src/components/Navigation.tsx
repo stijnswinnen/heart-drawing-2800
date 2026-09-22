@@ -77,7 +77,7 @@ export const Navigation = ({
   const links = [
     { path: "/", label: "Teken een hart" },
     { path: "/mijn-favoriete-plek", label: "Deel jouw plek" },
-    { path: "/locaties", label: "Locaties" },
+    { path: "/locaties", label: "Locaties in Mechelen" },
     { path: "/over", label: "Over" },
   ];
 
