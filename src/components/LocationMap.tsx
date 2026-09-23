@@ -49,10 +49,10 @@ const LocationMap = ({ onLocationSelect }: LocationMapProps) => {
           'carto-light': {
             type: 'raster',
             tiles: [
-              'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-              'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-              'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-              'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+              'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=cb1_3vhw_1_75613701781a405ddf708c73',
+              'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=cb1_3vhw_1_75613701781a405ddf708c73',
+              'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=cb1_3vhw_1_75613701781a405ddf708c73',
+              'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png?key=cb1_3vhw_1_75613701781a405ddf708c73',
             ],
             tileSize: 256,
             attribution:
