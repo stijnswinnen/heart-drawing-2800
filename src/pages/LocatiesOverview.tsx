@@ -99,7 +99,7 @@ const LocatiesOverview = () => {
             padding: "5px 12px",
           }}
         >
-          Plekjes in 2800
+          Locaties in Mechelen
         </span>
         <h1
           className="font-fraunces font-normal text-ink mt-5"
