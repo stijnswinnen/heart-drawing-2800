@@ -7,6 +7,8 @@ interface LocationHeroProps {
   category?: string | null;
   summary?: string | null;
   credit?: string | null;
+  /** Link back to the Flickr photo page (required by Flickr Terms of Use) */
+  flickrUrl?: string | null;
 }
 
 const MORPH_RANGE = 320;
@@ -29,6 +31,7 @@ export const LocationHero = ({
   category,
   summary,
   credit,
+  flickrUrl,
 }: LocationHeroProps) => {
   const figRef = useRef<HTMLElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -232,7 +235,7 @@ export const LocationHero = ({
         </div>
 
         <a
-          href="https://www.stijnswinnen.be/"
+          href={flickrUrl || "https://www.stijnswinnen.be/"}
           target="_blank"
           rel="noopener noreferrer"
           className="absolute italic hover:text-white transition-colors"
@@ -243,7 +246,7 @@ export const LocationHero = ({
             color: "rgba(255,255,255,.6)",
           }}
         >
-          Foto · Stijn Swinnen
+          Foto · Stijn Swinnen{flickrUrl ? " op Flickr" : ""}
         </a>
 
         {/* scroll hint */}
