@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { parseFlickrEmbed } from "@/utils/flickr";
 
 interface LocationEditDialogProps {
   location: Tables<"locations"> | null;
@@ -195,12 +196,16 @@ export const LocationEditDialog = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="image_path">Afbeelding URL</Label>
-              <Input
+              <Label htmlFor="image_path">Flickr embedcode</Label>
+              <small className="block text-xs text-muted-foreground -mt-1">
+                Plak hier de volledige Flickr-embedcode (via "Deel" → "Embed" op Flickr). De foto linkt dan automatisch terug naar Flickr, zoals de Flickr-voorwaarden vereisen.
+              </small>
+              <Textarea
                 id="image_path"
                 value={formData.image_path}
                 onChange={(e) => handleInputChange("image_path", e.target.value)}
-                placeholder="https://example.com/image.jpg"
+                placeholder='<a data-flickr-embed="true" href="https://www.flickr.com/photos/..." title="..."><img src="https://live.staticflickr.com/..." width="2048" height="1365" alt="..."/></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>'
+                rows={4}
               />
             </div>
             
@@ -275,11 +280,11 @@ export const LocationEditDialog = ({
             />
           </div>
 
-          {formData.image_path && (
+          {formData.image_path && parseFlickrEmbed(formData.image_path) && (
             <div className="space-y-2">
               <Label>Voorvertoning afbeelding</Label>
-              <img 
-                src={formData.image_path} 
+              <img
+                src={parseFlickrEmbed(formData.image_path)!.imgSrc}
                 alt="Preview"
                 className="w-full max-w-md h-32 object-cover rounded-lg"
                 onError={(e) => {
