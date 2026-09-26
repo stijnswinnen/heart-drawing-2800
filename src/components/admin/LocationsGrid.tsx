@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, X, Trash2, Edit } from "lucide-react";
 import { LocationRejectionDialog } from "./LocationRejectionDialog";
+import { parseFlickrEmbed } from "@/utils/flickr";
 import {
   AlertDialog,
   AlertDialogAction,
