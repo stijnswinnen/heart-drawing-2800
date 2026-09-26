@@ -130,17 +130,17 @@ export const LocationsGrid = ({
                  <TableRow key={location.id}>
                    <TableCell>{location.name}</TableCell>
                    <TableCell>{location.description || "-"}</TableCell>
-                   <TableCell>
-                     {location.image_path ? (
-                       <img 
-                         src={location.image_path} 
-                         alt={location.name}
-                         className="w-16 h-12 object-cover rounded"
-                       />
-                     ) : (
-                       "-"
-                     )}
-                   </TableCell>
+                    <TableCell>
+                      {parseFlickrEmbed(location.image_path) ? (
+                        <img
+                          src={parseFlickrEmbed(location.image_path)!.imgSrc}
+                          alt={location.name}
+                          className="w-16 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
                    <TableCell>
                      {location.category ? (
                        <span className="inline-block bg-pink-400 text-white text-xs font-semibold px-2 py-1 rounded uppercase">
