@@ -14,6 +14,7 @@ import { TIDYCAL_URLS } from "@/config/tidycal";
 import { useSession } from "@supabase/auth-helpers-react";
 import { LocationHero } from "@/components/LocationHero";
 import { Helmet } from "react-helmet-async";
+import { parseFlickrEmbed } from "@/utils/flickr";
 
 const LocatieDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -130,7 +131,11 @@ const LocatieDetail = () => {
     : null;
   const jsonLd = [placeJsonLd, breadcrumbJsonLd].filter(Boolean) as unknown[];
 
-  const hasHero = Boolean(selectedLocation?.image_path);
+  const flickr = useMemo(
+    () => parseFlickrEmbed(selectedLocation?.image_path),
+    [selectedLocation?.image_path]
+  );
+  const hasHero = Boolean(flickr?.imgSrc);
   const heroPending = Boolean(slug) && locations.length === 0 && !selectedLocation;
   const showHeroSlot = hasHero || heroPending;
 
@@ -145,16 +150,17 @@ const LocatieDetail = () => {
       />
       <Navigation transparentOverHero={showHeroSlot} />
 
-      {hasHero && selectedLocation && (
+      {hasHero && selectedLocation && flickr && (
         <>
           <Helmet>
-            <link rel="preload" as="image" href={selectedLocation.image_path as string} fetchPriority="high" />
+            <link rel="preload" as="image" href={flickr.imgSrc} fetchPriority="high" />
           </Helmet>
           <LocationHero
-            imageUrl={selectedLocation.image_path as string}
+            imageUrl={flickr.imgSrc}
             name={selectedLocation.name}
             category={selectedLocation.category}
             summary={selectedLocation.summary}
+            flickrUrl={flickr.linkHref}
           />
         </>
       )}

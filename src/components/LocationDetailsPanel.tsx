@@ -7,6 +7,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Heart, Share2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { parseFlickrEmbed } from "@/utils/flickr";
 
 type Profile = { id: string; name: string; };
 
@@ -167,15 +168,28 @@ export const LocationDetailsPanel = ({ location, onClose, heroAbove = false }: L
         </p>
       )}
 
-      {!heroAbove && location.image_path && (
-        <div className="mb-6">
+      {!heroAbove && location.image_path && (() => {
+        const flickr = parseFlickrEmbed(location.image_path);
+        if (!flickr) return null;
+        const img = (
           <img
-            src={location.image_path}
-            alt={location.name}
+            src={flickr.imgSrc}
+            alt={flickr.alt || location.name}
             className="w-full h-auto rounded-[14px] object-cover"
           />
-        </div>
-      )}
+        );
+        return (
+          <div className="mb-6">
+            {flickr.linkHref ? (
+              <a href={flickr.linkHref} target="_blank" rel="noopener noreferrer">
+                {img}
+              </a>
+            ) : (
+              img
+            )}
+          </div>
+        );
+      })()}
 
       {location.description && (
         <p
